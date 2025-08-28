@@ -101,6 +101,7 @@ def parse_args():
     p.add_argument("--timeout", type=int, default=15, help="Timeout HTTP (seg)")
     p.add_argument("--rate", type=float, default=1.0, help="Rate limit por host (req/seg)")
     p.add_argument("--no-robots", action="store_true", help="Ignorar robots.txt (para pruebas/MVP)")
+    p.add_argument("--force-https", action="store_true", help="Reescribe http:// → https:// en seeds y enlaces")  # 👈 añadido
     p.add_argument("--verbose", action="store_true", help="Logs INFO")
     # chunking
     p.add_argument("--chunk-size", type=int, default=700)
