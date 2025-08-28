@@ -8,6 +8,9 @@
 # - Canonicalización de URLs (+ uso de <link rel="canonical"> si existe).
 # - Soporte force_https (útil cuando el sitemap devuelve http://).
 # - Retries con backoff exponencial y jitter para 429/5xx.
+# - NUEVO: Política granular de robots:
+#       * robots_policy: 'strict' | 'ignore' | 'list'
+#       * ignore_robots_for: conjunto de dominios a los que se ignora robots.txt
 #
 # NOTAS:
 # - Ejecución directa (smoke): `python -m app.rag.scrapers.requests_bs4 --seed ...`
@@ -49,6 +52,7 @@ class ScrapeConfig:
     exclude_url_patterns: Optional[List[str]] = None
 
     # Políticas de acceso
+    # (compatibilidad) si respect_robots=False => robots_policy pasa a "ignore"
     respect_robots: bool = True
     user_agent: str = DEFAULT_UA
     rate_limit_per_host: float = 1.0  # req/seg (mínimo base, puede aumentar por Crawl-delay)
@@ -65,10 +69,25 @@ class ScrapeConfig:
     # Canonicalización adicional
     force_https: bool = False              # reescribe http:// → https:// en seeds y enlaces
 
+    # NUEVO — Política granular de robots
+    #   - 'strict'  => respetar robots (por defecto)
+    #   - 'ignore'  => ignorar robots en todos los dominios
+    #   - 'list'    => respetar robots salvo en dominios indicados en ignore_robots_for
+    robots_policy: str = "strict"
+    ignore_robots_for: Optional[Set[str]] = None  # p. ej. {"onda.es", "www.onda.es"}
+
     def normalized(self) -> "ScrapeConfig":
         """Normaliza la configuración (dominios a minúsculas, etc.)."""
         if self.allowed_domains:
             self.allowed_domains = {d.lower() for d in self.allowed_domains}
+        if self.ignore_robots_for:
+            self.ignore_robots_for = {d.lower() for d in self.ignore_robots_for}
+        # compat: si respect_robots == False, fuerza política ignore
+        if not self.respect_robots:
+            self.robots_policy = "ignore"
+        # normaliza valor de robots_policy
+        if self.robots_policy not in {"strict", "ignore", "list"}:
+            self.robots_policy = "strict"
         return self
 
 
@@ -92,46 +111,86 @@ def _compile_patterns(patterns: Optional[List[str]]) -> List[re.Pattern]:
 
 
 class RobotsCache:
-    """Caché simple de robots.txt por dominio usando urllib.robotparser."""
-    def __init__(self, user_agent: str) -> None:
-        self._cache: Dict[str, robotparser.RobotFileParser] = {}
+    """Caché de robots.txt por dominio con control explícito del status HTTP.
+    - Si robots.txt no es 200 -> se asume 'allow all' y NO se consulta can_fetch.
+    - Si es 200 -> se parsea y se respeta.
+    - Soporta force_https para formar la URL base.
+    """
+    def __init__(self, user_agent: str, *, force_https: bool = False, session: Optional[requests.Session] = None) -> None:
         self._ua = user_agent
-        self._delay_cache: Dict[str, Optional[float]] = {}
+        self._force_https = force_https
+        self._session = session or requests.Session()
+        # base -> dict(parser=RobotFileParser, delay=Optional[float], status_ok=bool)
+        self._cache: Dict[str, Dict[str, object]] = {}
 
-    def _get_parser(self, url: str) -> robotparser.RobotFileParser:
-        parsed = up.urlparse(url)
-        base = f"{parsed.scheme}://{parsed.netloc}"
-        rp = self._cache.get(base)
-        if rp is None:
-            robots_url = up.urljoin(base, "/robots.txt")
-            rp = robotparser.RobotFileParser()
-            try:
+    def _base_for(self, url: str) -> str:
+        p = up.urlparse(url)
+        scheme = "https" if self._force_https else p.scheme
+        return f"{scheme}://{p.netloc}"
+
+    def _load(self, base: str) -> Dict[str, object]:
+        if base in self._cache:
+            return self._cache[base]
+
+        robots_url = up.urljoin(base, "/robots.txt")
+        rp = robotparser.RobotFileParser()
+        status_ok = False
+        delay: Optional[float] = None
+
+        try:
+            resp = self._session.get(robots_url, timeout=10, allow_redirects=True)
+            if resp.status_code == 200 and resp.content:
+                text = resp.text or ""
                 rp.set_url(robots_url)
-                rp.read()
-            except Exception:
-                logger.debug("robots.txt not reachable for %s", base)
-            self._cache[base] = rp
-            try:
-                delay = rp.crawl_delay(self._ua)  # puede ser None
-            except Exception:
-                delay = None
-            self._delay_cache[base] = delay
-        return rp
+                rp.parse(text.splitlines())
+                status_ok = True
+                try:
+                    delay = rp.crawl_delay(self._ua)
+                except Exception:
+                    delay = None
+                logger.debug("robots.load.ok: %s (delay=%s)", robots_url, delay)
+            else:
+                # Cualquier status !=200: tratamos como 'allow all'
+                rp.set_url(robots_url)
+                rp.parse([])  # sin reglas
+                logger.info("robots.load.missing: %s (status=%s) -> allow all", robots_url, resp.status_code)
+        except Exception as e:
+            # Error de red: permitir
+            rp.set_url(robots_url)
+            rp.parse([])
+            logger.info("robots.load.error: %s (%s) -> allow all", robots_url, e)
+
+        entry = {"parser": rp, "delay": delay, "status_ok": status_ok}
+        self._cache[base] = entry
+        return entry
 
     def allowed(self, url: str) -> bool:
         try:
-            rp = self._get_parser(url)
-            return rp.can_fetch(self._ua, url)
+            base = self._base_for(url)
+            entry = self._load(base)
+            status_ok = bool(entry["status_ok"])
+            rp: robotparser.RobotFileParser = entry["parser"]  # type: ignore
+
+            # Si robots.txt NO es 200, **permitimos** sin consultar can_fetch
+            if not status_ok:
+                return True
+
+            test_url = url
+            if self._force_https and test_url.startswith("http://"):
+                test_url = "https://" + test_url[len("http://"):]
+            ok = rp.can_fetch(self._ua, test_url)
+            if not ok:
+                logger.info("robots.block.detail: base=%s test=%s ua=%s", base, test_url, self._ua)
+            return ok
         except Exception:
+            # Prudente: si algo falla, permitir
             return True
 
     def crawl_delay_or_none(self, url: str) -> Optional[float]:
         try:
-            parsed = up.urlparse(url)
-            base = f"{parsed.scheme}://{parsed.netloc}"
-            if base not in self._cache:
-                self._get_parser(url)
-            return self._delay_cache.get(base)
+            base = self._base_for(url)
+            entry = self._load(base)
+            return entry["delay"]  # type: ignore
         except Exception:
             return None
 
@@ -220,7 +279,10 @@ class RequestsBS4Scraper:
             self._session.headers.update(cfg.headers)
 
         # Robots y rate-limiter
-        self._robots = RobotsCache(self.cfg.user_agent) if self.cfg.respect_robots else None
+        # Creamos siempre la caché; el uso depende de robots_policy
+        self._robots_cache = RobotsCache(
+            self.cfg.user_agent, force_https=self.cfg.force_https, session=self._session
+        )
         self._ratelimiter = RateLimiter(self.cfg.rate_limit_per_host)
 
         # Compilación de patrones include/exclude
@@ -233,7 +295,7 @@ class RequestsBS4Scraper:
         BFS desde seeds, respetando:
         - Profundidad `depth`
         - Filtro de dominios y patrones
-        - robots.txt (si está activado)
+        - robots.txt (según robots_policy / ignore_robots_for)
         - Rate limit + Crawl-delay
         - Límite de páginas `max_pages`
         """
@@ -255,7 +317,7 @@ class RequestsBS4Scraper:
                 logger.debug("skip.filters: %s", url)
                 continue
 
-            if self._robots and not self._robots.allowed(url):
+            if not self._is_allowed_by_robots(url):
                 logger.info("robots.block: %s", url)
                 continue
 
@@ -283,13 +345,44 @@ class RequestsBS4Scraper:
             logger.debug("skip.filters: %s", url)
             return None
 
-        if self._robots and not self._robots.allowed(url):
+        if not self._is_allowed_by_robots(url):
             logger.info("robots.block: %s", url)
             return None
 
         return self._fetch(url)
 
     # --------------------------- Lógica interna ---------------------------
+    def _robots_ignored_for_domain(self, netloc: str) -> bool:
+        """Determina si debemos ignorar robots para este dominio según la política 'list'."""
+        if not self.cfg.ignore_robots_for:
+            return False
+        # Ignora en coincidencia exacta o subdominios
+        return _same_or_subdomain(netloc, self.cfg.ignore_robots_for)
+
+    def _is_allowed_by_robots(self, url: str) -> bool:
+        """Evalúa robots.txt según robots_policy/ignore_robots_for."""
+        # Política global 'ignore'
+        if self.cfg.robots_policy == "ignore":
+            return True
+
+        netloc = up.urlparse(url).netloc.lower()
+
+        # Política 'list': ignora robots si el dominio está en la lista
+        if self.cfg.robots_policy == "list" and self._robots_ignored_for_domain(netloc):
+            return True
+
+        # Política 'strict' o 'list' fuera de lista: consulta robots.txt
+        return self._robots_cache.allowed(url)
+
+    def _crawl_delay_if_any(self, url: str) -> Optional[float]:
+        """Obtiene crawl-delay si aplica (no se aplica si robots se ignora para este dominio)."""
+        if self.cfg.robots_policy == "ignore":
+            return None
+        netloc = up.urlparse(url).netloc.lower()
+        if self.cfg.robots_policy == "list" and self._robots_ignored_for_domain(netloc):
+            return None
+        return self._robots_cache.crawl_delay_or_none(url)
+
     def _should_visit(self, url: str) -> bool:
         """Aplica filtros de esquema, dominio, include/exclude sobre la URL."""
         try:
@@ -333,10 +426,8 @@ class RequestsBS4Scraper:
         """
         netloc = up.urlparse(url).netloc
 
-        # Considera Crawl-delay si existe
-        crawl_delay = None
-        if self._robots:
-            crawl_delay = self._robots.crawl_delay_or_none(url)
+        # Considera Crawl-delay si existe (solo cuando robots aplica)
+        crawl_delay = self._crawl_delay_if_any(url)
         self._ratelimiter.wait(netloc, extra_min_interval=crawl_delay)
 
         # Retries/backoff
@@ -458,7 +549,23 @@ if __name__ == "__main__":
     parser.add_argument("--max-pages", type=int, default=10, help="Máximo de páginas a descargar")
     parser.add_argument("--timeout", type=int, default=15, help="Timeout HTTP (seg)")
     parser.add_argument("--rate", type=float, default=1.0, help="Rate-limit por host (req/seg)")
+
+    # Compatibilidad previa:
     parser.add_argument("--no-robots", action="store_true", help="No respetar robots.txt (MVP/tests)")
+
+    # NUEVO: controles granulares de robots
+    parser.add_argument(
+        "--robots-policy",
+        choices=["strict", "ignore", "list"],
+        default=None,
+        help="Política de robots: strict=respeta; ignore=ignora global; list=ignora solo dominios indicados",
+    )
+    parser.add_argument(
+        "--ignore-robots-for",
+        default="",
+        help="Lista de dominios (coma) a los que ignorar robots.txt cuando --robots-policy=list",
+    )
+
     parser.add_argument("--force-https", action="store_true", help="Reescribe http:// → https:// en seeds y enlaces")
     parser.add_argument("--verbose", action="store_true", help="Logs INFO")
     args = parser.parse_args()
@@ -470,17 +577,25 @@ if __name__ == "__main__":
 
     allowed = {d.strip().lower() for d in args.allowed_domains.split(",") if d.strip()} or None
 
+    # Resolver política final de robots (compat con --no-robots)
+    policy = args.robots_policy or ("ignore" if args.no_robots else "strict")
+    ignore_set = {d.strip().lower() for d in args.ignore_robots_for.split(",") if d.strip()} or None
+
     cfg = ScrapeConfig(
         seeds=args.seed,
         depth=args.depth,
         allowed_domains=allowed,
         include_url_patterns=args.include or None,
         exclude_url_patterns=args.exclude or None,
-        respect_robots=not args.no_robots,
+        # Mantener compat: respect_robots solo influye si robots_policy no viene dado
+        respect_robots=(policy != "ignore"),
+        user_agent=DEFAULT_UA,
         timeout_seconds=args.timeout,
         rate_limit_per_host=args.rate,
         max_pages=args.max_pages,
         force_https=args.force_https,
+        robots_policy=policy,
+        ignore_robots_for=ignore_set,
     )
 
     scraper = RequestsBS4Scraper(cfg)
