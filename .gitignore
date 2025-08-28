@@ -1,0 +1,22 @@
+﻿# Entornos y temporales
+.venv/
+__pycache__/
+app/models/__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+instance/
+
+
+# Datos y modelos
+data/processed/*
+data/web/*
+models/faiss/*
+models/chroma/*
+models/embeddings/*
+
+# Config
+.env
+config/settings.toml
