@@ -1,277 +1,259 @@
-Mostrar siempre los detalles
-# This script writes a unified CSS file by consolidating styles found across the uploaded templates.
-# The CSS focuses on generic, reusable components and normalizes colors to the `--onda-*` variables
-# that already exist in your original custom.css.
-
-unified_css = r"""
 /* ==========================================================================
-   Onda App - Unified Custom CSS
-   Consolidated & normalized styles extracted from templates
+   Ayuntamiento de Onda – CSS unificado y armonizado
+   Basado en la guía de identidad (tipografía Ubuntu / Liberation Sans y paleta corporativa)
+   y compatible con Bootstrap 5.
    --------------------------------------------------------------------------
-   HOW TO USE:
-   1) Include ONLY this file in your layout (base.html) after Bootstrap.
-   2) Remove inline <style> blocks from individual templates.
-   3) Prefer the generic component classes below over page-specific ones.
+   Instrucciones:
+   1) Carga la tipografía Ubuntu desde Google Fonts o tu hosting y aplica este CSS
+      DESPUÉS de Bootstrap y ANTES de cualquier override específico de página.
+   2) Evita estilos en línea y usa estas utilidades y componentes.
+   3) Mantén las variables :root como única fuente de verdad cromática.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   0) Variable bridge (maps template colors -> Onda corporate palette)
+   0) Variables de marca (Onda.es)
    -------------------------------------------------------------------------- */
 
 :root {
-  /* Bridge common template tokens to Onda palette (from existing custom.css) */
-  --primary-color: var(--onda-primary, #2c5aa0);
-  --secondary-color: var(--onda-secondary, #4a90c2);
-  --accent-color: var(--onda-accent, #f39c12);
-  --success-color: var(--onda-success, #27ae60);
-  --warning-color: var(--onda-warning, #f39c12);
-  --danger-color: var(--onda-danger, #e74c3c);
-  --dark-color: var(--onda-dark, #1a4480);
-  --muted-color: var(--onda-gray, #95a5a6);
+  /* Colores corporativos (Manual Identitat Visual) */
+  --onda-primary: #009681;    /* PANTONE 3285 C */
+  --onda-secondary: #861F41;  /* PANTONE 208 C  */
+  --onda-accent: #BA0C2F;     /* PANTONE 200 C  */
 
-  /* Light surfaces */
-  --surface-0: #ffffff;
-  --surface-1: #f8f9fa;
-  --surface-2: #f1f5f9;
+  /* Grises derivados (aprox. PANTONE 441/444 C) */
+  --onda-gray-100: #F3F5F6;
+  --onda-gray-200: #E6EAEC;
+  --onda-gray-300: #D2D8DB;
+  --onda-gray-400: #B5BEC3;
+  --onda-gray-500: #8E9AA1;
+  --onda-gray-600: #6F7C84;
+  --onda-gray-700: #556068;
+  --onda-gray-800: #3D464C;
+  --onda-gray-900: #262C30;
 
-  /* Shadows & transitions */
+  /* Estado */
+  --onda-success: #2BA84A;
+  --onda-warning: #F39C12;
+  --onda-danger:  #E74C3C;
+  --onda-info:    #2C7BE5;
+
+  /* Superficies, sombras y transiciones */
+  --surface-0: #FFFFFF;
+  --surface-1: #F8FAFB;
+  --surface-2: #F1F5F9;
   --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
   --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
   --shadow-md: 0 6px 18px rgba(0,0,0,.12);
-  --elevate:  transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+  --elevate: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
 }
 
-/* --------------------------------------------------------------------------
-   1) Global tweaks
-   -------------------------------------------------------------------------- */
+/* Tipografía (usar Ubuntu como primaria y Liberation Sans como fallback secundario) */
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Ubuntu'), local('Ubuntu-Regular');
+}
+@font-face {
+  font-family: 'Liberation Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Liberation Sans'), local('LiberationSans-Regular');
+}
 
+html { scroll-behavior: smooth; }
 body {
-  background-color: var(--surface-1);
+  background: var(--surface-1);
+  color: var(--onda-gray-900);
+  font-family: Ubuntu, 'Liberation Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.55;
+}
+a { color: var(--onda-primary); }
+a:hover { color: var(--onda-secondary); }
+
+/* --------------------------------------------------------------------------
+   1) Headings y textos
+   -------------------------------------------------------------------------- */
+h1, .h1 { font-weight: 700; letter-spacing: -.01em; }
+h2, .h2 { font-weight: 700; letter-spacing: -.005em; }
+h3, .h3 { font-weight: 600; }
+.lead { color: var(--onda-gray-700); }
+
+/* --------------------------------------------------------------------------
+   2) Componentes base
+   -------------------------------------------------------------------------- */
+.card {
+  border: none;
+  border-radius: 14px;
+  background: var(--surface-0);
+  box-shadow: var(--shadow-xs);
+  transition: var(--elevate);
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: var(--elevate);
+}
+.btn:hover { transform: translateY(-1px); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--onda-primary), var(--onda-secondary));
+  border: none;
+}
+.btn-primary:hover { background: linear-gradient(135deg, var(--onda-secondary), var(--onda-primary)); }
+
+.btn-outline-primary {
+  color: var(--onda-primary);
+  border: 2px solid var(--onda-primary);
+}
+.btn-outline-primary:hover {
+  background: var(--onda-primary);
+  color: #fff;
 }
 
-/* Utility animation used across pages */
-.pulse { animation: pulse 2s infinite; }
-@keyframes pulse { 0% {opacity:1;} 50% {opacity:.7;} 100% {opacity:1;} }
+.badge { border-radius: 12px; }
 
-/* Focusable skip link */
-.visually-hidden-focusable {
-  position:absolute!important; width:1px!important; height:1px!important; padding:0!important;
-  margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important;
-}
-.visually-hidden-focusable:focus {
-  position:static!important; width:auto!important; height:auto!important; padding:.25rem .5rem!important;
-  margin:0!important; overflow:visible!important; clip:auto!important; white-space:normal!important;
-  background-color: var(--primary-color)!important; color:#fff!important; text-decoration:none!important;
+.alert-primary {
+  background: rgba(0,150,129,.08);
+  color: #005B4E;
+  border: 1px solid rgba(0,150,129,.25);
 }
 
 /* --------------------------------------------------------------------------
-   2) Page headers / hero blocks
+   3) Formularios
    -------------------------------------------------------------------------- */
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 1px solid var(--onda-gray-300);
+  padding: .75rem 1rem;
+  transition: var(--elevate);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--onda-primary);
+  box-shadow: 0 0 0 .2rem rgba(0,150,129,.25);
+  transform: translateY(-1px);
+}
+.input-group .form-control { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.input-group .btn { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
-.page-header,
-.hero-section {
-  color:#fff;
-  border-radius:12px;
-  padding:2rem;
-  margin-bottom:2rem;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 60%, var(--accent-color) 100%);
-  position:relative; overflow:hidden;
+/* --------------------------------------------------------------------------
+   4) Tablas
+   -------------------------------------------------------------------------- */
+.table thead th { border-bottom: 1px solid var(--onda-gray-300); }
+.table-hover tbody tr:hover { background: var(--surface-2); }
+
+/* --------------------------------------------------------------------------
+   5) Barras laterales y topbar
+   -------------------------------------------------------------------------- */
+.sidebar {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--onda-secondary), var(--onda-gray-800));
+  color: #fff;
+}
+.sidebar .nav-link {
+  color: #e6e6e6;
+  border-radius: 8px;
+  margin: 2px 0;
+}
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: var(--onda-primary);
+  color: #fff;
+}
+.top-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--onda-gray-200);
+  padding: 1rem 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+/* --------------------------------------------------------------------------
+   6) Cabeceras de página / Hero
+   -------------------------------------------------------------------------- */
+.page-header, .hero-section {
+  color: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--onda-primary) 0%, var(--onda-secondary) 60%, var(--onda-accent) 100%);
   box-shadow: var(--shadow-sm);
 }
-.page-header .display-5, .hero-section .display-5,
-.page-header h1, .hero-section h1 { font-weight:700; }
-.hero-section * { position:relative; z-index:1; }
-
-/* Optional subtle grain overlay */
-.hero-section::before,
-.page-header::before {
-  content:""; position:absolute; inset:0; opacity:.12;
+.page-header h1, .hero-section h1 { font-weight: 800; }
+.hero-section::before, .page-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .12;
   background-image: radial-gradient(rgba(255,255,255,.4) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 
 /* --------------------------------------------------------------------------
-   3) Cards (metrics, sources, stores, config panels)
+   7) Métricas y paneles
    -------------------------------------------------------------------------- */
-
-.card { border:none; border-radius:12px; box-shadow: var(--shadow-xs); transition: var(--elevate); overflow:hidden; }
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
-
-/* Metric card (numbers + label) */
-.metric-card, .stats-card {
+.metric-card {
   background: var(--surface-0);
-  border-radius:12px; padding:1.25rem; box-shadow: var(--shadow-sm);
-  border-left:4px solid var(--primary-color);
+  border-left: 4px solid var(--onda-primary);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
 }
-.metric-card:hover, .stats-card:hover { box-shadow: var(--shadow-md); }
-.metric-value, .stats-number { font-size: clamp(1.75rem, 2.5vw, 2.5rem); font-weight:700; color: var(--dark-color); }
-.metric-label { color: var(--muted-color); letter-spacing:.03em; text-transform:uppercase; font-size:.85rem; }
-
-/* Elevated containers used for charts/config sections */
-.chart-container, .config-panel {
-  background: var(--surface-0); border-radius:12px; padding:1.25rem; box-shadow: var(--shadow-sm);
+.metric-value {
+  font-weight: 800;
+  font-size: clamp(1.75rem, 2.5vw, 2.75rem);
+  color: var(--onda-gray-900);
 }
-
-/* Source/store tile */
-.source-card, .store-card {
-  background: var(--surface-0); border-radius:12px; padding:1.25rem; box-shadow: var(--shadow-sm);
-  transition: var(--elevate);
+.metric-label {
+  color: var(--onda-gray-600);
+  text-transform: uppercase;
+  font-size: .8rem;
+  letter-spacing: .04em;
 }
-.source-card:hover, .store-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-.store-card.active { border:2px solid var(--primary-color); box-shadow: 0 8px 20px rgba(37,99,235,.15); }
-
-/* Side panel (admin) */
-.sidebar {
-  min-height:100vh;
-  background: linear-gradient(135deg, var(--dark-color) 0%, #374151 100%);
-  color:#fff;
-}
-.sidebar .nav-link { color:#d1d5db; border-radius:8px; margin:2px 0; transition: var(--elevate); }
-.sidebar .nav-link:hover, .sidebar .nav-link.active {
-  background-color: var(--primary-color); color:#fff; transform: translateX(4px);
-}
-.top-bar { background:#fff; border-bottom:1px solid #e5e7eb; padding:1rem 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 
 /* --------------------------------------------------------------------------
-   4) Selectable option cards (auth/db/method types)
+   8) Estados y etiquetas
    -------------------------------------------------------------------------- */
-
-.select-card {
-  border:2px solid #e9ecef; border-radius:10px; padding:1rem; transition: var(--elevate); cursor:pointer; background:#fff;
-}
-.select-card:hover { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-.select-card.selected { border-color: var(--primary-color); background: rgba(44,90,160,.06); }
-.select-card.disabled { opacity:.6; cursor:not-allowed; border-color:#dee2e6; }
-
-/* Migrate old specific classes => keep for backward-compat */
-.auth-card, .db-type-card, .method-card { composes: select-card; } /* note: composes is non-standard; left for clarity */
-
-/* --------------------------------------------------------------------------
-   5) Status tokens & badges
-   -------------------------------------------------------------------------- */
-
 .status-indicator { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:8px; }
-.status-healthy, .status-indicator.active    { background-color: var(--success-color); }
-.status-warning, .status-indicator.processing{ background-color: var(--warning-color); }
-.status-error,   .status-indicator.error     { background-color: var(--danger-color); }
-.status-indicator.inactive { background-color:#6c757d; }
-
-.status-badge {
-  font-size:.75rem; padding:.25rem .5rem; border-radius:12px;
-}
+.status-healthy { background: var(--onda-success); }
+.status-warning { background: var(--onda-warning); }
+.status-error   { background: var(--onda-danger); }
+.status-inactive{ background: var(--onda-gray-500); }
 
 /* --------------------------------------------------------------------------
-   6) Code-like items & editors (endpoints/queries/logs)
+   9) Utilidades
    -------------------------------------------------------------------------- */
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0% {opacity:1} 50% {opacity:.7} 100% {opacity:1} }
 
-.code-item, .endpoint-item, .query-item, .log-entry {
-  background: #f8f9fa; border-radius:6px; padding:.5rem .75rem; margin:.25rem 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size:.875rem; border-left:3px solid #e5e7eb;
-}
-.log-info { border-left-color: var(--primary-color); }
-.log-success { border-left-color: var(--success-color); }
-.log-warning { border-left-color: var(--warning-color); }
-.log-error { border-left-color: var(--danger-color); }
+.h-320 { height: 320px; }
+.h-400 { height: 400px; }
+.h-500 { height: 500px; }
 
-.sql-editor { font-family: ui-monospace, Consolas, "Courier New", monospace; font-size:.9rem; }
-
-/* File list items */
-.file-item { padding:.75rem; border-bottom:1px solid #e9ecef; transition: background-color .2s ease; }
-.file-item:hover { background:#f8f9fa; }
-.file-item:last-child { border-bottom:none; }
-
-/* Directory tags */
-.directory-tag { background:#e9ecef; border-radius:4px; padding:.25rem .5rem; margin:.25rem; font-size:.875rem; display:inline-block; }
+.main-content { padding: 1rem; }
+@media (min-width: 992px) { .main-content { padding: 1.5rem 2rem; } }
 
 /* --------------------------------------------------------------------------
-   7) Buttons
+   10) Overrides mínimos de Bootstrap para armonía cromática
    -------------------------------------------------------------------------- */
-
-.btn { border-radius:8px; font-weight:500; transition: var(--elevate); }
-.btn:hover { transform: translateY(-1px); }
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  color:#fff; border:none;
+:root {
+  --bs-primary: var(--onda-primary);
+  --bs-secondary: var(--onda-secondary);
+  --bs-success: var(--onda-success);
+  --bs-info: var(--onda-info);
+  --bs-warning: var(--onda-warning);
+  --bs-danger: var(--onda-danger);
+  --bs-light: var(--surface-1);
+  --bs-dark: var(--onda-gray-900);
 }
-.btn-primary:hover { background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%); box-shadow: 0 4px 12px rgba(44,90,160,.3); }
-
-.btn-success { background-color: var(--success-color); color:#fff; border:none; }
-.btn-success:hover { background-color: #219a52; box-shadow: 0 4px 12px rgba(39,174,96,.3); }
-
-.btn-warning { background-color: var(--warning-color); color:#fff; border:none; }
-.btn-warning:hover { background-color:#e67e22; box-shadow: 0 4px 12px rgba(243,156,18,.3); }
-
-.btn-info { background-color: var(--secondary-color); color:#fff; border:none; }
-.btn-info:hover { background-color: var(--primary-color); box-shadow: 0 4px 12px rgba(74,144,194,.3); }
-
-.btn-outline-primary { border:2px solid var(--primary-color); color: var(--primary-color); background: transparent; }
-.btn-outline-primary:hover { background: var(--primary-color); color:#fff; border-color: var(--primary-color); }
 
 /* --------------------------------------------------------------------------
-   8) Forms
+   11) Zona de compatibilidad (conserva selectores previos)
    -------------------------------------------------------------------------- */
-
-.form-control, .form-select {
-  border-radius:8px; border:1px solid #ced4da; padding:.75rem 1rem; transition: var(--elevate);
-}
-.form-control:focus, .form-select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 .2rem rgba(44,90,160,.25);
-  transform: translateY(-1px);
-}
-.input-group .form-control { border-top-right-radius:0; border-bottom-right-radius:0; }
-.input-group .btn { border-top-left-radius:0; border-bottom-left-radius:0; }
-
-/* --------------------------------------------------------------------------
-   9) Tables
-   -------------------------------------------------------------------------- */
-
-.table-sm th, .table-sm td { padding:.4rem .6rem; }
-.table thead th { border-bottom:1px solid #dee2e6; }
-.table-hover tbody tr:hover { background-color:#f8f9fa; }
-
-/* --------------------------------------------------------------------------
-  10) Layout helpers
-  -------------------------------------------------------------------------- */
-
-.main-content { padding:1rem; }
-@media (min-width: 992px) { .main-content { padding:1.5rem 2rem; } }
-
-/* Height utilities (charts, panels) */
-.h-320 { height:320px; }
-.h-400 { height:400px; }
-.h-500 { height:500px; }
-
-/* --------------------------------------------------------------------------
-  11) Gradiented feature tiles (ingestion types)
-  -------------------------------------------------------------------------- */
-
-.ingestion-card {
-  border:none; border-radius:16px; transition: var(--elevate);
-  height:320px; color:#fff; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-}
-.ingestion-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,.15); }
-.ingestion-card .ingestion-icon { font-size:3rem; margin-bottom:1rem; opacity:.9; }
-.ingestion-card .status-badge {
-  position:absolute; top:15px; right:15px; font-size:.75rem; padding:4px 8px;
-  border-radius:12px; background: rgba(40,167,69,.2); color:#28a745; border:1px solid rgba(40,167,69,.3);
-}
-
-/* Variants (kept for semantic clarity if desired) */
-.ingestion-card.documents { background: linear-gradient(135deg, #667eea, #764ba2); }
-.ingestion-card.web       { background: linear-gradient(135deg, #f093fb, #f5576c); }
-.ingestion-card.api       { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-.ingestion-card.database  { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-
-/* --------------------------------------------------------------------------
-  12) Misc
-  -------------------------------------------------------------------------- */
-
-.spinner-grow-sm { width:1rem; height:1rem; }
-.scraping-active { animation: pulse 2s infinite; }
-
-/* Footer (align with Onda look & feel if used) */
-.footer-onda { background: linear-gradient(135deg, #f8f9fa 0%, var(--onda-light, #e8f4f8) 100%); border-top:3px solid var(--primary-color); }
-.footer-icon { font-size:1.5rem; color: var(--primary-color) !important; }
+/* Puedes pegar estilos existentes si son estrictamente necesarios.
+   Revisa y elimina duplicados. */

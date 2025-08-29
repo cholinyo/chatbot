@@ -1,39 +1,30 @@
 #!/usr/bin/env python
-# scripts/ingest_documents.py
 from __future__ import annotations
 
 import argparse
 import csv
 import hashlib
 import json
+import logging
 import os
 import sys
 import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, Iterator, List, Dict, Tuple, Optional
+from typing import Iterator, List, Dict, Optional
 
-# -------------------------
-# CLI
-# -------------------------
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Ingesta de Documentos — TFM RAG")
-
-    # UI (nueva)
     p.add_argument("--input-dir", required=True, help="Carpeta base a ingerir")
-    p.add_argument(
-        "--pattern",
-        action="append",
-        default=None,
-        help="Patrones glob separados por coma (p.ej. *.pdf,*.docx). Repetible.",
-    )
+    p.add_argument("--pattern", action="append", default=None,
+                   help="Patrones glob separados por coma (p.ej. *.pdf,*.docx). Repetible.")
     p.add_argument("--recursive", dest="recursive", action="store_true", default=True)
     p.add_argument("--no-recursive", dest="recursive", action="store_false")
     p.add_argument("--only-new", action="store_true", default=False, help="Procesar solo nuevos/modificados")
 
-    # Legado (compat)
-    p.add_argument("--include-ext", nargs="+", default=None, help="Extensiones (sin punto). Alternativa a --pattern")
-    p.add_argument("--policy", choices=["hash", "mtime"], default="hash", help="Estrategia de cambio")
+    # Legado / compat
+    p.add_argument("--include-ext", nargs="+", default=None)
+    p.add_argument("--policy", choices=["hash", "mtime"], default="hash")
 
     # CSV / texto
     p.add_argument("--encoding-default", default="utf-8")
@@ -49,15 +40,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # Salidas
     p.add_argument("--verbose-json", action="store_true")
+    p.add_argument("--run-dir", default=None, help="Directorio donde guardar artefactos de este run")
 
-    # Proyecto (para importar app/*)
+    # Proyecto
     p.add_argument("--project-root", default=".", help="Ruta del proyecto (donde está app/)")
     return p
 
-
-# -------------------------
-# Utilidades
-# -------------------------
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -65,14 +53,11 @@ def _sha256_file(path: Path) -> str:
             h.update(chunk)
     return h.hexdigest()
 
-
 def _fingerprint(path: Path, policy: str) -> str:
     if policy == "hash":
         return _sha256_file(path)
-    # mtime+size
     st = path.stat()
     return f"{st.st_size}:{int(st.st_mtime_ns)}"
-
 
 def _split_patterns(patterns_arg: Optional[List[str]], include_ext: Optional[List[str]]) -> List[str]:
     if patterns_arg:
@@ -82,9 +67,7 @@ def _split_patterns(patterns_arg: Optional[List[str]], include_ext: Optional[Lis
         return pats
     if include_ext:
         return [f"*.{e.lstrip('.')}" for e in include_ext]
-    # por defecto: como en la UI
     return ["*.pdf", "*.docx", "*.txt", "*.md", "*.csv"]
-
 
 def _iter_files(base: Path, patterns: List[str], recursive: bool) -> Iterator[Path]:
     if recursive:
@@ -94,14 +77,8 @@ def _iter_files(base: Path, patterns: List[str], recursive: bool) -> Iterator[Pa
         for pat in patterns:
             yield from base.glob(pat)
 
-
 def _read_text_file(path: Path, enc: str) -> str:
     return path.read_text(encoding=enc, errors="ignore")
-
-
-def _read_md(path: Path, enc: str) -> str:
-    return path.read_text(encoding=enc, errors="ignore")
-
 
 def _read_csv(path: Path, delimiter: str, quotechar: str, header: bool, columns: Optional[List[str]], enc: str) -> str:
     out_rows: List[str] = []
@@ -117,8 +94,7 @@ def _read_csv(path: Path, delimiter: str, quotechar: str, header: bool, columns:
             if columns and cols_idx is not None:
                 row = [row[j] for j in cols_idx if j < len(row)]
             out_rows.append(" ".join(row))
-    return "\n".join(out_rows)
-
+    return "\n".Join(out_rows)
 
 def _read_pdf(path: Path) -> Optional[str]:
     try:
@@ -135,7 +111,6 @@ def _read_pdf(path: Path) -> Optional[str]:
     except Exception:
         return None
 
-
 def _read_docx(path: Path) -> Optional[str]:
     try:
         import docx  # type: ignore
@@ -146,7 +121,6 @@ def _read_docx(path: Path) -> Optional[str]:
         return "\n".join(p.text for p in d.paragraphs).strip() or None
     except Exception:
         return None
-
 
 def _chunk_text(text: str, size: int, overlap: int) -> List[str]:
     if size <= 0:
@@ -160,27 +134,20 @@ def _chunk_text(text: str, size: int, overlap: int) -> List[str]:
         i += step
     return chunks
 
+def _setup_logging() -> None:
+    logs_dir = Path("data/logs"); logs_dir.mkdir(parents=True, exist_ok=True)
+    log_path = logs_dir / "ingestion.log"
+    fmt = logging.Formatter("[%(asctime)s] %(levelname)s %(message)s")
+    root = logging.getLogger()
+    root.handlers.clear()
+    root.setLevel(logging.INFO)
+    fh = logging.FileHandler(log_path, encoding="utf-8")
+    fh.setFormatter(fmt)
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setFormatter(fmt)
+    root.addHandler(fh)
+    root.addHandler(sh)
 
-# -------------------------
-# Persistencia (BD) + manifest
-# -------------------------
-def _load_manifest(manifest_path: Path) -> Dict[str, Dict[str, str]]:
-    if manifest_path.exists():
-        try:
-            return json.loads(manifest_path.read_text(encoding="utf-8"))
-        except Exception:
-            return {}
-    return {}
-
-
-def _save_manifest(manifest_path: Path, data: Dict[str, Dict[str, str]]) -> None:
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-# -------------------------
-# Proceso principal
-# -------------------------
 def main() -> int:
     args = build_parser().parse_args()
 
@@ -193,23 +160,42 @@ def main() -> int:
         sys.path.insert(0, str(project_root))
     os.chdir(project_root)
 
-    # Importar app / modelos
+    _setup_logging()
+    logging.info("== Ingesta DOCS iniciada ==")
+
     try:
         from app import create_app  # type: ignore
         from app.extensions.db import get_session  # type: ignore
         from app.models import Source, Document, Chunk  # type: ignore
     except Exception as e:
+        logging.exception("ImportError")
         sys.stderr.write(f"ImportError: {e}\n")
         return 2
 
     app = create_app()
+    logging.info("App creada: Prototipo_chatbot")
 
     base = Path(args.input_dir).resolve()
     base.mkdir(parents=True, exist_ok=True)
 
     patterns = _split_patterns(args.pattern, args.include_ext)
     manifest_path = Path("data/processed/documents/manifest.json")
-    manifest = _load_manifest(manifest_path)
+    if manifest_path.exists():
+        try:
+            manifest: Dict[str, Dict[str, str]] = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except Exception:
+            manifest = {}
+    else:
+        manifest = {}
+
+    # run_dir (si no viene de fuera, crearlo)
+    if args.run_dir:
+        run_dir = Path(args.run_dir)
+    else:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_dir = Path("data/processed/runs/docs") / f"run_{ts}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    logging.info("run_dir: %s", run_dir)
 
     stats = {
         "scanned": 0,
@@ -220,7 +206,10 @@ def main() -> int:
         "total_chunks": 0,
     }
 
-    # Buscar/crear Source (tipo 'docs') por URL=carpeta
+    from time import perf_counter
+    t0 = perf_counter()
+
+    # Asegurar Source (por URL base)
     with get_session() as s:
         src = s.query(Source).filter(Source.type == "docs", Source.url == str(base)).first()
         if not src:
@@ -231,26 +220,28 @@ def main() -> int:
                 "policy": args.policy,
             })
             s.add(src)
-            s.flush()  # src.id
-
+            s.flush()
         source_id = src.id
 
-    # Enumeración
     files = list(_iter_files(base, patterns, args.recursive))
-    # Evitar duplicados y ordenar
     files = sorted({f.resolve() for f in files if f.is_file()})
+    logging.info("Enumerados %d ficheros", len(files))
+
     for path in files:
         stats["scanned"] += 1
         try:
             fp = _fingerprint(path, args.policy)
             key = str(path)
             prev = manifest.get(key)
-            unchanged = prev and prev.get("fp") == fp
+            unchanged = bool(prev and prev.get("fp") == fp)
+
+            # Si solo_nuevos y sin cambios -> saltar
             if args.only_new and unchanged:
                 stats["skipped_unchanged"] += 1
+                logging.info("SKIP (unchanged, only_new): %s", path)
                 continue
 
-            # lectura de contenido si posible
+            # leer contenido (si podemos)
             ext = path.suffix.lower().lstrip(".")
             content: Optional[str] = None
             if ext in ("txt", "md"):
@@ -261,15 +252,15 @@ def main() -> int:
                 content = _read_pdf(path)
             elif ext == "docx":
                 content = _read_docx(path)
-            # si no hay extractor, seguiremos registrando el Document sin chunks
 
-            # Upsert Document
+            rechunked = False
+
+            from app.models import Document as _Doc  # type: ignore
             with get_session() as s:
                 doc = s.query(Document).filter(
                     Document.source_id == source_id, Document.path == str(path)
                 ).first()
                 if doc is None:
-                    from app.models import Document as _Doc  # type: ignore
                     st = path.stat()
                     doc = _Doc(
                         source_id=source_id,
@@ -279,7 +270,7 @@ def main() -> int:
                         size=st.st_size,
                         mtime_ns=int(st.st_mtime_ns),
                         hash=fp if args.policy == "hash" else None,
-                        metadata={"policy": args.policy},
+                        meta={"policy": args.policy},
                     )
                     s.add(doc)
                     s.flush()
@@ -292,9 +283,8 @@ def main() -> int:
                         doc.hash = fp
                     created = False
 
-                # (re)chunk si tenemos content
+                # (re)chunk si hay contenido
                 if content is not None:
-                    # eliminar chunks antiguos del doc
                     s.query(Chunk).filter(Chunk.document_id == doc.id).delete()
                     pieces = _chunk_text(content, args.chunk_size, args.chunk_overlap)
                     for i, piece in enumerate(pieces, start=1):
@@ -304,29 +294,42 @@ def main() -> int:
                             index=i,
                             text=piece,
                             content=piece,
-                            metadata={"path": str(path)},
+                            meta={"path": str(path)},
                         ))
                     stats["total_chunks"] += len(pieces)
+                    rechunked = True
 
                 s.commit()
 
             # actualizar manifest
             manifest[key] = {"fp": fp, "ts": datetime.now().isoformat()}
+
+            # --- contabilización clara ---
             if created:
                 stats["new_docs"] += 1
+                logging.info("NEW: %s", path)
             else:
-                if unchanged:
-                    stats["skipped_unchanged"] += 1
-                else:
+                if not unchanged:
                     stats["updated_docs"] += 1
+                    logging.info("UPDATED (changed fp): %s", path)
+                else:
+                    # unchanged pero lo hemos re-chunkeado => contarlo como updated
+                    if rechunked:
+                        stats["updated_docs"] += 1
+                        logging.info("UPDATED (rechunk unchanged): %s", path)
+                    else:
+                        stats["skipped_unchanged"] += 1
+                        logging.info("SKIP (unchanged, no-op): %s", path)
 
         except Exception:
             stats["failed"] += 1
+            logging.exception("Fallo procesando %s", path)
             traceback.print_exc(file=sys.stderr)
 
-    _save_manifest(manifest_path, manifest)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # Salida
+    elapsed = perf_counter() - t0
     payload = {
         "status": "done",
         "stats": stats,
@@ -335,7 +338,10 @@ def main() -> int:
         "policy": args.policy,
         "recursive": bool(args.recursive),
         "only_new": bool(args.only_new),
+        "elapsed_sec": round(elapsed, 3),
+        "run_dir": str(run_dir.resolve()),
     }
+
     if args.verbose_json:
         print(json.dumps(payload, ensure_ascii=False))
     else:
@@ -345,13 +351,18 @@ def main() -> int:
             "Stats : scanned={scanned} new={new_docs} updated={updated_docs} "
             "skipped={skipped_unchanged} failed={failed} chunks={total_chunks}".format(**st)
         )
+        print(f"Elapsed: {round(elapsed,2)}s")
+        print(f"run_dir: {run_dir.resolve()}")
 
-    # Guardar un resumen del run
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "summary.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
     out_dir = Path("data/processed/documents/runs"); out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     (out_dir / f"run_docs_{ts}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    return 0
 
+    logging.info("== Ingesta DOCS finalizada: %s ==", stats)
+    return 0
 
 if __name__ == "__main__":
     raise SystemExit(main())

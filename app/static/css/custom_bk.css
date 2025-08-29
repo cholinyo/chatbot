@@ -1,0 +1,246 @@
+
+/* --------------------------------------------------------------------------
+   0) Variables de marca (Onda.es)
+   -------------------------------------------------------------------------- */
+
+   :root {{
+    /* Colores corporativos (Manual Identitat Visual) */
+    --onda-primary: #009681;    /* PANTONE 3285 C */
+    --onda-secondary: #861F41;  /* PANTONE 208 C  */
+    --onda-accent: #BA0C2F;     /* PANTONE 200 C  */
+  
+    /* Grises derivados (aprox. PANTONE 441/444 C) */
+    --onda-gray-100: #F3F5F6;
+    --onda-gray-200: #E6EAEC;
+    --onda-gray-300: #D2D8DB;
+    --onda-gray-400: #B5BEC3;
+    --onda-gray-500: #8E9AA1;
+    --onda-gray-600: #6F7C84;
+    --onda-gray-700: #556068;
+    --onda-gray-800: #3D464C;
+    --onda-gray-900: #262C30;
+  
+    /* Estado */
+    --onda-success: #2BA84A;
+    --onda-warning: #F39C12;
+    --onda-danger:  #E74C3C;
+    --onda-info:    #2C7BE5;
+  
+    /* Superficies, sombras y transiciones */
+    --surface-0: #FFFFFF;
+    --surface-1: #F8FAFB;
+    --surface-2: #F1F5F9;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-md: 0 6px 18px rgba(0,0,0,.12);
+    --elevate: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+  }}
+  
+  /* Tipografía (usar Ubuntu como primaria y Liberation Sans como fallback secundario) */
+  @font-face {{
+    font-family: 'Ubuntu';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Ubuntu'), local('Ubuntu-Regular');
+  }}
+  @font-face {{
+    font-family: 'Liberation Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Liberation Sans'), local('LiberationSans-Regular');
+  }}
+  
+  html {{ scroll-behavior: smooth; }}
+  body {{
+    background: var(--surface-1);
+    color: var(--onda-gray-900);
+    font-family: Ubuntu, 'Liberation Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    line-height: 1.55;
+  }}
+  a {{ color: var(--onda-primary); }}
+  a:hover {{ color: var(--onda-secondary); }}
+  
+  /* --------------------------------------------------------------------------
+     1) Headings y textos
+     -------------------------------------------------------------------------- */
+  h1, .h1 {{ font-weight: 700; letter-spacing: -.01em; }}
+  h2, .h2 {{ font-weight: 700; letter-spacing: -.005em; }}
+  h3, .h3 {{ font-weight: 600; }}
+  .lead {{ color: var(--onda-gray-700); }}
+  
+  /* --------------------------------------------------------------------------
+     2) Componentes base
+     -------------------------------------------------------------------------- */
+  .card {{
+    border: none;
+    border-radius: 14px;
+    background: var(--surface-0);
+    box-shadow: var(--shadow-xs);
+    transition: var(--elevate);
+  }}
+  .card:hover {{ transform: translateY(-2px); box-shadow: var(--shadow-sm); }}
+  
+  .btn {{
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--elevate);
+  }}
+  .btn:hover {{ transform: translateY(-1px); }}
+  
+  .btn-primary {{
+    background: linear-gradient(135deg, var(--onda-primary), var(--onda-secondary));
+    border: none;
+  }}
+  .btn-primary:hover {{ background: linear-gradient(135deg, var(--onda-secondary), var(--onda-primary)); }}
+  
+  .btn-outline-primary {{
+    color: var(--onda-primary);
+    border: 2px solid var(--onda-primary);
+  }}
+  .btn-outline-primary:hover {{
+    background: var(--onda-primary);
+    color: #fff;
+  }}
+  
+  .badge {{ border-radius: 12px; }}
+  
+  .alert-primary {{
+    background: rgba(0,150,129,.08);
+    color: #005B4E;
+    border: 1px solid rgba(0,150,129,.25);
+  }}
+  
+  /* --------------------------------------------------------------------------
+     3) Formularios
+     -------------------------------------------------------------------------- */
+  .form-control, .form-select {{
+    border-radius: 10px;
+    border: 1px solid var(--onda-gray-300);
+    padding: .75rem 1rem;
+    transition: var(--elevate);
+  }}
+  .form-control:focus, .form-select:focus {{
+    border-color: var(--onda-primary);
+    box-shadow: 0 0 0 .2rem rgba(0,150,129,.25);
+    transform: translateY(-1px);
+  }}
+  .input-group .form-control {{ border-top-right-radius: 0; border-bottom-right-radius: 0; }}
+  .input-group .btn {{ border-top-left-radius: 0; border-bottom-left-radius: 0; }}
+  
+  /* --------------------------------------------------------------------------
+     4) Tablas
+     -------------------------------------------------------------------------- */
+  .table thead th {{ border-bottom: 1px solid var(--onda-gray-300); }}
+  .table-hover tbody tr:hover {{ background: var(--surface-2); }}
+  
+  /* --------------------------------------------------------------------------
+     5) Barras laterales y topbar
+     -------------------------------------------------------------------------- */
+  .sidebar {{
+    min-height: 100vh;
+    background: linear-gradient(160deg, var(--onda-secondary), var(--onda-gray-800));
+    color: #fff;
+  }}
+  .sidebar .nav-link {{
+    color: #e6e6e6;
+    border-radius: 8px;
+    margin: 2px 0;
+  }}
+  .sidebar .nav-link:hover,
+  .sidebar .nav-link.active {{
+    background: var(--onda-primary);
+    color: #fff;
+  }}
+  .top-bar {{
+    background: #fff;
+    border-bottom: 1px solid var(--onda-gray-200);
+    padding: 1rem 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }}
+  
+  /* --------------------------------------------------------------------------
+     6) Cabeceras de página / Hero
+     -------------------------------------------------------------------------- */
+  .page-header, .hero-section {{
+    color: #fff;
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--onda-primary) 0%, var(--onda-secondary) 60%, var(--onda-accent) 100%);
+    box-shadow: var(--shadow-sm);
+  }}
+  .page-header h1, .hero-section h1 {{ font-weight: 800; }}
+  .hero-section::before, .page-header::before {{
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .12;
+    background-image: radial-gradient(rgba(255,255,255,.4) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }}
+  
+  /* --------------------------------------------------------------------------
+     7) Métricas y paneles
+     -------------------------------------------------------------------------- */
+  .metric-card {{
+    background: var(--surface-0);
+    border-left: 4px solid var(--onda-primary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+  }}
+  .metric-value {{
+    font-weight: 800;
+    font-size: clamp(1.75rem, 2.5vw, 2.75rem);
+    color: var(--onda-gray-900);
+  }}
+  .metric-label {{
+    color: var(--onda-gray-600);
+    text-transform: uppercase;
+    font-size: .8rem;
+    letter-spacing: .04em;
+  }}
+  
+  /* --------------------------------------------------------------------------
+     8) Estados y etiquetas
+     -------------------------------------------------------------------------- */
+  .status-indicator {{ display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:8px; }}
+  .status-healthy {{ background: var(--onda-success); }}
+  .status-warning {{ background: var(--onda-warning); }}
+  .status-error   {{ background: var(--onda-danger); }}
+  .status-inactive{{ background: var(--onda-gray-500); }}
+  
+  /* --------------------------------------------------------------------------
+     9) Utilidades
+     -------------------------------------------------------------------------- */
+  .pulse {{ animation: pulse 2s infinite; }}
+  @keyframes pulse {{ 0% {{opacity:1}} 50% {{opacity:.7}} 100% {{opacity:1}} }}
+  
+  .h-320 {{ height: 320px; }}
+  .h-400 {{ height: 400px; }}
+  .h-500 {{ height: 500px; }}
+  
+  .main-content {{ padding: 1rem; }}
+  @media (min-width: 992px) {{ .main-content {{ padding: 1.5rem 2rem; }} }}
+  
+  /* --------------------------------------------------------------------------
+     10) Overrides mínimos de Bootstrap para armonía cromática
+     -------------------------------------------------------------------------- */
+  :root {{
+    --bs-primary: var(--onda-primary);
+    --bs-secondary: var(--onda-secondary);
+    --bs-success: var(--onda-success);
+    --bs-info: var(--onda-info);
+    --bs-warning: var(--onda-warning);
+    --bs-danger: var(--onda-danger);
+    --bs-light: var(--surface-1);
+    --bs-dark: var(--onda-gray-900);
+  }}
+  
+  /* --------------------------------------------------------------------------
+     11) Zona de compatibilidad (conserva selectores previos)
+     -------------------------------------------------------------------------- */

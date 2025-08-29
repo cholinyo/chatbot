@@ -1,4 +1,5 @@
-from sqlalchemy import Integer, String, JSON, ForeignKey, DateTime, Text
+from __future__ import annotations
+from sqlalchemy import Integer, String, JSON, ForeignKey, DateTime, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.extensions.db import Base
@@ -9,10 +10,15 @@ class Document(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), index=True, nullable=False)
 
-    # Puedes ajustar estos campos a tus necesidades reales
+    # Campos coherentes con la ingesta
     path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    mime_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ext: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    mtime_ns: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    # ¡OJO!: usar 'meta' (JSON) en vez de 'metadata' para evitar el nombre reservado
     meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
