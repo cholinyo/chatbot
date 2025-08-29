@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Ingesta Documentos · TFM RAG{% endblock %}
+
+{% block content %}
+<h1 class="h4 mb-3">Ingesta de documentos</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="row g-4">
+
+  <!-- Subir ficheros sueltos -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header">Subir ficheros</div>
+      <div class="card-body">
+        <p class="text-muted mb-2">Carpeta de subida: <code>{{ upload_dir }}</code></p>
+        <form method="post" action="{{ url_for('ingesta_docs.upload') }}" enctype="multipart/form-data">
+          <input class="form-control mb-2" type="file" name="files" multiple>
+          <button class="btn btn-primary">Subir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lado derecho: Guardar fuente + Ejecutar ingesta -->
+  <div class="col-lg-7">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">Guardar como fuente (docs)</div>
+      <div class="card-body">
+        <form id="quickSaveForm" method="post" action="{{ url_for('ingesta_docs.quick_save') }}" class="row g-2">
+          <div class="col-md-7">
+            <label class="form-label">Carpeta</label>
+            <input class="form-control" name="input_dir" id="qs_input_dir" value="{{ defaults.input_dir }}">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label">Nombre (opcional)</label>
+            <input class="form-control" name="name" placeholder="Carpeta local">
+          </div>
+          <div class="col-md-7">
+            <label class="form-label">Patrones</label>
+            <input class="form-control" name="patterns" id="qs_patterns" value="{{ defaults.patterns }}">
+          </div>
+          <div class="col-md-5 d-flex align-items-end gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="recursive" id="qs_recursive"
+                     {% if defaults.recursive %}checked{% endif %}>
+              <label class="form-check-label" for="qs_recursive">Subcarpetas</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="only_new" id="qs_only_new"
+                     {% if defaults.only_new %}checked{% endif %}>
+              <label class="form-check-label" for="qs_only_new">Sólo nuevos</label>
+            </div>
+            <button class="btn btn-outline-primary ms-auto">Guardar</button>
+          </div>
+        </form>
+        <div class="form-text mt-2">Las opciones se guardan en la fuente y se usarán como valores por defecto al ejecutar.</div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Lanzar ingesta por carpeta</div>
+      <div class="card-body">
+        <form id="runForm" method="post" action="{{ url_for('ingesta_docs.run') }}">
+          <div class="mb-2">
+            <label class="form-label">Fuente (docs)</label>
+            <select class="form-select" name="source_id" id="source_id" required>
+              <option value="" disabled {% if not select_id %}selected{% endif %}>-- selecciona --</option>
+              {% for s in sources %}
+                <option value="{{ s.id }}"
+                        data-config='{{ (s.config or {})|tojson }}'
+                        {% if select_id and select_id==s.id %}selected{% endif %}>
+                  #{{ s.id }} · {{ s.name or s.url }}
+                </option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Crea la fuente arriba si no aparece en la lista.</div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Carpeta base</label>
+            <input class="form-control" name="input_dir" id="input_dir" value="{{ defaults.input_dir }}">
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Patrones</label>
+              <input class="form-control" name="patterns" id="patterns" value="{{ defaults.patterns }}">
+              <div class="form-text">Separados por coma. Ej.: <code>*.pdf,*.docx,*.txt,*.csv</code></div>
+            </div>
+            <div class="col-md-3 form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="recursive" name="recursive"
+                     {% if defaults.recursive %}checked{% endif %}>
+              <label class="form-check-label" for="recursive">Incluir subcarpetas</label>
+            </div>
+            <div class="col-md-3 form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="only_new" name="only_new"
+                     {% if defaults.only_new %}checked{% endif %}>
+              <label class="form-check-label" for="only_new">Sólo nuevos/modificados</label>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Args extra (opcional)</label>
+            <input class="form-control" name="extra_args" placeholder="--workers 4 --max-size-mb 20">
+            <div class="form-text">Se añaden tal cual al script <code>scripts/ingest_documents.py</code>.</div>
+          </div>
+
+          <div class="card-footer bg-transparent px-0">
+            <button class="btn btn-success">Ejecutar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Runs -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header">Ejecuciones recientes</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr><th>ID</th><th>Fuente</th><th>Estado</th><th>Preview</th></tr>
+          </thead>
+          <tbody>
+          {% for r in runs %}
+            <tr>
+              <td>{{ r.id }}</td>
+              <td>{{ r.source_id }}</td>
+              <td>
+                <span class="badge text-bg-{{ 'success' if r.status=='done' else ('danger' if r.status=='error' else 'secondary') }}">
+                  {{ r.status }}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#stdout{{ r.id }}">
+                  Ver salida
+                </button>
+              </td>
+            </tr>
+            <tr class="collapse" id="stdout{{ r.id }}">
+              <td colspan="4">
+                <pre style="white-space:pre-wrap">{{ (r.meta or {}).get('stdout','(sin salida)') }}</pre>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if not runs %}
+            <tr><td colspan="4" class="text-center text-muted py-3">Sin ejecuciones aún.</td></tr>
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Al seleccionar una fuente, rellenamos campos con su config
+  const sel = document.getElementById('source_id');
+  const inputDir = document.getElementById('input_dir');
+  const patterns = document.getElementById('patterns');
+  const recursive = document.getElementById('recursive');
+  const onlyNew = document.getElementById('only_new');
+
+  function applyCfg(cfg) {
+    if (!cfg) return;
+    if (cfg.input_dir) inputDir.value = cfg.input_dir;
+    if (cfg.patterns)  patterns.value = cfg.patterns;
+    if (typeof cfg.recursive === 'boolean') recursive.checked = cfg.recursive;
+    if (typeof cfg.only_new  === 'boolean') onlyNew.checked = cfg.only_new;
+  }
+
+  sel?.addEventListener('change', () => {
+    try {
+      const opt = sel.options[sel.selectedIndex];
+      const cfg = JSON.parse(opt.getAttribute('data-config') || '{}');
+      applyCfg(cfg);
+    } catch (_) {}
+  });
+
+  // Si venimos con ?select_id=..., aplicamos los defaults guardados
+  (function autoSelect() {
+    const opt = sel?.options[sel.selectedIndex];
+    if (!opt) return;
+    try {
+      const cfg = JSON.parse(opt.getAttribute('data-config') || '{}');
+      applyCfg(cfg);
+      // y también precargamos el bloque de “Guardar fuente” con lo mismo
+      const qsInput = document.getElementById('qs_input_dir');
+      const qsPat   = document.getElementById('qs_patterns');
+      const qsRec   = document.getElementById('qs_recursive');
+      const qsNew   = document.getElementById('qs_only_new');
+      if (qsInput && cfg.input_dir) qsInput.value = cfg.input_dir;
+      if (qsPat   && cfg.patterns)  qsPat.value   = cfg.patterns;
+      if (qsRec   && typeof cfg.recursive === 'boolean') qsRec.checked = cfg.recursive;
+      if (qsNew   && typeof cfg.only_new  === 'boolean') qsNew.checked = cfg.only_new;
+    } catch (_) {}
+  })();
+</script>
+{% endblock %}

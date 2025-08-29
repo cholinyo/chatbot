@@ -1,53 +1,33 @@
-"""
-Application factory for the TFM RAG project (Flask + SQLAlchemy 2.x).
-
-Purpose
-- Centraliza la carga de configuración (.env + settings.toml) y la init de extensiones.
-- Inicializa la base de control y crea las tablas ORM (tracking.sqlite) en el arranque.
-- Configura el sistema de logging (consola + ficheros rotados) antes de registrar blueprints.
-
-Validación rápida
-    # Desde la raíz del proyecto
-    python -c "from app import create_app; create_app(); print('OK')"
-
-    # Logs (por defecto en data/logs)
-    Get-Content .\\data\\logs\\app.log -Wait
-
-Notas
-- No dependemos de Flask-SQLAlchemy. Usamos SQLAlchemy ORM vía app.extensions.db
-- El módulo de logging del proyecto es app.extensions.logging (no choca con 'logging' stdlib)
-"""
+# app/__init__.py
 from __future__ import annotations
 
 import os
+import secrets
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 try:
-    # Python 3.11+: parser TOML estándar
-    import tomllib  # type: ignore[attr-defined]
+    import tomllib  # Python 3.11+
 except Exception:  # pragma: no cover
     tomllib = None  # type: ignore
 
 try:
-    # Opcional: cargar .env en desarrollo si python-dotenv está instalado
-    from dotenv import load_dotenv  # type: ignore
+    from dotenv import load_dotenv  # opcional
 except Exception:  # pragma: no cover
     load_dotenv = None  # type: ignore
 
 from flask import Flask, jsonify
 
-# Extensiones propias
 from app.extensions.logging import init_logging
 from app.extensions.db import init_engine, init_session, create_all
 
+from app.blueprints.admin.routes_main import bp as bp_admin_home
+from app.blueprints.admin.routes_data_sources import bp_ds
+from app.blueprints.admin.routes_ingesta_docs import bp as bp_ingesta_docs
+from app.blueprints.admin.routes_ingesta_web import bp_ingesta_web
 
-# ------------------------------
-# Helpers de configuración
-# ------------------------------
 
 def _load_settings(path: str = "config/settings.toml") -> Dict[str, Any]:
-    """Carga settings TOML si existe. Devuelve dict (vacío si no hay fichero)."""
     p = Path(path)
     if not p.exists() or tomllib is None:
         return {}
@@ -58,62 +38,113 @@ def _load_settings(path: str = "config/settings.toml") -> Dict[str, Any]:
         return {}
 
 
-# ------------------------------
-# Application factory
-# ------------------------------
-
 def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
-    """Crea y configura la instancia Flask.
-
-    - Carga .env (si está disponible) para desarrollo local.
-    - Carga config/settings.toml (si existe) con settings no secretos.
-    - Inicializa el sistema de logging (consola + ficheros rotados).
-    - Inicializa SQLAlchemy (engine/sesión) y crea tablas ORM.
-    - Registra blueprints (si están disponibles).
-    """
-    # 1) Cargar variables de entorno desde .env (opcional)
+    """Factory principal."""
+    # 1) .env (si está disponible)
     if load_dotenv:
-        load_dotenv()  # no-op si no existe .env
+        load_dotenv()
 
     app = Flask(__name__)
 
-    # 2) Defaults seguros para primer arranque
+    # 2) SECRET_KEY SIEMPRE (antes de registrar blueprints o usar flash)
+    secret = os.getenv("FLASK_SECRET_KEY") or os.getenv("SECRET_KEY")
+    if not secret:
+        key_file = Path("data/secret_key.txt")
+        try:
+            if key_file.exists():
+                secret = key_file.read_text(encoding="utf-8").strip()
+            else:
+                key_file.parent.mkdir(parents=True, exist_ok=True)
+                secret = secrets.token_hex(32)
+                key_file.write_text(secret, encoding="utf-8")
+        except Exception:
+            # último recurso no persistido
+            secret = secrets.token_hex(32)
+    app.config["SECRET_KEY"] = secret
+
+    # 3) Defaults de app
     app.config.setdefault("APP_NAME", "Prototipo_chatbot")
     app.config.setdefault(
         "SQLALCHEMY_DATABASE_URI",
         os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///data/processed/tracking.sqlite"),
     )
 
-    # 3) Mezclar settings.toml (si lo tienes) y overrides explícitos
-    _ = _load_settings()  # reservado para mapear claves adicionales si lo necesitas
+    # 4) Mezclar settings.toml + overrides
+    _ = _load_settings()
     if config_override:
         app.config.update(config_override)
 
-    # 4) Logging lo antes posible (para capturar mensajes de init)
+    # 5) Logging temprano
     init_logging(app)
 
-    # 5) Asegurar carpeta del SQLite y levantar engine/sesión
+    # 6) Engine/sesión + create_all
     if str(app.config["SQLALCHEMY_DATABASE_URI"]).startswith("sqlite"):
         Path("data/processed").mkdir(parents=True, exist_ok=True)
 
     engine = init_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     init_session(engine)
 
-    # 6) Importar modelos ANTES de create_all
+    # Importa modelos ANTES de create_all
     from app.models import source, ingestion_run, document, chunk  # noqa: F401
     create_all(engine)
 
-    # 7) Registrar blueprints (tolerante si aún no existen)
+    # 7) Blueprints
+    app.register_blueprint(bp_admin_home)
+    app.register_blueprint(bp_ds)
+    app.register_blueprint(bp_ingesta_docs)
+    app.register_blueprint(bp_ingesta_web)
+
     try:
         from app.blueprints.ingestion.routes import bp as ingestion_bp  # type: ignore
         app.register_blueprint(ingestion_bp, url_prefix="/ingestion")
-    except Exception as e:  # pragma: no cover - útil en fases tempranas
+    except Exception as e:
         app.logger.warning("Ingestion blueprint no registrado: %s", e)
 
-    # 8) Endpoint mínimo de salud
+    # 8) Healthcheck
     @app.get("/status/ping")
     def status_ping():  # type: ignore[override]
         return jsonify({"status": "ok", "app": app.config.get("APP_NAME")})
+
+    # 9) Shell context
+    @app.shell_context_processor
+    def _ctx():
+        ctx = {}
+        try:
+            from app.extensions.db import SessionLocal as db_session  # type: ignore
+            ctx["db_session"] = db_session
+        except Exception:
+            pass
+        try:
+            from app.models import Source, Document, Chunk, IngestionRun  # type: ignore
+            ctx.update(Source=Source, Document=Document, Chunk=Chunk, IngestionRun=IngestionRun)
+        except Exception:
+            pass
+        return ctx
+
+    # 10) Helpers Jinja
+    from datetime import datetime
+    from flask import url_for, current_app
+
+    @app.context_processor
+    def _inject_helpers():
+        def url_for_safe(endpoint: str, **values) -> str:
+            try:
+                return url_for(endpoint, **values)
+            except Exception:
+                return "#"
+
+        def has_endpoint(endpoint: str) -> bool:
+            try:
+                return any(rule.endpoint == endpoint for rule in current_app.url_map.iter_rules())
+            except Exception:
+                return False
+
+        return dict(
+            app_name=app.config.get("APP_NAME", "Prototipo_chatbot"),
+            current_year=datetime.now().year,
+            url_for_safe=url_for_safe,
+            has_endpoint=has_endpoint,
+        )
 
     app.logger.info("App creada: %s", app.config.get("APP_NAME"))
     return app

@@ -16,6 +16,7 @@ import json
 from app.rag.scrapers.requests_bs4 import ScrapeConfig, RequestsBS4Scraper
 from app.rag.scrapers.web_normalizer import html_to_text, NormalizeConfig
 from app.rag.scrapers.sitemap import discover_sitemaps_from_robots, collect_all_pages
+from app.rag.scrapers.selenium_fetcher import SeleniumScraper, SeleniumOptions
 
 logger = logging.getLogger("ingestion.web.cli")
 
@@ -37,10 +38,10 @@ def _ensure_run_dirs(root: Path) -> None:
 
 
 def main(argv: List[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description="Ingesta Web (requests+BS4) con strategy 'requests' o 'sitemap'")
+    p = argparse.ArgumentParser(description="Ingesta Web con strategy 'requests' | 'sitemap' | 'selenium'")
     p.add_argument("--seed", action="append", required=True, help="URL semilla base (repetible). Para sitemap, usa la home del dominio.")
-    p.add_argument("--strategy", choices=["requests", "sitemap"], default="requests", help="Estrategia de descubrimiento")
-    p.add_argument("--depth", type=int, default=1, help="Profundidad BFS (solo strategy=requests)")
+    p.add_argument("--strategy", choices=["requests", "sitemap", "selenium"], default="requests", help="Estrategia de descubrimiento/render")
+    p.add_argument("--depth", type=int, default=1, help="Profundidad BFS (requests/selenium)")
     p.add_argument("--allowed-domains", default="", help="Dominios permitidos (coma)")
     p.add_argument("--include", action="append", default=[], help="Patrón include (glob o regex). Repetible.")
     p.add_argument("--exclude", action="append", default=[], help="Patrón exclude (glob o regex). Repetible.")
@@ -62,6 +63,16 @@ def main(argv: List[str] | None = None) -> int:
     p.add_argument("--user-agent",
                    default="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
                    help="User-Agent para las peticiones HTTP")
+
+    # Opciones Selenium
+    p.add_argument("--driver", choices=["chrome", "firefox"], default="chrome", help="Navegador Selenium (selenium)")
+    p.add_argument("--no-headless", action="store_true", help="Abrir navegador con ventana (selenium)")
+    p.add_argument("--wait-selector", default=None, help="CSS a esperar en render (selenium)")
+    p.add_argument("--render-wait-ms", type=int, default=3000, help="Espera adicional post-carga (ms) (selenium)")
+    p.add_argument("--scroll", action="store_true", help="Hacer scroll para lazy-load (selenium)")
+    p.add_argument("--scroll-steps", type=int, default=4, help="Pasos de scroll (selenium)")
+    p.add_argument("--scroll-wait-ms", type=int, default=500, help="Espera entre scrolls (ms) (selenium)")
+    p.add_argument("--window-size", default="1366,900", help='Tamaño de ventana "ancho,alto" (selenium)')
 
     # Artefactos
     p.add_argument("--outdir", default="data/processed/runs", help="Carpeta raíz de artefactos")
@@ -170,8 +181,66 @@ def main(argv: List[str] | None = None) -> int:
                     }
                 )
 
+    elif args.strategy == "selenium":
+        # Renderizado JS + BFS
+        sopt = SeleniumOptions(
+            driver=args.driver,
+            headless=(not args.no_headless),
+            wait_selector=args.wait_selector,
+            render_wait_ms=args.render_wait_ms,
+            scroll=args.scroll,
+            scroll_steps=args.scroll_steps,
+            scroll_wait_ms=args.scroll_wait_ms,
+            window_size=args.window_size,
+        )
+        cfg = ScrapeConfig(
+            seeds=args.seed,
+            depth=args.depth,
+            allowed_domains=allowed,
+            include_url_patterns=args.include or None,
+            exclude_url_patterns=args.exclude or None,
+            respect_robots=(robots_policy != "ignore"),
+            user_agent=args.user_agent,
+            timeout_seconds=args.timeout,
+            rate_limit_per_host=args.rate,
+            max_pages=args.max_pages,
+            force_https=args.force_https,
+            robots_policy=robots_policy,
+            ignore_robots_for=ignore_set,
+        )
+        scraper = SeleniumScraper(cfg, sopt)
+
+        for page in scraper.crawl():
+            count += 1
+
+            if args.preview:
+                try:
+                    text = html_to_text(page.html, NormalizeConfig())
+                except Exception:
+                    text = ""
+                print(f"\n=== [{count}] {page.url} ===")
+                print((page.title or "").strip()[:200])
+                if text:
+                    print(text[:800] + ("…" if len(text) > 800 else ""))
+
+            if args.dump_html:
+                raw_path = run_dir / "raw" / f"page_{count:04d}.html"
+                raw_path.write_text(page.html, encoding="utf-8")
+                index.append(
+                    {
+                        "i": count,
+                        "url": page.url,
+                        "base_url": page.base_url,
+                        "status": page.status_code,
+                        "title": page.title,
+                        "raw": str(raw_path),
+                        "hash": page.origin_hash,
+                        "links": page.links[:100],
+                    }
+                )
+
     else:
-        # strategy == requests (BFS por enlaces)
+        # strategy == requests (BFS por enlaces sin JS)
         cfg = ScrapeConfig(
             seeds=args.seed,
             depth=args.depth,

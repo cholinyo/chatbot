@@ -13,17 +13,20 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🤖</text></svg>">
 
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkfFf3Z8N8Uq+EVS1Z8V+JvC1rSLIVSPdZRhqUQofuk+qS+8q0P4KX1pg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- CSS corporativo UNIFICADO -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.unified.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
   
   {% block extra_head %}{% endblock %}
 </head>
 
 <body>
+  {# Fallbacks por si no has inyectado los helpers aún #}
+  {% if url_for_safe is not defined %}{% set url_for_safe = url_for %}{% endif %}
+
   <!-- Enlace de accesibilidad: saltar al contenido -->
   <a class="visually-hidden-focusable" href="#contenido">Saltar al contenido principal</a>
 
@@ -37,36 +40,74 @@
         <span class="fw-bold">{{ app_name or 'Prototipo_chatbot' }}</span>
       </div>
       <nav class="nav flex-column">
-        <a class="nav-link" href="{{ url_for('index') }}"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio</a>
-        <a class="nav-link" href="{{ url_for('chat') }}"><i class="fa-solid fa-comments me-2" aria-hidden="true"></i>Chat</a>
-        <a class="nav-link" href="{{ url_for('chat_comparador') }}"><i class="fa-solid fa-code-compare me-2" aria-hidden="true"></i>Chat comparador</a>
+        <a class="nav-link" href="{{ url_for('admin_home.index') }}">
+          <i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio
+        </a>
 
-        <!-- Configuración (submenu) -->
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('chat') %}disabled{% endif %}"
+           href="{{ url_for_safe('chat') }}">
+          <i class="fa-solid fa-comments me-2" aria-hidden="true"></i>Chat
+        </a>
+
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('chat_comparador') %}disabled{% endif %}"
+           href="{{ url_for_safe('chat_comparador') }}">
+          <i class="fa-solid fa-code-compare me-2" aria-hidden="true"></i>Chat comparador
+        </a>
+
+        <!-- Configuración -->
         <a class="nav-link" data-bs-toggle="collapse" href="#menuConfig" role="button" aria-expanded="false" aria-controls="menuConfig">
           <i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>Configuración
           <i class="fa-solid fa-angle-down float-end" aria-hidden="true"></i>
         </a>
         <div class="collapse ps-3" id="menuConfig">
-          <a class="nav-link" href="{{ url_for('config_modelos') }}"><i class="fa-solid fa-microchip me-2" aria-hidden="true"></i>Modelos IA</a>
-          <a class="nav-link" href="{{ url_for('admin_stores') }}"><i class="fa-solid fa-store me-2" aria-hidden="true"></i>Stores</a>
-          <a class="nav-link" href="{{ url_for('fuentes_datos') }}"><i class="fa-solid fa-layer-group me-2" aria-hidden="true"></i>Fuentes de datos</a>
-          <a class="nav-link" href="{{ url_for('config_general') }}"><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>General</a>
+          <a class="nav-link {% if has_endpoint is defined and not has_endpoint('config_modelos') %}disabled{% endif %}"
+             href="{{ url_for_safe('config_modelos') }}">
+            <i class="fa-solid fa-microchip me-2" aria-hidden="true"></i>Modelos IA
+          </a>
+
+          <a class="nav-link {% if has_endpoint is defined and not has_endpoint('admin_stores') %}disabled{% endif %}"
+             href="{{ url_for_safe('admin_stores') }}">
+            <i class="fa-solid fa-store me-2" aria-hidden="true"></i>Stores
+          </a>
+
+          <a class="nav-link" href="{{ url_for('data_sources.index') }}">
+            <i class="fa-solid fa-layer-group me-2" aria-hidden="true"></i>Fuentes de datos
+          </a>
+
+          <a class="nav-link {% if has_endpoint is defined and not has_endpoint('config_general') %}disabled{% endif %}"
+             href="{{ url_for_safe('config_general') }}">
+            <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>General
+          </a>
         </div>
 
-        <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i>Dashboard</a>
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('dashboard') %}disabled{% endif %}"
+           href="{{ url_for_safe('dashboard') }}">
+          <i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i>Dashboard
+        </a>
 
-        <!-- Endpoints (submenu) -->
+        <!-- Endpoints -->
         <a class="nav-link" data-bs-toggle="collapse" href="#menuEndpoints" role="button" aria-expanded="false" aria-controls="menuEndpoints">
           <i class="fa-solid fa-plug me-2" aria-hidden="true"></i>Endpoints
           <i class="fa-solid fa-angle-down float-end" aria-hidden="true"></i>
         </a>
         <div class="collapse ps-3" id="menuEndpoints">
-          <a class="nav-link" href="{{ url_for('status') }}"><i class="fa-solid fa-signal me-2" aria-hidden="true"></i>Estado del sistema</a>
-          <a class="nav-link" href="{{ url_for('routes') }}"><i class="fa-solid fa-route me-2" aria-hidden="true"></i>Lista de rutas</a>
+          <a class="nav-link" href="{{ url_for_safe('status_ping') }}">
+            <i class="fa-solid fa-signal me-2" aria-hidden="true"></i>Estado del sistema
+          </a>
+          <a class="nav-link" href="{{ url_for('admin_home.routes') }}">
+            <i class="fa-solid fa-route me-2" aria-hidden="true"></i>Lista de rutas
+          </a>
         </div>
 
-        <a class="nav-link" href="{{ url_for('documentacion') }}"><i class="fa-regular fa-file-lines me-2" aria-hidden="true"></i>Documentación</a>
-        <a class="nav-link" href="{{ url_for('acerca_de') }}"><i class="fa-regular fa-circle-question me-2" aria-hidden="true"></i>Acerca de</a>
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('documentacion') %}disabled{% endif %}"
+           href="{{ url_for_safe('documentacion') }}">
+          <i class="fa-regular fa-file-lines me-2" aria-hidden="true"></i>Documentación
+        </a>
+
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('acerca_de') %}disabled{% endif %}"
+           href="{{ url_for_safe('acerca_de') }}">
+          <i class="fa-regular fa-circle-question me-2" aria-hidden="true"></i>Acerca de
+        </a>
       </nav>
     </aside>
     {% endblock %}
@@ -91,8 +132,17 @@
               <i class="fa-regular fa-circle-question me-1"></i>Ayuda
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAyuda">
-              <li><a class="dropdown-item" href="{{ url_for('routes') if 'routes' in globals() else '#' }}" target="_blank"><i class="fa-solid fa-route me-2 text-warning" aria-hidden="true"></i>Rutas</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('status') if 'status' in globals() else '#' }}" target="_blank"><i class="fa-solid fa-signal me-2 text-success" aria-hidden="true"></i>Status</a></li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('admin_home.routes') }}" target="_blank">
+                  <i class="fa-solid fa-route me-2 text-warning" aria-hidden="true"></i>Rutas
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item {% if has_endpoint is defined and not has_endpoint('status_ping') %}disabled{% endif %}"
+                   href="{{ url_for_safe('status_ping') }}" target="_blank">
+                  <i class="fa-solid fa-signal me-2 text-success" aria-hidden="true"></i>Status
+                </a>
+              </li>
             </ul>
           </div>
           <!-- Tema claro/oscuro -->
@@ -132,36 +182,74 @@
     <div class="offcanvas-body">
       {% block sidebar_offcanvas %}
       <nav class="nav flex-column">
-        <a class="nav-link" href="{{ url_for('index') }}"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio</a>
-        <a class="nav-link" href="{{ url_for('chat') }}"><i class="fa-solid fa-comments me-2" aria-hidden="true"></i>Chat</a>
-        <a class="nav-link" href="{{ url_for('chat_comparador') }}"><i class="fa-solid fa-code-compare me-2" aria-hidden="true"></i>Chat comparador</a>
+        <a class="nav-link" href="{{ url_for('admin_home.index') }}">
+          <i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio
+        </a>
 
-        <!-- Configuración (submenu) -->
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('chat') %}disabled{% endif %}"
+           href="{{ url_for_safe('chat') }}">
+          <i class="fa-solid fa-comments me-2" aria-hidden="true"></i>Chat
+        </a>
+
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('chat_comparador') %}disabled{% endif %}"
+           href="{{ url_for_safe('chat_comparador') }}">
+          <i class="fa-solid fa-code-compare me-2" aria-hidden="true"></i>Chat comparador
+        </a>
+
+        <!-- Configuración -->
         <a class="nav-link" data-bs-toggle="collapse" href="#menuConfig" role="button" aria-expanded="false" aria-controls="menuConfig">
           <i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>Configuración
           <i class="fa-solid fa-angle-down float-end" aria-hidden="true"></i>
         </a>
         <div class="collapse ps-3" id="menuConfig">
-          <a class="nav-link" href="{{ url_for('config_modelos') }}"><i class="fa-solid fa-microchip me-2" aria-hidden="true"></i>Modelos IA</a>
-          <a class="nav-link" href="{{ url_for('admin_stores') }}"><i class="fa-solid fa-store me-2" aria-hidden="true"></i>Stores</a>
-          <a class="nav-link" href="{{ url_for('fuentes_datos') }}"><i class="fa-solid fa-layer-group me-2" aria-hidden="true"></i>Fuentes de datos</a>
-          <a class="nav-link" href="{{ url_for('config_general') }}"><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>General</a>
+          <a class="nav-link {% if has_endpoint is defined and not has_endpoint('config_modelos') %}disabled{% endif %}"
+             href="{{ url_for_safe('config_modelos') }}">
+            <i class="fa-solid fa-microchip me-2" aria-hidden="true"></i>Modelos IA
+          </a>
+
+          <a class="nav-link {% if has_endpoint is defined and not has_endpoint('admin_stores') %}disabled{% endif %}"
+             href="{{ url_for_safe('admin_stores') }}">
+            <i class="fa-solid fa-store me-2" aria-hidden="true"></i>Stores
+          </a>
+
+          <a class="nav-link" href="{{ url_for('data_sources.index') }}">
+            <i class="fa-solid fa-layer-group me-2" aria-hidden="true"></i>Fuentes de datos
+          </a>
+
+          <a class="nav-link {% if has_endpoint is defined and not has_endpoint('config_general') %}disabled{% endif %}"
+             href="{{ url_for_safe('config_general') }}">
+            <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>General
+          </a>
         </div>
 
-        <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i>Dashboard</a>
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('dashboard') %}disabled{% endif %}"
+           href="{{ url_for_safe('dashboard') }}">
+          <i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i>Dashboard
+        </a>
 
-        <!-- Endpoints (submenu) -->
+        <!-- Endpoints -->
         <a class="nav-link" data-bs-toggle="collapse" href="#menuEndpoints" role="button" aria-expanded="false" aria-controls="menuEndpoints">
           <i class="fa-solid fa-plug me-2" aria-hidden="true"></i>Endpoints
           <i class="fa-solid fa-angle-down float-end" aria-hidden="true"></i>
         </a>
         <div class="collapse ps-3" id="menuEndpoints">
-          <a class="nav-link" href="{{ url_for('status') }}"><i class="fa-solid fa-signal me-2" aria-hidden="true"></i>Estado del sistema</a>
-          <a class="nav-link" href="{{ url_for('routes') }}"><i class="fa-solid fa-route me-2" aria-hidden="true"></i>Lista de rutas</a>
+          <a class="nav-link" href="{{ url_for_safe('status_ping') }}">
+            <i class="fa-solid fa-signal me-2" aria-hidden="true"></i>Estado del sistema
+          </a>
+          <a class="nav-link" href="{{ url_for('admin_home.routes') }}">
+            <i class="fa-solid fa-route me-2" aria-hidden="true"></i>Lista de rutas
+          </a>
         </div>
 
-        <a class="nav-link" href="{{ url_for('documentacion') }}"><i class="fa-regular fa-file-lines me-2" aria-hidden="true"></i>Documentación</a>
-        <a class="nav-link" href="{{ url_for('acerca_de') }}"><i class="fa-regular fa-circle-question me-2" aria-hidden="true"></i>Acerca de</a>
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('documentacion') %}disabled{% endif %}"
+           href="{{ url_for_safe('documentacion') }}">
+          <i class="fa-regular fa-file-lines me-2" aria-hidden="true"></i>Documentación
+        </a>
+
+        <a class="nav-link {% if has_endpoint is defined and not has_endpoint('acerca_de') %}disabled{% endif %}"
+           href="{{ url_for_safe('acerca_de') }}">
+          <i class="fa-regular fa-circle-question me-2" aria-hidden="true"></i>Acerca de
+        </a>
       </nav>
       {% endblock %}
     </div>
@@ -178,7 +266,7 @@
   </div>
 
   <!-- Bootstrap JS (bundle) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
   <!-- Preferencias de tema claro/oscuro -->
   <script>

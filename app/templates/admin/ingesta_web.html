@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %}Ingesta Web · TFM RAG{% endblock %}
 {% block content %}
 <div class="container py-4">
   <h1 class="h3 mb-3">Ingesta Web (RAG)</h1>
@@ -19,6 +20,7 @@
         <div class="card-body">
           <form method="post" action="{{ url_for('ingesta_web.save') }}">
             <input type="hidden" name="id" id="src_id">
+
             <div class="mb-2">
               <label class="form-label">URL base</label>
               <input class="form-control" name="url" placeholder="https://www.onda.es" required>
@@ -30,6 +32,7 @@
                 <select class="form-select" name="strategy">
                   <option value="sitemap" selected>Sitemap</option>
                   <option value="requests">Requests (BFS)</option>
+                  <option value="selenium">Selenium (JS)</option>
                 </select>
               </div>
               <div class="col-6 mb-2">
@@ -92,6 +95,49 @@
               <input class="form-control" name="user_agent" value="{{cfg_defaults.user_agent}}">
             </div>
 
+            <div class="border rounded p-2 mb-3">
+              <div class="form-text mb-2">Opciones Selenium (solo si Strategy = Selenium)</div>
+              <div class="row g-2">
+                <div class="col-4">
+                  <label class="form-label">Driver</label>
+                  <select class="form-select" name="driver">
+                    <option value="chrome" selected>chrome</option>
+                    <option value="firefox">firefox</option>
+                  </select>
+                </div>
+                <div class="col-4">
+                  <label class="form-label">Window size</label>
+                  <input class="form-control" name="window_size" value="{{cfg_defaults.window_size}}">
+                </div>
+                <div class="col-4">
+                  <label class="form-label">Render wait (ms)</label>
+                  <input class="form-control" type="number" name="render_wait_ms" value="{{cfg_defaults.render_wait_ms}}">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Wait selector (CSS)</label>
+                  <input class="form-control" name="wait_selector" placeholder="#content, .app">
+                </div>
+                <div class="col-3 form-check mt-4">
+                  <input class="form-check-input" type="checkbox" id="no_headless" name="no_headless">
+                  <label class="form-check-label" for="no_headless">Mostrar ventana (no headless)</label>
+                </div>
+                <div class="col-3 form-check mt-4">
+                  <input class="form-check-input" type="checkbox" id="scroll" name="scroll">
+                  <label class="form-check-label" for="scroll">Hacer scroll</label>
+                </div>
+              </div>
+              <div class="row g-2 mt-2">
+                <div class="col-4">
+                  <label class="form-label">Scroll steps</label>
+                  <input class="form-control" type="number" name="scroll_steps" value="{{cfg_defaults.scroll_steps}}">
+                </div>
+                <div class="col-4">
+                  <label class="form-label">Scroll wait (ms)</label>
+                  <input class="form-control" type="number" name="scroll_wait_ms" value="{{cfg_defaults.scroll_wait_ms}}">
+                </div>
+              </div>
+            </div>
+
             <div class="d-flex gap-2">
               <button class="btn btn-primary">Guardar fuente</button>
               <button type="button" class="btn btn-outline-secondary" onclick="fillFromSelection()">Cargar selección</button>
@@ -114,7 +160,7 @@
             {% for s in sources %}
               <tr>
                 <td>{{s.id}}</td>
-                <td>{{s.url}}</td>
+                <td class="text-truncate" style="max-width:360px">{{s.url}}</td>
                 <td>{{(s.config or {}).get('strategy','sitemap')}}</td>
                 <td>{{(s.config or {}).get('robots_policy','strict')}}</td>
                 <td class="text-nowrap">
@@ -149,7 +195,7 @@
                 </td>
                 <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('ingesta_web.preview', run_id=r.id) }}">Ver salida</a></td>
                 <td class="text-nowrap">
-                  {% set rd = (r.metadata or {}).get('run_dir') %}
+                  {% set rd = (r.meta or {}).get('run_dir') %}
                   {% if rd %}
                     <a class="btn btn-sm btn-outline-primary" href="{{ url_for('ingesta_web.artifact', relpath=rd ~ '/fetch_index.json') }}">fetch_index.json</a>
                     <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('ingesta_web.artifact', relpath=rd ~ '/sitemap_index.json') }}">sitemap_index.json</a>
@@ -157,7 +203,7 @@
                   {% else %}
                     <small class="text-muted">Sin path del run</small>
                   {% endif %}
-                </td>                
+                </td>
               </tr>
             {% endfor %}
             </tbody>
@@ -191,6 +237,15 @@ function selectSource(id, srcJson){
   f.querySelector('[name="max_pages"]').value = cfg.max_pages ?? 100;
   f.querySelector('[name="force_https"]').checked = !!cfg.force_https;
   f.querySelector('[name="user_agent"]').value = cfg.user_agent || '';
+  // Selenium
+  f.querySelector('[name="driver"]').value = cfg.driver || 'chrome';
+  f.querySelector('[name="window_size"]').value = cfg.window_size || '1366,900';
+  f.querySelector('[name="render_wait_ms"]').value = cfg.render_wait_ms ?? 3000;
+  f.querySelector('[name="wait_selector"]').value = cfg.wait_selector || '';
+  f.querySelector('[name="no_headless"]').checked = !!cfg.no_headless;
+  f.querySelector('[name="scroll"]').checked = !!cfg.scroll;
+  f.querySelector('[name="scroll_steps"]').value = cfg.scroll_steps ?? 4;
+  f.querySelector('[name="scroll_wait_ms"]').value = cfg.scroll_wait_ms ?? 500;
 }
 function fillFromSelection(){ /* no-op; el botón llama a selectSource antes */ }
 </script>

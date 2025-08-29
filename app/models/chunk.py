@@ -1,29 +1,17 @@
-from __future__ import annotations
-
-from typing import Any, Optional
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, JSON, String, Text, func
+from sqlalchemy import Integer, String, JSON, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.extensions.db import Base
 
-
 class Chunk(Base):
-    __tablename__ = "chunk"
+    __tablename__ = "chunks"
 
-    chunk_id: Mapped[str] = mapped_column(String(160), primary_key=True)
-    doc_id: Mapped[str] = mapped_column(String(128), ForeignKey("document.doc_id", ondelete="CASCADE"), nullable=False)
-    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), index=True, nullable=False)
+    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"), nullable=True)
 
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
-    lang: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
-    title: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-
-    retrieval_tags: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
-    provenance: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
-
-    created_at: Mapped[Any] = mapped_column(DateTime, nullable=False, server_default=func.now())
-
-    document: Mapped["Document"] = relationship(back_populates="chunks")
-
-    __table_args__ = (Index("ix_chunk_doc_pos", "doc_id", "position"),)
+    # Relaciones
+    source = relationship("Source", back_populates="chunks")
+    document = relationship("Document", back_populates="chunks")

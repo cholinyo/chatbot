@@ -1,39 +1,19 @@
-from __future__ import annotations
-
-from uuid import uuid4
-from typing import Any, Optional
-from sqlalchemy import DateTime, ForeignKey, Index, JSON, String, func
+from sqlalchemy import Integer, String, JSON, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 from app.extensions.db import Base
 
-
 class IngestionRun(Base):
-    __tablename__ = "ingestion_run"
+    __tablename__ = "ingestion_runs"
 
-    run_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    source_id: Mapped[str] = mapped_column(String(100), ForeignKey("source.id", ondelete="CASCADE"), nullable=False)
-    source_type: Mapped[str] = mapped_column(String(16), nullable=False)
-    source_scope: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
-    params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), index=True, nullable=False)
 
-    started_at: Mapped[Any] = mapped_column(DateTime, nullable=False, server_default=func.now())
-    ended_at: Mapped[Optional[Any]] = mapped_column(DateTime, nullable=True)
-    status: Mapped[str] = mapped_column(String(16), nullable=False, default="running")
-    stats: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
-    log_path: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="running")
+    # ¡OJO!: no usar 'metadata' como atributo de clase en modelos declarativos
+    meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
-    source: Mapped["Source"] = relationship(back_populates="runs")
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    __table_args__ = (
-        Index("ix_ingestion_run_source", "source_id", "started_at"),
-        Index("ix_ingestion_run_status", "status"),
-    )
-
-    @property
-    def duration_seconds(self) -> Optional[float]:
-        if self.ended_at is None:
-            return None
-        try:
-            return (self.ended_at - self.started_at).total_seconds()
-        except Exception:
-            return None
+    # Relaciones
+    source = relationship("Source", back_populates="runs")

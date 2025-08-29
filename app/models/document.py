@@ -1,40 +1,22 @@
-from __future__ import annotations
-
-from typing import Any, Optional
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, JSON, String, Text, func
+from sqlalchemy import Integer, String, JSON, ForeignKey, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 from app.extensions.db import Base
 
-
 class Document(Base):
-    __tablename__ = "document"
+    __tablename__ = "documents"
 
-    doc_id: Mapped[str] = mapped_column(String(128), primary_key=True)
-    source_id: Mapped[Optional[str]] = mapped_column(String(100), ForeignKey("source.id", ondelete="SET NULL"), nullable=True)
-    source_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), index=True, nullable=False)
 
-    uri: Mapped[str] = mapped_column(String(2048), nullable=False)
+    # Puedes ajustar estos campos a tus necesidades reales
+    path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    mime_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
-    title: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    lang: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
-    mime: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    version: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    collected_at: Mapped[Optional[Any]] = mapped_column(DateTime, nullable=True)
-    size_bytes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-
-    origin_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    normalized_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-
-    license: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    confidentiality: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-
-    created_at: Mapped[Any] = mapped_column(DateTime, nullable=False, server_default=func.now())
-
-    source: Mapped[Optional["Source"]] = relationship(back_populates="documents")
-    chunks: Mapped[list["Chunk"]] = relationship(back_populates="document", cascade="all, delete-orphan", passive_deletes=True)
-
-    __table_args__ = (
-        Index("ix_document_source", "source_type", "source_id"),
-        Index("ix_document_uri", "uri"),
-    )
+    # Relaciones
+    source = relationship("Source", back_populates="documents")
+    chunks = relationship("Chunk", back_populates="document", cascade="all, delete-orphan")

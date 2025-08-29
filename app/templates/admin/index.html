@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Inicio · TFM RAG{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Panel de administración</h1>
+<p class="text-muted">Prototipo RAG para Administraciones Locales · UJI 2024–2025</p>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Fuentes de datos</h2>
+        <p>Crear y gestionar fuentes: web, documentos locales, BBDD, APIs…</p>
+        <a class="btn btn-primary" href="{{ url_for('data_sources.index') }}">Abrir</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Ingesta Web</h2>
+        <p>Configura sitios, ejecuta crawls y descarga artefactos.</p>
+        <a class="btn btn-outline-primary" href="{{ url_for('ingesta_web.index') }}">Abrir</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Ingesta de Documentos</h2>
+        <p>Sube ficheros (PDF/DOCX/TXT/CSV) y lanza la ingesta.</p>
+        <a class="btn btn-outline-primary" href="{{ url_for('ingesta_docs.index') }}">Abrir</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

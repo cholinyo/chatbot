@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Fuentes de datos · TFM RAG{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="h4 mb-1">Fuentes de datos</h1>
+      <p class="text-muted mb-0">Hub de ingestas y estado general.</p>
+    </div>
+  </div>
+
+  {# Accesos rápidos: Web, Documentos, APIs, BBDD #}
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fa-solid fa-spider me-2"></i><strong>Ingesta Web</strong>
+          </div>
+          <p class="text-muted small mb-3">Configura sitios, ejecuta crawls y descarga artefactos.</p>
+          <a class="btn btn-primary btn-sm w-100" href="{{ url_for('ingesta_web.index') }}">Abrir</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fa-regular fa-file-lines me-2"></i><strong>Ingesta Documentos</strong>
+          </div>
+          <p class="text-muted small mb-3">Sube ficheros (PDF/DOCX/TXT/CSV) y lanza la ingesta.</p>
+          <a class="btn btn-outline-primary btn-sm w-100" href="{{ url_for('ingesta_docs.index') }}">Abrir</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fa-solid fa-cloud-arrow-down me-2"></i><strong>APIs</strong>
+          </div>
+          <p class="text-muted small mb-3">Conecta a APIs públicas/privadas (en preparación).</p>
+          <a class="btn btn-outline-secondary btn-sm w-100 disabled"
+             href="{{ url_for_safe('ingesta_apis.index') }}">Próximamente</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fa-solid fa-database me-2"></i><strong>Bases de datos</strong>
+          </div>
+          <p class="text-muted small mb-3">ETL desde SQL/NoSQL (en preparación).</p>
+          <a class="btn btn-outline-secondary btn-sm w-100 disabled"
+             href="{{ url_for_safe('ingesta_bbdd.index') }}">Próximamente</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Mensajes #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{cat}}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {# Listado de fuentes #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header">Listado de fuentes</div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width:80px;">ID</th>
+            <th style="width:120px;">Tipo</th>
+            <th style="width:220px;">Nombre</th>
+            <th>URL / Carpeta</th>
+            <th style="width:220px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for s in sources %}
+          <tr>
+            <td class="text-muted">#{{ s.id }}</td>
+            <td><span class="badge text-bg-secondary">{{ s.type }}</span></td>
+            <td>{{ s.name or "-" }}</td>
+            <td class="text-truncate" style="max-width:520px">{{ s.url }}</td>
+            <td class="text-nowrap">
+              {% if s.type == 'web' %}
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('ingesta_web.index') }}">Ingesta Web</a>
+              {% elif s.type == 'docs' %}
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('ingesta_docs.index') }}">Ingesta Docs</a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        {% if not sources %}
+          <tr><td colspan="5" class="text-center text-muted py-4">Sin fuentes todavía.</td></tr>
+        {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {# Estadísticas por tipo #}
+  <div class="card shadow-sm">
+    <div class="card-header">Estadísticas por tipo</div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th class="text-end"># Fuentes</th>
+            <th class="text-end"># Documentos</th>
+            <th class="text-end"># Chunks</th>
+            <th class="text-end"># Runs</th>
+            <th class="text-end"># OK</th>
+            <th class="text-end"># Error</th>
+            <th class="text-end">Último run</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if stats_by_type %}
+            {% for t, st in stats_by_type.items() %}
+            <tr>
+              <td><span class="badge text-bg-secondary">{{ t }}</span></td>
+              <td class="text-end">{{ st.sources }}</td>
+              <td class="text-end">{{ st.documents }}</td>
+              <td class="text-end">{{ st.chunks }}</td>
+              <td class="text-end">{{ st.runs_total }}</td>
+              <td class="text-end">{{ st.runs_done }}</td>
+              <td class="text-end">{{ st.runs_error }}</td>
+              <td class="text-end">
+                {% if st.last_run %}{{ st.last_run.strftime("%Y-%m-%d %H:%M") }}{% else %}<span class="text-muted">—</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="8" class="text-center text-muted py-4">Sin estadísticas disponibles.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

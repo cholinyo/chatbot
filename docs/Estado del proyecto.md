@@ -1,45 +1,59 @@
-# TFM RAG — Estado del proyecto y guía de estructura (v2025-08-28)
+TFM RAG — Estado del proyecto y guía de estructura (v2025-08-29)
 
-> **Proyecto**: Prototipo de Chatbot RAG para Administraciones Locales (Flask + Python)
-> **Autor**: Vicente Caruncho Ramos
-> **Contexto**: TFM UJI 2024–2025
-> **Objetivo de este documento**: Dejar por escrito **qué hay implementado**, **cómo está estructurado** el repositorio, **modelos de datos**, **pipeline de ingesta de documentos y web**, **logging**, **artefactos generados** y **cómo ejecutar/monitorizar**. Sirve como handoff para continuar el desarrollo (siguientes fuentes: BBDD, APIs; Vector Stores; Chat/Comparador; Benchmarking).
+Proyecto: Prototipo de Chatbot RAG para Administraciones Locales (Flask + Python)
+Autor: Vicente Caruncho Ramos
+Contexto: TFM UJI 2024–2025
+Objetivo: Detallar qué hay implementado, cómo está organizado el repo, modelos de datos, pipelines de ingesta (docs + web), logging, artefactos y cómo ejecutar/validar. Punto de partida para las siguientes iteraciones (BBDD, APIs, vector stores, chat/benchmark).
 
----
+1) Resumen ejecutivo
 
-## 1) Resumen ejecutivo
+App factory (app/__init__.py) operativa. Carga .env, inicializa logging y DB, crea tablas en data/processed/tracking.sqlite, registra blueprints y expone /status/ping.
 
-* **App factory** (`app/__init__.py`) lista y validada. Crea tablas en `data/processed/tracking.sqlite`, registra (si existe) el blueprint de ingesta y expone `/status/ping`.
-* **Sistema de logging** centralizado (`app/extensions/logging.py`), con **rotación** y doble salida: consola y ficheros en `data/logs/{app.log, ingestion.log}`. Nivel controlable por `LOG_LEVEL`.
-* **Ingesta de Documentos** implementada (v1):
+Se añadió gestión de SECRET_KEY:
 
-  * **Loaders** para `pdf`, `docx`, `txt`, `csv`.
-  * **Cleaning** y **Splitters** con solape configurables (bug de avance resuelto para textos cortos).
-  * **Deduplicación**/reprocesado por **política**: `hash` (por defecto) o `mtime` (placeholder).
-  * **Persistencia** en SQLite vía ORM: `Source`, `Document`, `Chunk`, `IngestionRun`.
-  * **Artefactos** JSONL: `data/processed/documents/{docs.jsonl, chunks.jsonl}` + resúmenes por run en `data/processed/documents/runs/`.
-  * **CLI**: `scripts/ingest_documents.py` (argumentos para carpeta, extensiones, split, CSV, etc.).
-* **Pruebas realizadas**: ingesta mínima sobre `data/raw/documents_test/hola.txt` → **1 documento / 2 chunks**. Logs y artefactos generados correctamente.
-* **Ingesta Web (fase inicial)** implementada:
+Usa FLASK_SECRET_KEY/SECRET_KEY si existen.
 
-  * Scraper `app/rag/scrapers/requests_bs4.py` con:
+Si no, genera una de desarrollo y la persiste en data/secret_key.txt (evita errores de flash()/sesión).
 
-    * Seeds múltiples, BFS por profundidad.
-    * Normalización de URLs y canonicalización.
-    * Robots.txt opcional (activable con `--no-robots`).
-    * Include/Exclude por regex o glob.
-    * Rate limiter por host.
-    * `fetch_url` para estrategias externas (ej. sitemap).
-  * Estrategia `sitemap` integrada en `scripts/ingest_web.py`.
-  * Nuevo flag `--force-https` para normalizar URLs descubiertas en sitemap.
-  * Pruebas realizadas con **portal onda.es**: detección y transformación de URLs, ingestiones completas de hasta **10 páginas / 14 chunks**.
-  * Logs detallados: `robots.block`, `robots.block.detail`, `fetch.ok`, `parse.ok`.
+Logging centralizado (app/extensions/logging.py): consola + ficheros rotados en data/logs/.
 
----
+ORM/DB (app/extensions/db.py + app/models/*): Source, Document, Chunk, IngestionRun. Relaciones y back_populates cuadradas.
 
-## 2) Estructura de directorios (actual)
+Ingesta de Documentos:
 
-```
+Loaders: pdf, docx, txt, csv. Limpieza y split con solape configurables.
+
+Política de re-ingesta por hash (por defecto) o mtime.
+
+Artefactos JSONL y registros de ejecución en DB.
+
+CLI: scripts/ingest_documents.py.
+
+Ingesta Web:
+
+Estrategias: sitemap y requests (BFS), con dominios permitidos, include/exclude, robots policy, force_https, rate/timeout.
+
+CLI: scripts/ingest_web.py.
+
+UI de administración (Flask + Jinja):
+
+Fuentes de datos: listado simple (ID, tipo, nombre, URL/carpeta) y enlaces a “Ingesta Web / Documentos”.
+
+Ingesta Documentos: subir ficheros, lanzar por carpeta (fuente docs, patrones, recursivo, “solo nuevos/modificados”, args extra).
+
+Ingesta Web: configurar fuente y lanzar con captura de stdout, returncode, comando y (si existe) run_dir. Descarga de artefactos con saneado de rutas.
+
+✅ Ahora mismo en curso: comprobación end-to-end de las ingestas (Documentos + Web) desde la aplicación web, asegurando que:
+
+Se persisten correctamente las fuentes y runs.
+
+Se captura salida/errores del proceso.
+
+Los artefactos se generan y se pueden descargar.
+
+No hay errores de sesión/SECRET_KEY ni de rutas/cwd.
+
+2) Estructura del repositorio (actual)
 <repo-root>/
 ├─ app/
 │  ├─ __init__.py
@@ -52,145 +66,141 @@
 │  │  ├─ document.py
 │  │  └─ chunk.py
 │  ├─ blueprints/
+│  │  ├─ admin/
+│  │  │  ├─ routes_main.py
+│  │  │  ├─ routes_data_sources.py
+│  │  │  ├─ routes_ingesta_docs.py
+│  │  │  └─ routes_ingesta_web.py
 │  │  └─ ingestion/
-│  │     ├─ routes.py
 │  │     └─ services.py
-│  └─ rag/
-│     ├─ processing/
-│     │  ├─ cleaners.py
-│     │  └─ splitters.py
-│     ├─ loaders/
-│     │  ├─ pdf_loader.py
-│     │  ├─ docx_loader.py
-│     │  ├─ txt_loader.py
-│     │  └─ csv_loader.py
-│     └─ scrapers/
-│        └─ requests_bs4.py
-│
+│  └─ templates/
+│     └─ admin/
+│        ├─ data_sources.html
+│        ├─ ingesta_docs.html
+│        └─ ingesta_web.html
 ├─ scripts/
 │  ├─ ingest_documents.py
 │  ├─ ingest_web.py
 │  └─ run_server.py
-│
 ├─ data/
 │  ├─ raw/
+│  │  └─ uploads/
 │  └─ processed/
 │     ├─ tracking.sqlite
-│     ├─ documents/
-│     │  ├─ docs.jsonl
-│     │  ├─ chunks.jsonl
-│     │  └─ runs/
-│     └─ logs/
-│        ├─ app.log
-│        └─ ingestion.log
-│
+│     ├─ runs/                  # artefactos de ingesta web
+│     └─ documents/
+│        ├─ docs.jsonl
+│        ├─ chunks.jsonl
+│        └─ runs/               # resúmenes por run de documentos
 ├─ config/
 │  └─ settings.toml
-├─ docs/
-└─ TFM/
-```
+└─ data/secret_key.txt          # generado si no hay SECRET_KEY en entorno
 
----
+3) Modelos (resumen de campos clave)
 
-## 3) Modelos de datos (ORM, SQLite `data/processed/tracking.sqlite`)
+Source: id (int), type ('web'|'docs'), url (str), name (str|None), config (JSON), rels: runs, documents, chunks.
 
-*(Sin cambios respecto al documento anterior, salvo que `Source.type` ahora también podrá tomar valor `"web"`).*
+IngestionRun: id, source_id, status ('running'|'done'|'error'), meta (JSON), created_at.
 
----
+meta guarda stdout (tail), returncode, cmd, run_dir (web) y/o docs_config/web_config.
 
-## 4) Pipeline de Ingesta
+Document / Chunk: trazabilidad hacia Source.
 
-### 4.1 Documentos (estable)
+4) Ejecución
+Pre-requisitos
+# Windows PowerShell
+$env:FLASK_APP="app:create_app"
+$env:FLASK_SECRET_KEY="lo_que_sea_bastante_largo_y_aleatorio"   # o deja que se genere en data/secret_key.txt
+# opcional
+$env:SQLALCHEMY_DATABASE_URI="sqlite:///data/processed/tracking.sqlite"
 
-*(Idéntico al estado anterior)*
 
-### 4.2 Web (fase inicial)
+Instala dependencias (incluye PyPDF2, docx, bs4, etc.). Luego:
 
-1. **Estrategia requests+BS4**: BFS con filtros de dominios, incluye/excluye, robots opcional.
-2. **Estrategia sitemap**: descubrimiento de URLs desde `sitemap.xml` o índices de sitemap.
-3. **Opción --force-https**: reescribe URLs descubiertas de `http://` a `https://`.
-4. **CLI ingest\_web.py**: soporta `--seed`, `--strategy {requests_bs4,sitemap}`, `--force-https`, `--no-robots`.
-5. **Artefactos**: cada run almacena chunks y metadatos en DB + JSONL.
+flask run --debug
 
-Limitaciones actuales: bloqueo estricto por robots.txt en onda.es, incluso aunque no exista robots.txt (404). Se ha probado con `--no-robots` para forzar ingestión.
+Flujo UI
 
----
+Fuentes de datos → crear fuente docs (con input_dir si procede) o web.
 
-## 5) Logging
+Ingesta de Documentos → seleccionar fuente, definir carpeta base/patrones si vas “ad-hoc”, lanzar.
 
-Idéntico a la fase Documentos, ampliado con:
+Ingesta Web → seleccionar/guardar fuente, lanzar.
 
-* Logger `ingestion.web.requests_bs4` y `ingestion.web.cli`.
-* Eventos nuevos: `robots.block`, `robots.block.detail`, `fetch.ok`, `parse.ok`.
+Revisar Ejecuciones recientes: estado, Preview (stdout), y artefactos (web).
 
----
+5) Validación E2E (lo que se está comprobando ahora)
 
-## 6) Artefactos generados
+Documentos:
 
-* **DB**: SQLite con tablas `Source`, `Document`, `Chunk`, `IngestionRun`.
-* **JSONL**: `docs.jsonl`, `chunks.jsonl`, resúmenes en `runs/`.
-* **Logs**: en `data/logs/`.
+Fuente docs creada/guardada correctamente.
 
-Ejemplo real: ingesta web onda.es → **10 páginas procesadas, 14 chunks generados**.
+Al lanzar: se respetan input_dir, recursividad y patrones (*.pdf,*.docx,*.txt,*.csv).
 
----
+Cambios detectados (hash/mtime) → solo nuevos/modificados.
 
-## 7) Ejecución y validación
+Artefactos: data/processed/documents/docs.jsonl, chunks.jsonl y runs/*.json.
 
-### Documentos
+En la tabla IngestionRun.meta: stdout, returncode, cmd.
 
-*(igual que antes)*
+Web:
 
-### Web
+Fuente web guardada con config (strategy, robots_policy, allowed_domains…).
 
-```powershell
-# Sitemap con robots deshabilitado
-ython scripts/ingest_web.py --source-id web_onda --strategy sitemap --seed https://www.onda.es/ \
-  --allowed-domains www.onda.es --exclude ".*\\.(png|jpg|jpeg|gif|pdf|zip)$" \
-  --max-pages 10 --no-robots --verbose
-```
+El botón “Lanzar ingesta” ejecuta scripts/ingest_web.py con cwd del proyecto, captura stdout/returncode y ubica run_dir.
 
----
+Descarga de artefactos segura bajo data/processed/runs.
 
-## 8) Próximos pasos
+Errores típicos y solución
 
-1. **Web**
+RuntimeError: The session is unavailable... → definir FLASK_SECRET_KEY o usar data/secret_key.txt autogenerado (ya soportado).
 
-   * Añadir soporte `sitemap_index.xml`.
-   * Parámetro granular `--ignore-robots-for`.
-   * Implementar estrategia **Selenium** para páginas dinámicas.
-   * Guardar config web en `Source.config` (url, depth, strategy, robots, force\_https).
+“(sin salida)” en runs → comprobar dependencias del script, rutas, y que el cwd sea la raíz del repo (ya forzado).
 
-2. **Fuentes nuevas**
+“No module named PyPDF2” → instalar dependencias.
 
-   * **BBDD** (ej: PostgreSQL, MySQL, SQLite).
-   * **APIs** con auth, paginación, rate-limit.
+6) Roadmap inmediato (2 sprints)
 
-3. **Vector Stores**
+Sprint A (estabilidad UI ingestas)
 
-   * FAISS + Chroma.
-   * Embeddings con `sentence-transformers`.
+✅ Captura robusta de stdout/cmd/returncode.
 
-4. **Chat + Comparador**
+✅ Normalización y seguridad de rutas de artefactos.
 
-   * RAG con trazabilidad de chunks usados.
-   * Comparación OpenAI API vs modelos locales.
+⏳ Métricas visibles por fuente (docs/chunks totales, últimos runs).
 
-5. **Benchmarking**
+⏳ Botón “ver artefactos” por run web y visor simple de JSON.
 
-   * Recall\@k, precisión, coste, latencia.
+Sprint B (mejoras pipeline)
 
----
+Web: sitemap_index, ignore_robots_for, selenium (opcional).
 
-## 9) Checklist
+Documentos: política mtime completa + checksum incremental.
 
-* [x] App factory + logging + DB init
-* [x] Modelos ORM creados y tablas generadas
-* [x] Ingesta Documentos con split y artefactos
-* [x] Logging por fichero de ingesta
-* [x] Ingesta Web inicial con requests+BS4 y sitemap
-* [ ] Endpoints REST de ingesta
-* [ ] Configuración UI para fuentes
-* [ ] Vector Stores + embeddings
-* [ ] Chat/Comparador de modelos
-* [ ] Benchmark + dashboard métricas
+Endpoints REST de ingesta (para CI y jobs).
+
+Siguientes
+
+Vector store (FAISS/Chroma), embeddings.
+
+Chat/Comparador.
+
+Benchmark (Recall@k, coste, latencia) y dashboard.
+
+7) Troubleshooting breve
+
+Si una ingesta termina “muy rápida” y sin salida:
+
+Abre la Preview del run → debe mostrar cmd y returncode.
+
+Si returncode != 0, revisa librerías/paths/filtros.
+
+Verifica que el script existe en scripts/ y que el blueprint lo localiza (ya se buscan candidatos y se informa si falta).
+
+8) Decisiones tomadas
+
+Mantener los scripts de ingesta en scripts/ y lanzarlos desde Flask (ventajas: ejecución también por CLI/cron).
+
+Persistir SECRET_KEY de dev en data/secret_key.txt si no hay variable de entorno.
+
+Guardar toda la traza útil del run en IngestionRun.meta.
