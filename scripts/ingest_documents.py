@@ -94,7 +94,7 @@ def _read_csv(path: Path, delimiter: str, quotechar: str, header: bool, columns:
             if columns and cols_idx is not None:
                 row = [row[j] for j in cols_idx if j < len(row)]
             out_rows.append(" ".join(row))
-    return "\n".Join(out_rows)
+    return "\n".join(out_rows)
 
 def _read_pdf(path: Path) -> Optional[str]:
     try:
@@ -188,7 +188,7 @@ def main() -> int:
     else:
         manifest = {}
 
-    # run_dir (si no viene de fuera, crearlo)
+    # run_dir
     if args.run_dir:
         run_dir = Path(args.run_dir)
     else:
@@ -235,7 +235,6 @@ def main() -> int:
             prev = manifest.get(key)
             unchanged = bool(prev and prev.get("fp") == fp)
 
-            # Si solo_nuevos y sin cambios -> saltar
             if args.only_new and unchanged:
                 stats["skipped_unchanged"] += 1
                 logging.info("SKIP (unchanged, only_new): %s", path)
@@ -255,14 +254,13 @@ def main() -> int:
 
             rechunked = False
 
-            from app.models import Document as _Doc  # type: ignore
             with get_session() as s:
                 doc = s.query(Document).filter(
                     Document.source_id == source_id, Document.path == str(path)
                 ).first()
                 if doc is None:
                     st = path.stat()
-                    doc = _Doc(
+                    doc = Document(
                         source_id=source_id,
                         path=str(path),
                         title=path.name,
@@ -283,7 +281,6 @@ def main() -> int:
                         doc.hash = fp
                     created = False
 
-                # (re)chunk si hay contenido
                 if content is not None:
                     s.query(Chunk).filter(Chunk.document_id == doc.id).delete()
                     pieces = _chunk_text(content, args.chunk_size, args.chunk_overlap)
@@ -301,10 +298,8 @@ def main() -> int:
 
                 s.commit()
 
-            # actualizar manifest
             manifest[key] = {"fp": fp, "ts": datetime.now().isoformat()}
 
-            # --- contabilización clara ---
             if created:
                 stats["new_docs"] += 1
                 logging.info("NEW: %s", path)
@@ -313,7 +308,6 @@ def main() -> int:
                     stats["updated_docs"] += 1
                     logging.info("UPDATED (changed fp): %s", path)
                 else:
-                    # unchanged pero lo hemos re-chunkeado => contarlo como updated
                     if rechunked:
                         stats["updated_docs"] += 1
                         logging.info("UPDATED (rechunk unchanged): %s", path)
