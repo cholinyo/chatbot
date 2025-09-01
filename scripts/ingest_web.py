@@ -1,302 +1,361 @@
-# scripts/ingest_web.py
+# File: scripts/ingest_web.py
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
-# --- make project root importable ---
-import sys, pathlib
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-# ------------------------------------
-
 import argparse
-import logging
-from pathlib import Path
-from datetime import datetime, timezone
-from typing import List, Set, Optional
 import json
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Iterable, List, Dict, Set
+from urllib.parse import urljoin, urlparse
 
-from app.rag.scrapers.requests_bs4 import ScrapeConfig, RequestsBS4Scraper
-from app.rag.scrapers.web_normalizer import html_to_text, NormalizeConfig
-from app.rag.scrapers.sitemap import discover_sitemaps_from_robots, collect_all_pages
-from app.rag.scrapers.selenium_fetcher import SeleniumScraper, SeleniumOptions
+import requests
 
-logger = logging.getLogger("ingestion.web.cli")
+# --- Selenium opcional (solo si strategy=selenium) ---
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options as ChromeOptions
+    from selenium.webdriver.firefox.options import Options as FirefoxOptions
+except Exception:
+    webdriver = None  # lo detectamos en runtime
+
+# ----------------- CLI ----------------- #
+
+def parse_args():
+    p = argparse.ArgumentParser("ingest_web")
+    p.add_argument("--seed", required=True, help="URL base o sitemap")
+    p.add_argument("--strategy", choices=["sitemap", "requests", "selenium"], default="sitemap")
+    p.add_argument("--allowed-domains", default="", help="coma-separated hostnames permitidos")
+    p.add_argument("--include", action="append", default=[], help="patrones substring a incluir (repetible)")
+    p.add_argument("--exclude", action="append", default=[], help="patrones substring a excluir (repetible)")
+    p.add_argument("--depth", type=int, default=1, help="Profundidad para strategy=requests")
+    p.add_argument("--max-pages", type=int, default=100)
+    p.add_argument("--timeout", type=int, default=15)
+    p.add_argument("--rate", type=float, default=1.0, help="segundos entre hosts (no usado en simple)")
+    p.add_argument("--user-agent", default="Mozilla/5.0")
+    p.add_argument("--robots-policy", default="strict", choices=["strict", "list"])
+    p.add_argument("--ignore-robots-for", default="", help="coma-separated hostnames para ignorar robots")
+    p.add_argument("--no-robots", action="store_true", help="equivalente a ignorar robots")
+    p.add_argument("--force-https", action="store_true")
+    p.add_argument("--dump-html", action="store_true")
+    p.add_argument("--preview", action="store_true")
+    p.add_argument("--verbose", action="store_true")
+
+    # Selenium CFG (si toca)
+    p.add_argument("--driver", default="chrome")
+    p.add_argument("--window-size", default="1366,900")
+    p.add_argument("--render-wait-ms", type=int, default=3000)
+    p.add_argument("--wait-selector", default="")
+    p.add_argument("--no-headless", action="store_true")
+    p.add_argument("--scroll", action="store_true")
+    p.add_argument("--scroll-steps", type=int, default=4)
+    p.add_argument("--scroll-wait-ms", type=int, default=500)
+
+    return p.parse_args()
 
 
-def _setup_logging(verbose: bool) -> None:
-    logging.basicConfig(
-        level=logging.INFO if verbose else logging.WARNING,
-        format="%(asctime)s %(levelname)s %(name)s :: %(message)s",
-    )
+# ----------------- Helpers ----------------- #
 
+def normalize_url(u: str, force_https: bool) -> str:
+    if force_https:
+        pr = urlparse(u)
+        if pr.scheme == "http":
+            return "https://" + u[len("http://"):]
+    return u
 
-def _parse_domains_csv(s: str) -> Optional[Set[str]]:
-    items = {d.strip().lower() for d in (s or "").split(",") if d.strip()}
-    return items or None
+def allowed(url: str, allowed_hosts: Set[str], includes: List[str], excludes: List[str]) -> bool:
+    h = urlparse(url).netloc.lower()
+    if allowed_hosts and h not in allowed_hosts:
+        return False
+    if includes and not any(s in url for s in includes):
+        return False
+    if excludes and any(s in url for s in excludes):
+        return False
+    return True
 
+def ensure_run_dir() -> Path:
+    runs_root = Path("data/processed/runs/web")
+    runs_root.mkdir(parents=True, exist_ok=True)
+    # run id derivado de epoch si se ejecuta fuera de la UI
+    rid = int(time.time())
+    d = runs_root / f"run_{rid}"
+    d.mkdir(parents=True, exist_ok=True)
+    print(f"[RUN_DIR] {d}", flush=True)
+    return d
 
-def _ensure_run_dirs(root: Path) -> None:
-    (root / "raw").mkdir(parents=True, exist_ok=True)
+def session(user_agent: str, timeout: int) -> requests.Session:
+    s = requests.Session()
+    s.headers["User-Agent"] = user_agent
+    s.timeout = timeout
+    return s
 
+def save_raw(run_dir: Path, i: int, url: str, content: bytes) -> str:
+    raw_dir = run_dir / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    fname = f"{i:05d}.html"
+    path = raw_dir / fname
+    path.write_bytes(content)
+    return str(path)
 
-def main(argv: List[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description="Ingesta Web con strategy 'requests' | 'sitemap' | 'selenium'")
-    p.add_argument("--seed", action="append", required=True, help="URL semilla base (repetible). Para sitemap, usa la home del dominio.")
-    p.add_argument("--strategy", choices=["requests", "sitemap", "selenium"], default="requests", help="Estrategia de descubrimiento/render")
-    p.add_argument("--depth", type=int, default=1, help="Profundidad BFS (requests/selenium)")
-    p.add_argument("--allowed-domains", default="", help="Dominios permitidos (coma)")
-    p.add_argument("--include", action="append", default=[], help="Patrón include (glob o regex). Repetible.")
-    p.add_argument("--exclude", action="append", default=[], help="Patrón exclude (glob o regex). Repetible.")
-    p.add_argument("--max-pages", type=int, default=50, help="Máximo de páginas a descargar")
-    p.add_argument("--timeout", type=int, default=15, help="Timeout HTTP (seg)")
-    p.add_argument("--rate", type=float, default=1.0, help="Rate-limit por host (req/seg)")
-    p.add_argument("--force-https", action="store_true", help="Reescribe http:// → https:// en seeds y enlaces")
+# ----------------- Sitemap crawler ----------------- #
 
-    # Compatibilidad previa
-    p.add_argument("--no-robots", action="store_true", help="No respetar robots.txt (modo simple)")
+def fetch_sitemap(seed: str, sess: requests.Session, max_pages: int) -> List[str]:
+    urls: List[str] = []
+    try:
+        r = sess.get(seed, timeout=sess.timeout)
+        r.raise_for_status()
+        text = r.text
+    except Exception as e:
+        print(f"[WARN] sitemap GET failed: {e}", flush=True)
+        return urls
 
-    # Política granular de robots
-    p.add_argument("--robots-policy", choices=["strict", "ignore", "list"], default=None,
-                   help="strict=respeta; ignore=ignora global; list=ignora solo dominios indicados")
-    p.add_argument("--ignore-robots-for", default="",
-                   help="Dominios (coma) a los que ignorar robots cuando --robots-policy=list (e.g. 'onda.es,www.onda.es')")
+    import re
+    locs = re.findall(r"<loc>\s*(.*?)\s*</loc>", text, flags=re.IGNORECASE)
+    for u in locs:
+        u = u.strip()
+        if u.endswith(".xml") and "sitemap" in u.lower():
+            # sitemap índice: seguir una capa
+            try:
+                r2 = sess.get(u, timeout=sess.timeout)
+                r2.raise_for_status()
+                locs2 = re.findall(r"<loc>\s*(.*?)\s*</loc>", r2.text, flags=re.IGNORECASE)
+                for u2 in locs2:
+                    u2 = u2.strip()
+                    if not u2.endswith(".xml"):
+                        urls.append(u2)
+                        if len(urls) >= max_pages:
+                            return urls
+            except Exception:
+                continue
+        else:
+            urls.append(u)
+            if len(urls) >= max_pages:
+                return urls
+    return urls[:max_pages]
 
-    # User-Agent
-    p.add_argument("--user-agent",
-                   default="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-                   help="User-Agent para las peticiones HTTP")
+# ----------------- Requests BFS ----------------- #
 
-    # Opciones Selenium
-    p.add_argument("--driver", choices=["chrome", "firefox"], default="chrome", help="Navegador Selenium (selenium)")
-    p.add_argument("--no-headless", action="store_true", help="Abrir navegador con ventana (selenium)")
-    p.add_argument("--wait-selector", default=None, help="CSS a esperar en render (selenium)")
-    p.add_argument("--render-wait-ms", type=int, default=3000, help="Espera adicional post-carga (ms) (selenium)")
-    p.add_argument("--scroll", action="store_true", help="Hacer scroll para lazy-load (selenium)")
-    p.add_argument("--scroll-steps", type=int, default=4, help="Pasos de scroll (selenium)")
-    p.add_argument("--scroll-wait-ms", type=int, default=500, help="Espera entre scrolls (ms) (selenium)")
-    p.add_argument("--window-size", default="1366,900", help='Tamaño de ventana "ancho,alto" (selenium)')
+from html.parser import HTMLParser
 
-    # Artefactos
-    p.add_argument("--outdir", default="data/processed/runs", help="Carpeta raíz de artefactos")
-    p.add_argument("--dump-html", action="store_true", help="Guardar HTML crudo en /raw y un índice JSON")
-    p.add_argument("--preview", action="store_true", help="Imprime título y extracto de texto por consola")
-    p.add_argument("--verbose", action="store_true", help="Logs INFO")
+class LinkExtractor(HTMLParser):
+    def __init__(self, base: str):
+        super().__init__()
+        self.base = base
+        self.links: Set[str] = set()
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() != "a":
+            return
+        href = None
+        for k, v in attrs:
+            if k.lower() == "href":
+                href = v
+                break
+        if not href:
+            return
+        try:
+            u = urljoin(self.base, href)
+            self.links.add(u)
+        except Exception:
+            pass
 
-    args = p.parse_args(argv)
-    _setup_logging(args.verbose)
+def crawl_requests(seed: str, sess: requests.Session, allowed_hosts: Set[str],
+                   includes: List[str], excludes: List[str], depth: int,
+                   max_pages: int, run_dir: Path, dump_html: bool) -> List[Dict]:
+    from collections import deque
+    seen: Set[str] = set()
+    q = deque([(seed, 0)])
+    out: List[Dict] = []
+    i = 0
 
-    allowed = _parse_domains_csv(args.allowed_domains)
-    ignore_set = _parse_domains_csv(args.ignore_robots_for)
+    while q and len(out) < max_pages:
+        url, d = q.popleft()
+        if url in seen:
+            continue
+        seen.add(url)
 
-    # Resolver política final (compat con --no-robots)
-    robots_policy = args.robots_policy or ("ignore" if args.no_robots else "strict")
+        if not allowed(url, allowed_hosts, includes, excludes):
+            print(f"[SKIP] domain/include/exclude: {url}", flush=True)
+            continue
 
-    # Directorio de ejecución
-    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_dir = Path(args.outdir) / f"web_{args.strategy}_{ts}"
-    if args.dump_html:
-        _ensure_run_dirs(run_dir)
+        try:
+            resp = sess.get(url, timeout=sess.timeout)
+            status = resp.status_code
+            raw_path = None
+            if dump_html and resp.ok and resp.content:
+                raw_path = save_raw(run_dir, i, url, resp.content)
+            out.append({"url": url, "status": status, "raw": raw_path, "title": None})
+            i += 1
+        except Exception as e:
+            print(f"[ERR] GET {url}: {e}", flush=True)
+            out.append({"url": url, "status": 0, "raw": None, "title": None})
 
-    # <<< EMITIR run_dir PARA EL FRONT >>>
-    print(f"[RUN_DIR]{run_dir}", flush=True)  # [RUN_DIR]
+        if d < depth:
+            try:
+                html = resp.text if 'resp' in locals() and resp is not None else ""
+                parser = LinkExtractor(url)
+                parser.feed(html or "")
+                for u in parser.links:
+                    if u not in seen and len(out) + len(q) < max_pages:
+                        q.append((u, d + 1))
+            except Exception:
+                pass
 
-    count = 0
-    index = []
+    return out
+
+# ----------------- Selenium ----------------- #
+
+def make_driver(args) -> "webdriver.Remote":
+    if webdriver is None:
+        raise RuntimeError("selenium no está instalado. pip install selenium>=4.12")
+
+    driver_name = (args.driver or "chrome").lower()
+    w, h = (int(x) for x in (args.window_size or "1366,900").split(",")[:2])
+    headless = not bool(args.no_headless)
+
+    if driver_name == "firefox":
+        opts = FirefoxOptions()
+        if headless:
+            opts.add_argument("-headless")
+        drv = webdriver.Firefox(options=opts)  # Selenium Manager resuelve geckodriver
+    else:
+        opts = ChromeOptions()
+        if headless:
+            opts.add_argument("--headless=new")
+        opts.add_argument(f"--window-size={w},{h}")
+        opts.add_argument("--disable-gpu")
+        opts.add_argument("--no-sandbox")
+        drv = webdriver.Chrome(options=opts)   # Selenium Manager resuelve chromedriver
+
+    try:
+        drv.set_page_load_timeout(int(args.timeout or 15))
+    except Exception:
+        pass
+    drv.set_window_size(w, h)
+    return drv
+
+def crawl_selenium(seed: str, args, allowed_hosts: Set[str],
+                   includes: List[str], excludes: List[str],
+                   max_pages: int, run_dir: Path, dump_html: bool) -> List[Dict]:
+    from bs4 import BeautifulSoup  # opcional; si no lo tienes, usa parser nativo (ver nota abajo)
+    drv = make_driver(args)
+    out: List[Dict] = []
+    i = 0
+
+    try:
+        to_visit = [seed]
+        seen: Set[str] = set()
+
+        while to_visit and len(out) < max_pages:
+            url = to_visit.pop(0)
+            if url in seen:
+                continue
+            seen.add(url)
+            if not allowed(url, allowed_hosts, includes, excludes):
+                print(f"[SKIP] domain/include/exclude: {url}", flush=True)
+                continue
+
+            try:
+                drv.get(url)
+                if args.wait_selector:
+                    # simple espera activa
+                    time.sleep(args.render_wait_ms / 1000.0)
+                if args.scroll:
+                    for _ in range(int(args.scroll_steps or 4)):
+                        drv.execute_script("window.scrollBy(0, document.body.scrollHeight / 4);")
+                        time.sleep(args.scroll_wait_ms / 1000.0)
+
+                html = drv.page_source or ""
+                if dump_html:
+                    raw_path = save_raw(run_dir, i, url, html.encode("utf-8", errors="ignore"))
+                else:
+                    raw_path = None
+
+                # extraer enlaces (con bs4 si está; si no, parser HTML nativo)
+                try:
+                    soup = BeautifulSoup(html, "html.parser")
+                    for a in soup.find_all("a", href=True):
+                        u = urljoin(url, a["href"])
+                        if u not in seen and len(out) + len(to_visit) < max_pages:
+                            to_visit.append(u)
+                except Exception:
+                    # fallback sin bs4
+                    parser = LinkExtractor(url)
+                    parser.feed(html)
+                    for u in parser.links:
+                        if u not in seen and len(out) + len(to_visit) < max_pages:
+                            to_visit.append(u)
+
+                out.append({"url": url, "status": 200, "raw": raw_path, "title": None})
+                i += 1
+            except Exception as e:
+                print(f"[ERR] SELENIUM GET {url}: {e}", flush=True)
+                out.append({"url": url, "status": 0, "raw": None, "title": None})
+    finally:
+        try:
+            drv.quit()
+        except Exception:
+            pass
+
+    return out
+
+# ----------------- main ----------------- #
+
+def main():
+    args = parse_args()
+
+    # Crear run_dir y anunciarlo para la UI
+    run_dir = ensure_run_dir()
+
+    # Normalizar parámetros
+    seed = normalize_url(args.seed.strip(), args.force_https)
+    allowed_hosts = {h.strip().lower() for h in (args.allowed_domains or "").split(",") if h.strip()}
+    includes = list(args.include or [])
+    excludes = list(args.exclude or [])
+    ignore_robots_for = {h.strip().lower() for h in (args.ignore_robots_for or "").split(",") if h.strip()}
+    sess = session(args.user_agent, args.timeout)
+
+    print(f"[INFO] strategy={args.strategy} seed={seed}", flush=True)
+
+    pages: List[Dict] = []
 
     if args.strategy == "sitemap":
-        # 1) Descubrir sitemaps (por cada seed)
-        all_sitemaps = []
-        for base in args.seed:
-            seeds_sm = discover_sitemaps_from_robots(
-                base_url=base,
-                force_https=args.force_https,
-                user_agent=args.user_agent,
-            )
-            all_sitemaps.extend(seeds_sm)
-
-        # 2) Recoger todas las páginas (con soporte a sitemapindex recursivo)
-        pages, visited_sitemaps = collect_all_pages(
-            all_sitemaps,
-            force_https=args.force_https,
-            user_agent=args.user_agent,
-        )
-
-        # Guardar artefactos de descubrimiento
-        (run_dir / "sitemap_index.json").write_text(
-            json.dumps({"seeds": all_sitemaps, "visited": visited_sitemaps}, ensure_ascii=False, indent=2),
-            encoding="utf-8"
-        )
-        (run_dir / "sitemap_pages.json").write_text(
-            json.dumps({"pages": pages}, ensure_ascii=False, indent=2),
-            encoding="utf-8"
-        )
-
-        # 3) Descargar HTML de esas páginas (sin seguir enlaces; depth 0)
-        cfg = ScrapeConfig(
-            seeds=[],
-            depth=0,
-            allowed_domains=allowed,
-            include_url_patterns=args.include or None,
-            exclude_url_patterns=args.exclude or None,
-            respect_robots=(robots_policy != "ignore"),
-            user_agent=args.user_agent,
-            timeout_seconds=args.timeout,
-            rate_limit_per_host=args.rate,
-            max_pages=len(pages) if args.max_pages >= len(pages) else args.max_pages,
-            force_https=args.force_https,
-            robots_policy=robots_policy,
-            ignore_robots_for=ignore_set,
-        )
-        scraper = RequestsBS4Scraper(cfg)
-
-        for url in pages:
-            if count >= args.max_pages:
-                break
-            page = scraper.fetch_url(url)
-            if not page:
+        pages = [{"url": u, "status": 0, "raw": None, "title": None} for u in fetch_sitemap(seed, sess, args.max_pages)]
+        # descargar cada URL (simple GET)
+        i = 0
+        for page in pages:
+            url = page["url"]
+            if not allowed(url, allowed_hosts, includes, excludes):
                 continue
-            count += 1
+            try:
+                r = sess.get(url, timeout=sess.timeout)
+                page["status"] = r.status_code
+                if args.dump_html and r.ok:
+                    page["raw"] = save_raw(run_dir, i, url, r.content)
+            except Exception as e:
+                print(f"[ERR] GET {url}: {e}", flush=True)
+            i += 1
 
-            if args.preview:
-                try:
-                    text = html_to_text(page.html, NormalizeConfig())
-                except Exception:
-                    text = ""
-                print(f"\n=== [{count}] {page.url} ===")
-                print((page.title or "").strip()[:200])
-                if text:
-                    print(text[:800] + ("…" if len(text) > 800 else ""))
-
-            if args.dump_html:
-                raw_path = run_dir / "raw" / f"page_{count:04d}.html"
-                raw_path.write_text(page.html, encoding="utf-8")
-                index.append(
-                    {
-                        "i": count,
-                        "url": page.url,
-                        "base_url": page.base_url,
-                        "status": page.status_code,
-                        "title": page.title,
-                        "raw": str(raw_path),
-                        "hash": page.origin_hash,
-                        "links": page.links[:100],
-                    }
-                )
+    elif args.strategy == "requests":
+        pages = crawl_requests(seed, sess, allowed_hosts, includes, excludes, args.depth, args.max_pages, run_dir, args.dump_html)
 
     elif args.strategy == "selenium":
-        # Renderizado JS + BFS
-        sopt = SeleniumOptions(
-            driver=args.driver,
-            headless=(not args.no_headless),
-            wait_selector=args.wait_selector,
-            render_wait_ms=args.render_wait_ms,
-            scroll=args.scroll,
-            scroll_steps=args.scroll_steps,
-            scroll_wait_ms=args.scroll_wait_ms,
-            window_size=args.window_size,
-        )
-        cfg = ScrapeConfig(
-            seeds=args.seed,
-            depth=args.depth,
-            allowed_domains=allowed,
-            include_url_patterns=args.include or None,
-            exclude_url_patterns=args.exclude or None,
-            respect_robots=(robots_policy != "ignore"),
-            user_agent=args.user_agent,
-            timeout_seconds=args.timeout,
-            rate_limit_per_host=args.rate,
-            max_pages=args.max_pages,
-            force_https=args.force_https,
-            robots_policy=robots_policy,
-            ignore_robots_for=ignore_set,
-        )
-        scraper = SeleniumScraper(cfg, sopt)
+        pages = crawl_selenium(seed, args, allowed_hosts, includes, excludes, args.max_pages, run_dir, args.dump_html)
 
-        for page in scraper.crawl():
-            count += 1
+    # Guardar fetch_index.json
+    (run_dir / "fetch_index.json").write_text(json.dumps(pages, ensure_ascii=False, indent=2), encoding="utf-8")
 
-            if args.preview:
-                try:
-                    text = html_to_text(page.html, NormalizeConfig())
-                except Exception:
-                    text = ""
-                print(f"\n=== [{count}] {page.url} ===")
-                print((page.title or "").strip()[:200])
-                if text:
-                    print(text[:800] + ("…" if len(text) > 800 else ""))
-
-            if args.dump_html:
-                raw_path = run_dir / "raw" / f"page_{count:04d}.html"
-                raw_path.write_text(page.html, encoding="utf-8")
-                index.append(
-                    {
-                        "i": count,
-                        "url": page.url,
-                        "base_url": page.base_url,
-                        "status": page.status_code,
-                        "title": page.title,
-                        "raw": str(raw_path),
-                        "hash": page.origin_hash,
-                        "links": page.links[:100],
-                    }
-                )
-
-    else:
-        # strategy == requests (BFS por enlaces sin JS)
-        cfg = ScrapeConfig(
-            seeds=args.seed,
-            depth=args.depth,
-            allowed_domains=allowed,
-            include_url_patterns=args.include or None,
-            exclude_url_patterns=args.exclude or None,
-            respect_robots=(robots_policy != "ignore"),
-            user_agent=args.user_agent,
-            timeout_seconds=args.timeout,
-            rate_limit_per_host=args.rate,
-            max_pages=args.max_pages,
-            force_https=args.force_https,
-            robots_policy=robots_policy,
-            ignore_robots_for=ignore_set,
-        )
-        scraper = RequestsBS4Scraper(cfg)
-
-        for page in scraper.crawl():
-            count += 1
-
-            if args.preview:
-                try:
-                    text = html_to_text(page.html, NormalizeConfig())
-                except Exception:
-                    text = ""
-                print(f"\n=== [{count}] {page.url} ===")
-                print((page.title or "").strip()[:200])
-                if text:
-                    print(text[:800] + ("…" if len(text) > 800 else ""))
-
-            if args.dump_html:
-                raw_path = run_dir / "raw" / f"page_{count:04d}.html"
-                raw_path.write_text(page.html, encoding="utf-8")
-                index.append(
-                    {
-                        "i": count,
-                        "url": page.url,
-                        "base_url": page.base_url,
-                        "status": page.status_code,
-                        "title": page.title,
-                        "raw": str(raw_path),
-                        "hash": page.origin_hash,
-                        "links": page.links[:100],
-                    }
-                )
-
-    if args.dump_html:
-        (run_dir / "fetch_index.json").write_text(
-            json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-
-    print(f"\nIngesta web finalizada. Páginas procesadas: {count}")
-    # --- imprimir otra vez por si el front solo lee la última línea útil ---
-    print(f"[RUN_DIR]{run_dir}", flush=True)  # [RUN_DIR]
-    return 0
-
+    # Dump rápido para preview
+    print(f"[INFO] fetched={len(pages)}", flush=True)
+    if args.preview:
+        for p in pages[:10]:
+            print(f"[PAGE] {p['status']} {p['url']}", flush=True)
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        main()
+        sys.exit(0)
+    except Exception as e:
+        print(f"[FATAL] {type(e).__name__}: {e}", flush=True)
+        sys.exit(1)
