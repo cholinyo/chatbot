@@ -1,10 +1,15 @@
-📄 Proyecto TFM — Estructura de Ficheros y Directorios (v2025-08-29)
-
 Este documento describe para qué sirve cada carpeta y archivo generado por el script de inicialización y las ampliaciones posteriores del proyecto (Flask + RAG + comparador de LLMs).
 
-Nota: Los archivos creados inicialmente estaban vacíos (o con texto mínimo). La lógica se ha ido implementando fase a fase. Actualmente la parte de ingesta de documentos ya está operativa, con persistencia en BD y visualización en UI.
+Nota: La lógica se ha ido implementando fase a fase.
+Actualmente:
 
-Raíz del proyecto
+Ingesta de documentos: estable y validada.
+
+Ingesta web: en pruebas (ya lanza runs y guarda stdout/artefactos).
+
+Vector store: pendiente de integrar.
+
+📂 Raíz del proyecto
 
 README.md — Resumen del proyecto y cómo empezar.
 
@@ -16,29 +21,43 @@ requirements.txt / requirements-dev.txt — Dependencias de runtime / desarrollo
 
 wsgi.py — Punto de entrada para despliegues WSGI (gunicorn/uwsgi).
 
+⚙️ Configuración
+
 config/ — Configuración externa (no incluye secretos).
 
 settings.example.toml — Plantilla de configuración (copiar a settings.toml).
 
 logging.yaml — Configuración de logging estructurado.
 
-docs/ — Documentación del proyecto.
+📑 Documentación
+
+docs/ — Documentación del proyecto:
 
 arquitectura.md, decisiones.md, evaluacion.md, despliegue.md.
 
-data/ — Datos del sistema (no versionar en su mayoría).
+📊 Datos
+
+data/
 
 raw/ — Fuentes originales intactas (PDFs, DOCX, HTML, JSON).
 
 processed/ — Texto normalizado, chunks, datasets y logs de ingesta.
 
-runs/ — Directorios por ejecución de ingestas (docs/run_<id> con stdout.txt, summary.json).
+runs/ — Directorios por ejecución de ingestas.
+
+docs/run_<id>/stdout.txt, summary.json.
+
+web/run_<id>/stdout.txt, fetch_index.json, raw/*.html.
 
 tracking.sqlite — Base de datos SQLite de seguimiento (Source, IngestionRun, Document, Chunk).
 
-logs/ingestion.log — Log global de ingestas.
+logs/
 
-web/ — Snapshots HTML/JSON de crawling (para ingesta web).
+ingestion.log — Log global de ingestas (documentos y webs).
+
+web/ — Snapshots HTML/JSON de crawling web.
+
+📦 Modelos y vector store
 
 models/ — Artefactos del vector store y cachés.
 
@@ -48,178 +67,121 @@ faiss/ — Índices FAISS.
 
 chroma/ — Colecciones ChromaDB.
 
-scripts/ — Scripts de ingesta y utilidades.
+🛠️ Scripts
 
-ingest_documents.py — Pipeline de ingesta de documentos (con chunking, fingerprints, logging).
+scripts/
 
-ingest_web.py — (en desarrollo) Pipeline de ingesta de webs (sitemap, crawling, Selenium).
+ingest_documents.py — Pipeline de ingesta de documentos (chunking, fingerprints, logging).
 
-TFM/ — Memoria y anexos académicos.
+ingest_web.py — Pipeline de ingesta web (sitemap, BFS requests, Selenium).
 
-tests/ — Tests pytest.
+check_sources.py — Utilidad para listar fuentes y runs en BD.
 
-app/ — Aplicación Flask
+📂 App Flask
 
-app/init.py — create_app(): carga config, registra extensiones, logging y DB.
+app/init.py — create_app(): carga config, logging y DB.
 
-app/extensions/ — Inicialización de librerías externas.
+app/extensions/
 
 db.py — SQLAlchemy + sesiones.
 
 logging.py — Logging estructurado.
 
-app/blueprints/ — Rutas organizadas por dominio.
+app/blueprints/
 
 admin/
 
 routes_data_sources.py — Lista de fuentes (docs/web).
 
-routes_ingesta_docs.py — Gestión de ingesta de documentos:
+routes_ingesta_docs.py — CRUD y ejecución de ingestas de documentos.
 
-CRUD de fuentes (crear/editar/eliminar).
+routes_ingesta_web.py — Configuración/ejecución de ingestas web (en progreso).
 
-Lanzar ingestas (recursivo, patrones, “solo nuevos”).
-
-Mostrar métricas por fuente (documentos, chunks, último run).
-
-Endpoints /stdout y /summary.json por run.
-
-routes_ingesta_web.py — Configuración y ejecución de ingestas web (en progreso).
-
-chat/ — Chat RAG y comparador (pendiente de completar).
+chat/ — Chat RAG y comparador (pendiente).
 
 dashboard/ — KPIs de ingesta/retrieval/evaluación (pendiente).
 
-app/models/ — Modelos SQLAlchemy.
+app/models/
 
-Source — Origen de datos (tipo docs | web, URL/carpeta, config).
+Source — Origen de datos (type=docs|web, url, config).
 
 IngestionRun — Ejecución de ingesta (status, meta, stdout, cmd, duración).
 
 Document — Documento ingerido (path, hash, size, mtime, metadata).
 
-Chunk — Trozos de texto de documentos (índice, contenido, metadata).
+Chunk — Fragmentos de texto.
 
-app/templates/admin/ — Vistas Jinja2.
+app/templates/admin/
 
-ingesta_docs.html — UI con tabla de fuentes, métricas, ejecuciones recientes, botones CRUD.
+ingesta_docs.html — UI de ingesta de documentos.
+
+ingesta_web.html — UI de ingesta web (CRUD fuentes, runs, métricas).
 
 app/static/css/custom.css — Estilos unificados.
 
+🧪 Tests
+
 tests/
 
-test_ingestion.py — Prueba de ingesta de documentos (solo nuevos vs. recursivo).
+test_ingestion.py — Verifica ingesta de documentos.
 
-test_rag_pipeline.py — Flujo E2E RAG (pendiente de completar).
+test_rag_pipeline.py — Flujo E2E RAG (pendiente).
 
 test_retrievers.py, test_generators.py, etc.
 
-Flujos actuales y verificados
+✅ Flujos actuales
 
-Ingesta de documentos (OK)
+Ingesta de documentos
 
-Desde la UI → seleccionar carpeta fuente.
+OK: crea fuentes, ejecuta ingestas, genera chunks y métricas.
 
-Ejecuta scripts/ingest_documents.py con cwd en raíz del repo.
+Ingesta web
 
-Guarda stdout.txt, summary.json en data/processed/runs/docs/run_<id>.
+En progreso: ya se ejecutan runs (sitemap, requests, selenium).
 
-Actualiza BD (Source, IngestionRun, Document, Chunk).
+Artefactos (stdout.txt, fetch_index.json) se guardan en runs/web/run_<id>.
 
-Vista UI muestra métricas (docs, chunks, último estado).
+Aún falta integrar chunking de HTML → Chunk en BD.
 
-“Ver salida” y summary.json funcionales.
+Vector store
 
-Ingesta web (en preparación)
+Pendiente: conectar Chunk a FAISS/Chroma.
 
-Blueprint y script existen (routes_ingesta_web.py, ingest_web.py) pero aún sin las mejoras aplicadas a docs.
+⚡ Super-prompt — Siguiente Paso
 
-Pendiente de validar strategy: sitemap, allowed_domains, max_pages.
+Rol: Tech lead e IC senior en un proyecto Flask+SQLAlchemy (TFM RAG).
+Objetivo: Terminar de robustecer la ingesta web y comenzar la integración con el vector store.
+Estado:
 
-Pendiente de exponer métricas (páginas escaneadas, chunks generados).
+Ingesta de documentos: estable.
 
-Vector store (pendiente)
+Ingesta web: runs ya ejecutan, pero falta persistir páginas y generar Chunks como en docs.
 
-Próxima fase: conectar resultados de ingesta a FAISS/Chroma.
+Vector store: aún sin poblar.
 
-⚡ Super-prompt — Siguiente Paso: Ingesta Web
+🎯 Prompt de continuación
+    Rol: Actúa como tech lead para el proyecto Flask+SQLAlchemy de ingesta RAG.
 
-Rol: Actúa como tech lead y IC senior para un proyecto Flask+SQLAlchemy que implementa pipelines de ingesta (documentos y web) para un Chatbot RAG.
+    Objetivo inmediato:
+    1. Revisar `scripts/ingest_web.py` y `routes_ingesta_web.py` para que:
+    - Cada página descargada genere un `Document` y sus `Chunk`s en BD (igual que ingest_documents.py).
+    - Se guarden en `data/processed/runs/web/run_<id>/summary.json` métricas claras (páginas, chunks, bytes).
+    - La UI muestre las métricas en la tabla de ejecuciones.
 
-Objetivo: Robustecer la ingesta web desde la UI con la misma calidad que la de documentos: runs trazables, métricas, summary, stdout, errores claros.
+    2. Validar que los `stdout.txt` y `summary.json` se actualizan bien en la UI (Ver salida / Artefactos).
 
-Contexto:
+    3. Preparar el pipeline para que los `Chunk`s de web sean después indexables en FAISS/Chroma (vector store).
 
-App factory en app/__init__.py con logging y DB (SQLite en data/processed/tracking.sqlite).
+    Restricciones:
+    - Sin frameworks nuevos, solo Flask + SQLAlchemy + libs ya usadas (requests, selenium, bs4).
+    - Código claro y trazable.
 
-Modelos: Source(type: 'docs'|'web', url, name, config), IngestionRun(status, meta), Document, Chunk.
+    Plan:
+    - Pedir solo los ficheros a modificar (seguro: `scripts/ingest_web.py`, quizá `routes_ingesta_web.py`, y modelos si hace falta un `Page`).
+    - Entregar archivos completos listos para pegar.
+    - Incluir comandos de prueba (PowerShell) y cómo validar en la UI.
 
-Blueprints admin:
-
-routes_data_sources.py — listado simple de fuentes y enlaces.
-
-routes_ingesta_docs.py — completado: CRUD, ejecución, métricas, stdout, summary.
-
-routes_ingesta_web.py — pendiente de mejora: configurar fuente web y lanzar run.
-
-Scripts:
-
-scripts/ingest_documents.py — ya robusto.
-
-scripts/ingest_web.py — necesita mejoras.
-
-SECRET_KEY: FLASK_SECRET_KEY o generado en data/secret_key.txt.
-
-Definition of Done (para web):
-
-Desde la UI se crea una fuente web con url, strategy=sitemap, filtros (allowed_domains, max_pages).
-
-Al ejecutar se lanza scripts/ingest_web.py con parámetros correctos.
-
-Se guardan stdout.txt y summary.json en data/processed/runs/web/run_<id>.
-
-La UI muestra métricas por fuente (páginas, chunks).
-
-“Ver salida” y summary.json funcionan igual que en docs.
-
-Errores claros cuando faltan dependencias (ej. Selenium) o el script.
-
-Restricciones:
-
-Sin frameworks adicionales; solo Flask + SQLAlchemy 2.x.
-
-Código claro, probado, trazable.
-
-Cómo trabajar:
-
-Pedir solo los ficheros que necesites ver/modificar (por ruta).
-
-Proponer cambios con el archivo completo, listo para pegar.
-
-Incluir comandos de prueba (PowerShell) y cómo verificar en la UI.
-
-Áreas prioritarias:
-
-app/blueprints/admin/routes_ingesta_web.py (refactor a nivel docs: CRUD, run, métricas, stdout, summary).
-
-scripts/ingest_web.py (captura stdout, returncode, cmd, run_dir).
-
-app/templates/admin/ingesta_web.html (tabla de fuentes, métricas, ejecuciones).
-
-app/models/* si faltan campos (Page?).
-
-Plan de test mínimo:
-
-Crear fuente web con url=https://ejemplo.com/sitemap.xml, max_pages=10.
-
-Lanzar ingesta → validar runs, stdout.txt, summary.json, métricas en UI.
-
-Forzar error (renombrar script) → mensaje claro en UI y meta.exception.
-
-Entregables:
-
-Ficheros modificados completos.
-
-Lista rápida de pruebas manuales.
-
-Notas de despliegue (ej. instalar Selenium/requests-html si son necesarias).
+    Contexto actual:
+    - BD tracking.sqlite con Source, IngestionRun, Document, Chunk.
+    - Ingesta de docs ya validada (crea Source, Document, Chunk).
+    - Ingesta web crea Source y Run, pero no aún Document/Chunk.

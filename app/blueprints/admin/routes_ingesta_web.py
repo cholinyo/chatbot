@@ -1,4 +1,3 @@
-# File: app/blueprints/admin/routes_ingesta_web.py
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
@@ -69,7 +68,7 @@ def _default_config():
         "rate_per_host": 1.0,
         "timeout": 15,
         "force_https": True,
-        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/124.0 Safari/537.36",
         "max_pages": 100,
         # Selenium (si se usa)
         "driver": "chrome",
@@ -190,6 +189,8 @@ def run(source_id: int):
     runs_web_root = (RUNS_ROOT / "web")
     runs_web_root.mkdir(parents=True, exist_ok=True)
     fallback_run_dir = runs_web_root / f"run_{run.id}"
+    # Aseguramos el directorio que usará el script (se lo pasamos vía env RUN_DIR)
+    fallback_run_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info(
         "[INGEST_WEB] start run source_id=%s run_id=%s url=%s strategy=%s max_pages=%s",
@@ -205,7 +206,6 @@ def run(source_id: int):
     script_path = next((p for p in candidates if p.exists()), None)
     if not script_path:
         try:
-            fallback_run_dir.mkdir(parents=True, exist_ok=True)
             (fallback_run_dir / "stdout.txt").write_text(
                 "[NO_SCRIPT_FOUND] Revisa la ruta del script de ingesta web.\n", encoding="utf-8"
             )
@@ -241,6 +241,11 @@ def run(source_id: int):
         "--dump-html",
         "--preview",
         "--verbose",
+        # ⚙️ Añadimos source y run para que el script cree Document/Chunk vinculados:
+        "--source-id",
+        str(src.id),
+        "--run-id",
+        str(run.id),
     ]
     if cfg.get("force_https"):
         args.append("--force-https")
@@ -269,13 +274,14 @@ def run(source_id: int):
 
     try:
         logger.info("[INGEST_WEB] exec run_id=%s cmd=%s", run.id, cmd_shown)
+        # Pasamos RUN_DIR para que el script deposite artefactos ahí y lo imprima con [RUN_DIR]
         proc = subprocess.run(
             args,
             capture_output=True,
             text=True,
             check=False,
             cwd=str(project_root),
-            env={**os.environ},
+            env={**os.environ, "RUN_DIR": str(fallback_run_dir)},
         )
         out = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
 

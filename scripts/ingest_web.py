@@ -1,725 +1,555 @@
-# File: scripts/ingest_web.py
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import argparse
 import json
 import os
-import sys
-import time
-from pathlib import Path
-from typing import Iterable, List, Dict, Set
-from urllib.parse import urljoin, urlparse
-
-import requests
-
-# --- Selenium opcional (solo si strategy=selenium) ---
-try:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options as ChromeOptions
-    from selenium.webdriver.firefox.options import Options as FirefoxOptions
-except Exception:
-    webdriver = None  # lo detectamos en runtime
-
-# ----------------- CLI ----------------- #
-
-def parse_args():
-    p = argparse.ArgumentParser("ingest_web")
-    p.add_argument("--seed", required=True, help="URL base o sitemap")
-    p.add_argument("--strategy", choices=["sitemap", "requests", "selenium"], default="sitemap")
-    p.add_argument("--allowed-domains", default="", help="coma-separated hostnames permitidos")
-    p.add_argument("--include", action="append", default=[], help="patrones substring a incluir (repetible)")
-    p.add_argument("--exclude", action="append", default=[], help="patrones substring a excluir (repetible)")
-    p.add_argument("--depth", type=int, default=1, help="Profundidad para strategy=requests")
-    p.add_argument("--max-pages", type=int, default=100)
-    p.add_argument("--timeout", type=int, default=15)
-    p.add_argument("--rate", type=float, default=1.0, help="segundos entre hosts (no usado en simple)")
-    p.add_argument("--user-agent", default="Mozilla/5.0")
-    p.add_argument("--robots-policy", default="strict", choices=["strict", "list"])
-    p.add_argument("--ignore-robots-for", default="", help="coma-separated hostnames para ignorar robots")
-    p.add_argument("--no-robots", action="store_true", help="equivalente a ignorar robots")
-    p.add_argument("--force-https", action="store_true")
-    p.add_argument("--dump-html", action="store_true")
-    p.add_argument("--preview", action="store_true")
-    p.add_argument("--verbose", action="store_true")
-
-    # Selenium CFG (si toca)
-    p.add_argument("--driver", default="chrome")
-    p.add_argument("--window-size", default="1366,900")
-    p.add_argument("--render-wait-ms", type=int, default=3000)
-    p.add_argument("--wait-selector", default="")
-    p.add_argument("--no-headless", action="store_true")
-    p.add_argument("--scroll", action="store_true")
-    p.add_argument("--scroll-steps", type=int, default=4)
-    p.add_argument("--scroll-wait-ms", type=int, default=500)
-
-    return p.parse_args()
-
-
-# ----------------- Helpers ----------------- #
-
-def normalize_url(u: str, force_https: bool) -> str:
-    if force_https:
-        pr = urlparse(u)
-        if pr.scheme == "http":
-            return "https://" + u[len("http://"):]
-    return u
-
-def allowed(url: str, allowed_hosts: Set[str], includes: List[str], excludes: List[str]) -> bool:
-    h = urlparse(url).netloc.lower()
-    if allowed_hosts and h not in allowed_hosts:
-        return False
-    if includes and not any(s in url for s in includes):
-        return False
-    if excludes and any(s in url for s in excludes):
-        return False
-    return True
-
-def ensure_run_dir() -> Path:
-    runs_root = Path("data/processed/runs/web")
-    runs_root.mkdir(parents=True, exist_ok=True)
-    # run id derivado de epoch si se ejecuta fuera de la UI
-    rid = int(time.time())
-    d = runs_root / f"run_{rid}"
-    d.mkdir(parents=True, exist_ok=True)
-    print(f"[RUN_DIR] {d}", flush=True)
-    return d
-
-def session(user_agent: str, timeout: int) -> requests.Session:
-    s = requests.Session()
-    s.headers["User-Agent"] = user_agent
-    s.timeout = timeout
-    return s
-
-def save_raw(run_dir: Path, i: int, url: str, content: bytes) -> str:
-    raw_dir = run_dir / "raw"
-    raw_dir.mkdir(parents=True, exist_ok=True)
-    fname = f"{i:05d}.html"
-    path = raw_dir / fname
-    path.write_bytes(content)
-    return str(path)
-
-# ----------------- Sitemap crawler ----------------- #
-
-def fetch_sitemap(seed: str, sess: requests.Session, max_pages: int) -> List[str]:
-    urls: List[str] = []
-    try:
-        r = sess.get(seed, timeout=sess.timeout)
-        r.raise_for_status()
-        text = r.text
-    except Exception as e:
-        print(f"[WARN] sitemap GET failed: {e}", flush=True)
-        return urls
-
-    import re
-    locs = re.findall(r"<loc>\s*(.*?)\s*</loc>", text, flags=re.IGNORECASE)
-    for u in locs:
-        u = u.strip()
-        if u.endswith(".xml") and "sitemap" in u.lower():
-            # sitemap índice: seguir una capa
-            try:
-                r2 = sess.get(u, timeout=sess.timeout)
-                r2.raise_for_status()
-                locs2 = re.findall(r"<loc>\s*(.*?)\s*</loc>", r2.text, flags=re.IGNORECASE)
-                for u2 in locs2:
-                    u2 = u2.strip()
-                    if not u2.endswith(".xml"):
-                        urls.append(u2)
-                        if len(urls) >= max_pages:
-                            return urls
-            except Exception:
-                continue
-        else:
-            urls.append(u)
-            if len(urls) >= max_pages:
-                return urls
-    return urls[:max_pages]
-
-# ----------------- Requests BFS ----------------- #
-
-from html.parser import HTMLParser
-
-class LinkExtractor(HTMLParser):
-    def __init__(self, base: str):
-        super().__init__()
-        self.base = base
-        self.links: Set[str] = set()
-    def handle_starttag(self, tag, attrs):
-        if tag.lower() != "a":
-            return
-        href = None
-        for k, v in attrs:
-            if k.lower() == "href":
-                href = v
-                break
-        if not href:
-            return
-        try:
-            u = urljoin(self.base, href)
-            self.links.add(u)
-        except Exception:
-            pass
-
-def crawl_requests(seed: str, sess: requests.Session, allowed_hosts: Set[str],
-                   includes: List[str], excludes: List[str], depth: int,
-                   max_pages: int, run_dir: Path, dump_html: bool) -> List[Dict]:
-    from collections import deque
-    seen: Set[str] = set()
-    q = deque([(seed, 0)])
-    out: List[Dict] = []
-    i = 0
-
-    while q and len(out) < max_pages:
-        url, d = q.popleft()
-        if url in seen:
-            continue
-        seen.add(url)
-
-        if not allowed(url, allowed_hosts, includes, excludes):
-            print(f"[SKIP] domain/include/exclude: {url}", flush=True)
-            continue
-
-        try:
-            resp = sess.get(url, timeout=sess.timeout)
-            status = resp.status_code
-            raw_path = None
-            if dump_html and resp.ok and resp.content:
-                raw_path = save_raw(run_dir, i, url, resp.content)
-            out.append({"url": url, "status": status, "raw": raw_path, "title": None})
-            i += 1
-        except Exception as e:
-            print(f"[ERR] GET {url}: {e}", flush=True)
-            out.append({"url": url, "status": 0, "raw": None, "title": None})
-
-        if d < depth:
-            try:
-                html = resp.text if 'resp' in locals() and resp is not None else ""
-                parser = LinkExtractor(url)
-                parser.feed(html or "")
-                for u in parser.links:
-                    if u not in seen and len(out) + len(q) < max_pages:
-                        q.append((u, d + 1))
-            except Exception:
-                pass
-
-    return out
-
-# ----------------- Selenium ----------------- #
-
-def make_driver(args) -> "webdriver.Remote":
-    if webdriver is None:
-        raise RuntimeError("selenium no está instalado. pip install selenium>=4.12")
-
-    driver_name = (args.driver or "chrome").lower()
-    w, h = (int(x) for x in (args.window_size or "1366,900").split(",")[:2])
-    headless = not bool(args.no_headless)
-
-    if driver_name == "firefox":
-        opts = FirefoxOptions()
-        if headless:
-            opts.add_argument("-headless")
-        drv = webdriver.Firefox(options=opts)  # Selenium Manager resuelve geckodriver
-    else:
-        opts = ChromeOptions()
-        if headless:
-            opts.add_argument("--headless=new")
-        opts.add_argument(f"--window-size={w},{h}")
-        opts.add_argument("--disable-gpu")
-        opts.add_argument("--no-sandbox")
-        drv = webdriver.Chrome(options=opts)   # Selenium Manager resuelve chromedriver
-
-    try:
-        drv.set_page_load_timeout(int(args.timeout or 15))
-    except Exception:
-        pass
-    drv.set_window_size(w, h)
-    return drv
-
-def crawl_selenium(seed: str, args, allowed_hosts: Set[str],
-                   includes: List[str], excludes: List[str],
-                   max_pages: int, run_dir: Path, dump_html: bool) -> List[Dict]:
-    from bs4 import BeautifulSoup  # opcional; si no lo tienes, usa parser nativo (ver nota abajo)
-    drv = make_driver(args)
-    out: List[Dict] = []
-    i = 0
-
-    try:
-        to_visit = [seed]
-        seen: Set[str] = set()
-
-        while to_visit and len(out) < max_pages:
-            url = to_visit.pop(0)
-            if url in seen:
-                continue
-            seen.add(url)
-            if not allowed(url, allowed_hosts, includes, excludes):
-                print(f"[SKIP] domain/include/exclude: {url}", flush=True)
-                continue
-
-            try:
-                drv.get(url)
-                if args.wait_selector:
-                    # simple espera activa
-                    time.sleep(args.render_wait_ms / 1000.0)
-                if args.scroll:
-                    for _ in range(int(args.scroll_steps or 4)):
-                        drv.execute_script("window.scrollBy(0, document.body.scrollHeight / 4);")
-                        time.sleep(args.scroll_wait_ms / 1000.0)
-
-                html = drv.page_source or ""
-                if dump_html:
-                    raw_path = save_raw(run_dir, i, url, html.encode("utf-8", errors="ignore"))
-                else:
-                    raw_path = None
-
-                # extraer enlaces (con bs4 si está; si no, parser HTML nativo)
-                try:
-                    soup = BeautifulSoup(html, "html.parser")
-                    for a in soup.find_all("a", href=True):
-                        u = urljoin(url, a["href"])
-                        if u not in seen and len(out) + len(to_visit) < max_pages:
-                            to_visit.append(u)
-                except Exception:
-                    # fallback sin bs4
-                    parser = LinkExtractor(url)
-                    parser.feed(html)
-                    for u in parser.links:
-                        if u not in seen and len(out) + len(to_visit) < max_pages:
-                            to_visit.append(u)
-
-                out.append({"url": url, "status": 200, "raw": raw_path, "title": None})
-                i += 1
-            except Exception as e:
-                print(f"[ERR] SELENIUM GET {url}: {e}", flush=True)
-                out.append({"url": url, "status": 0, "raw": None, "title": None})
-    finally:
-        try:
-            drv.quit()
-        except Exception:
-            pass
-
-    return out
-
-# ----------------- main ----------------- #
-
-def main():
-    args = parse_args()
-
-    # Crear run_dir y anunciarlo para la UI
-    run_dir = ensure_run_dir()
-
-    # Normalizar parámetros
-    seed = normalize_url(args.seed.strip(), args.force_https)
-    allowed_hosts = {h.strip().lower() for h in (args.allowed_domains or "").split(",") if h.strip()}
-    includes = list(args.include or [])
-    excludes = list(args.exclude or [])
-    ignore_robots_for = {h.strip().lower() for h in (args.ignore_robots_for or "").split(",") if h.strip()}
-    sess = session(args.user_agent, args.timeout)
-
-    print(f"[INFO] strategy={args.strategy} seed={seed}", flush=True)
-
-    pages: List[Dict] = []
-
-    if args.strategy == "sitemap":
-        pages = [{"url": u, "status": 0, "raw": None, "title": None} for u in fetch_sitemap(seed, sess, args.max_pages)]
-        # descargar cada URL (simple GET)
-        i = 0
-        for page in pages:
-            url = page["url"]
-            if not allowed(url, allowed_hosts, includes, excludes):
-                continue
-            try:
-                r = sess.get(url, timeout=sess.timeout)
-                page["status"] = r.status_code
-                if args.dump_html and r.ok:
-                    page["raw"] = save_raw(run_dir, i, url, r.content)
-            except Exception as e:
-                print(f"[ERR] GET {url}: {e}", flush=True)
-            i += 1
-
-    elif args.strategy == "requests":
-        pages = crawl_requests(seed, sess, allowed_hosts, includes, excludes, args.depth, args.max_pages, run_dir, args.dump_html)
-
-    elif args.strategy == "selenium":
-        pages = crawl_selenium(seed, args, allowed_hosts, includes, excludes, args.max_pages, run_dir, args.dump_html)
-
-    # Guardar fetch_index.json
-    (run_dir / "fetch_index.json").write_text(json.dumps(pages, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    # Dump rápido para preview
-    print(f"[INFO] fetched={len(pages)}", flush=True)
-    if args.preview:
-        for p in pages[:10]:
-            print(f"[PAGE] {p['status']} {p['url']}", flush=True)
-# -*- coding: utf-8 -*-
-from __future__ import annotations
-
-import argparse
-import json
-import os
-import sys
-import time
-from pathlib import Path
-from typing import List, Dict, Set
-from urllib.parse import urljoin, urlparse
-
 import re
-import requests
+import shlex
+import subprocess
+import sys
+import logging
+from logging.handlers import RotatingFileHandler
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
-# --- Selenium opcional (solo si strategy=selenium) ---
-try:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options as ChromeOptions
-    from selenium.webdriver.firefox.options import Options as FirefoxOptions
-except Exception:
-    webdriver = None  # lo detectamos en runtime
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    send_file,
+    abort,
+    current_app,
+)
 
+import app.extensions.db as db
+from app.models import Source, IngestionRun
 
-def parse_args():
-    p = argparse.ArgumentParser("ingest_web")
-    p.add_argument("--seed", required=True, help="URL base o sitemap")
-    p.add_argument("--strategy", choices=["sitemap", "requests", "selenium"], default="sitemap")
-    p.add_argument("--allowed-domains", default="", help="coma-separated hostnames permitidos")
-    p.add_argument("--include", action="append", default=[], help="patrones substring a incluir (repetible)")
-    p.add_argument("--exclude", action="append", default=[], help="patrones substring a excluir (repetible)")
-    p.add_argument("--depth", type=int, default=1, help="Profundidad para strategy=requests")
-    p.add_argument("--max-pages", type=int, default=100)
-    p.add_argument("--timeout", type=int, default=15)
-    p.add_argument("--rate", type=float, default=1.0, help="segundos entre hosts (no usado en simple)")
-    p.add_argument("--user-agent", default="Mozilla/5.0")
-    p.add_argument("--robots-policy", default="strict", choices=["strict", "list"])
-    p.add_argument("--ignore-robots-for", default="", help="coma-separated hostnames para ignorar robots")
-    p.add_argument("--no-robots", action="store_true", help="equivalente a ignorar robots")
-    p.add_argument("--force-https", action="store_true")
-    p.add_argument("--dump-html", action="store_true")
-    p.add_argument("--preview", action="store_true")
-    p.add_argument("--verbose", action="store_true")
+# Blueprint
+bp_ingesta_web = Blueprint("ingesta_web", __name__, url_prefix="/admin/ingesta-web")
 
-    # Selenium CFG (si toca)
-    p.add_argument("--driver", default="chrome")
-    p.add_argument("--window-size", default="1366,900")
-    p.add_argument("--render-wait-ms", type=int, default=3000)
-    p.add_argument("--wait-selector", default="")
-    p.add_argument("--no-headless", action="store_true")
-    p.add_argument("--scroll", action="store_true")
-    p.add_argument("--scroll-steps", type=int, default=4)
-    p.add_argument("--scroll-wait-ms", type=int, default=500)
-    return p.parse_args()
+# Directorios
+RUNS_ROOT = Path("data/processed/runs")
+RUNS_ROOT.mkdir(parents=True, exist_ok=True)
+LOGS_DIR = Path("data/logs")
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOGS_DIR / "ingestion.log"
 
 
-def normalize_url(u: str, force_https: bool) -> str:
-    if force_https:
-        pr = urlparse(u)
-        if pr.scheme == "http":
-            return "https://" + u[len("http://"):]
-    return u
+def _get_ingestion_logger() -> logging.Logger:
+    """Logger a data/logs/ingestion.log (rotativo)."""
+    logger = logging.getLogger("ingesta_web")
+    logger.setLevel(logging.INFO)
+    if not any(
+        isinstance(h, RotatingFileHandler)
+        and Path(getattr(h, "baseFilename", "")).resolve() == LOG_FILE.resolve()
+        for h in logger.handlers
+    ):
+        fh = RotatingFileHandler(LOG_FILE, maxBytes=2_000_000, backupCount=3, encoding="utf-8")
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+        logger.addHandler(fh)
+    return logger
 
 
-def allowed(url: str, allowed_hosts: Set[str], includes: List[str], excludes: List[str]) -> bool:
-    h = urlparse(url).netloc.lower()
-    if allowed_hosts and h not in allowed_hosts:
-        return False
-    if includes and not any(s in url for s in includes):
-        return False
-    if excludes and any(s in url for s in excludes):
-        return False
-    return True
+def _default_config():
+    """Defaults para la UI (no mutan DB a menos que el usuario guarde)."""
+    return {
+        "strategy": "sitemap",
+        "depth": 1,
+        "allowed_domains": [],
+        "include": [],
+        "exclude": [],
+        "robots_policy": "strict",
+        "ignore_robots_for": [],
+        "rate_per_host": 1.0,
+        "timeout": 15,
+        "force_https": True,
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "max_pages": 100,
+        # Selenium (si se usa)
+        "driver": "chrome",
+        "window_size": "1366,900",
+        "render_wait_ms": 3000,
+        "wait_selector": "",
+        "no_headless": False,
+        "scroll": False,
+        "scroll_steps": 4,
+        "scroll_wait_ms": 500,
+    }
 
 
-def ensure_run_dir() -> Path:
-    runs_root = Path("data/processed/runs/web")
-    runs_root.mkdir(parents=True, exist_ok=True)
-    rid = int(time.time())
-    d = runs_root / f"run_{rid}"
-    d.mkdir(parents=True, exist_ok=True)
-    print(f"[RUN_DIR] {d}", flush=True)
-    return d
+@bp_ingesta_web.route("/", methods=["GET"])
+def index():
+    with db.get_session() as s:
+        sources = (
+            s.query(Source)
+            .filter(Source.type == "web")
+            .order_by(Source.id.desc())
+            .all()
+        )
+        runs = (
+            s.query(IngestionRun)
+            .join(Source, IngestionRun.source_id == Source.id)
+            .filter(Source.type == "web")
+            .order_by(IngestionRun.id.desc())
+            .limit(20)
+            .all()
+        )
 
-
-def session(user_agent: str, timeout: int) -> requests.Session:
-    s = requests.Session()
-    s.headers["User-Agent"] = user_agent
-    s.timeout = timeout  # atributo ad hoc que usamos en .get(...)
-    return s
-
-
-def save_raw(run_dir: Path, i: int, url: str, content: bytes) -> str:
-    raw_dir = run_dir / "raw"
-    raw_dir.mkdir(parents=True, exist_ok=True)
-    fname = f"{i:05d}.html"
-    path = raw_dir / fname
-    path.write_bytes(content)
-    return str(path)
-
-
-def fetch_sitemap(seed: str, sess: requests.Session, max_pages: int) -> List[str]:
-    urls: List[str] = []
-    try:
-        r = sess.get(seed, timeout=sess.timeout)
-        r.raise_for_status()
-        text = r.text
-    except Exception as e:
-        print(f"[WARN] sitemap GET failed: {e}", flush=True)
-        return urls
-
-    locs = re.findall(r"<loc>\s*(.*?)\s*</loc>", text, flags=re.IGNORECASE)
-    for u in locs:
-        u = u.strip()
-        if u.endswith(".xml") and "sitemap" in u.lower():
-            try:
-                r2 = sess.get(u, timeout=sess.timeout)
-                r2.raise_for_status()
-                locs2 = re.findall(r"<loc>\s*(.*?)\s*</loc>", r2.text, flags=re.IGNORECASE)
-                for u2 in locs2:
-                    u2 = u2.strip()
-                    if not u2.endswith(".xml"):
-                        urls.append(u2)
-                        if len(urls) >= max_pages:
-                            return urls
-            except Exception:
-                continue
-        else:
-            urls.append(u)
-            if len(urls) >= max_pages:
-                return urls
-    return urls[:max_pages]
-
-
-from html.parser import HTMLParser
-class LinkExtractor(HTMLParser):
-    def __init__(self, base: str):
-        super().__init__()
-        self.base = base
-        self.links: Set[str] = set()
-    def handle_starttag(self, tag, attrs):
-        if tag.lower() != "a":
-            return
-        href = None
-        for k, v in attrs:
-            if k.lower() == "href":
-                href = v
-                break
-        if not href:
-            return
-        try:
-            u = urljoin(self.base, href)
-            self.links.add(u)
-        except Exception:
-            pass
-
-
-def crawl_requests(seed: str, sess: requests.Session, allowed_hosts: Set[str],
-                   includes: List[str], excludes: List[str], depth: int,
-                   max_pages: int, run_dir: Path, dump_html: bool) -> List[Dict]:
-    from collections import deque
-    seen: Set[str] = set()
-    q = deque([(seed, 0)])
-    out: List[Dict] = []
-    i = 0
-
-    while q and len(out) < max_pages:
-        url, d = q.popleft()
-        if url in seen:
-            continue
-        seen.add(url)
-
-        if not allowed(url, allowed_hosts, includes, excludes):
-            print(f"[SKIP] domain/include/exclude: {url}", flush=True)
-            continue
-
-        resp = None
-        try:
-            resp = sess.get(url, timeout=sess.timeout)
-            status = resp.status_code
-            raw_path = None
-            if dump_html and resp.ok and resp.content:
-                raw_path = save_raw(run_dir, i, url, resp.content)
-            out.append({"url": url, "status": status, "raw": raw_path, "title": None})
-            i += 1
-        except Exception as e:
-            print(f"[ERR] GET {url}: {e}", flush=True)
-            out.append({"url": url, "status": 0, "raw": None, "title": None})
-
-        if d < depth:
-            try:
-                html = resp.text if resp is not None else ""
-                parser = LinkExtractor(url)
-                parser.feed(html or "")
-                for u in parser.links:
-                    if u not in seen and len(out) + len(q) < max_pages:
-                        q.append((u, d + 1))
-            except Exception:
-                pass
-
-    return out
-
-
-def make_driver(args):
-    if webdriver is None:
-        raise RuntimeError("selenium no está instalado. pip install selenium>=4.12")
-
-    driver_name = (args.driver or "chrome").lower()
-    w, h = (int(x) for x in (args.window_size or "1366,900").split(",")[:2])
-    headless = not bool(args.no_headless)
-
-    if driver_name == "firefox":
-        opts = FirefoxOptions()
-        if headless:
-            opts.add_argument("-headless")
-        drv = webdriver.Firefox(options=opts)
-    else:
-        opts = ChromeOptions()
-        if headless:
-            opts.add_argument("--headless=new")
-        opts.add_argument(f"--window-size={w},{h}")
-        opts.add_argument("--disable-gpu")
-        opts.add_argument("--no-sandbox")
-        drv = webdriver.Chrome(options=opts)
-
-    try:
-        drv.set_page_load_timeout(int(args.timeout or 15))
-    except Exception:
-        pass
-    drv.set_window_size(w, h)
-    return drv
-
-
-def crawl_selenium(seed: str, args, allowed_hosts: Set[str],
-                   includes: List[str], excludes: List[str],
-                   max_pages: int, run_dir: Path, dump_html: bool) -> List[Dict]:
-    try:
-        from bs4 import BeautifulSoup  # opcional
-    except Exception:
-        BeautifulSoup = None
-
-    drv = make_driver(args)
-    out: List[Dict] = []
-    i = 0
-
-    try:
-        to_visit = [seed]
-        seen: Set[str] = set()
-
-        while to_visit and len(out) < max_pages:
-            url = to_visit.pop(0)
-            if url in seen:
-                continue
-            seen.add(url
-            )
-            if not allowed(url, allowed_hosts, includes, excludes):
-                print(f"[SKIP] domain/include/exclude: {url}", flush=True)
-                continue
-
-            try:
-                drv.get(url)
-                # espera simple
-                if args.render_wait_ms:
-                    time.sleep(args.render_wait_ms / 1000.0)
-                if args.scroll:
-                    for _ in range(int(args.scroll_steps or 4)):
-                        drv.execute_script("window.scrollBy(0, document.body.scrollHeight / 4);")
-                        time.sleep(args.scroll_wait_ms / 1000.0)
-
-                html = drv.page_source or ""
-                if dump_html:
-                    raw_path = save_raw(run_dir, i, url, html.encode("utf-8", errors="ignore"))
-                else:
-                    raw_path = None
-
-                # enlaces
-                if BeautifulSoup:
-                    try:
-                        soup = BeautifulSoup(html, "html.parser")
-                        for a in soup.find_all("a", href=True):
-                            u = urljoin(url, a["href"])
-                            if u not in seen and len(out) + len(to_visit) < max_pages:
-                                to_visit.append(u)
-                    except Exception:
-                        pass
-                else:
-                    parser = LinkExtractor(url)
-                    parser.feed(html)
-                    for u in parser.links:
-                        if u not in seen and len(out) + len(to_visit) < max_pages:
-                            to_visit.append(u)
-
-                out.append({"url": url, "status": 200, "raw": raw_path, "title": None})
-                i += 1
-            except Exception as e:
-                print(f"[ERR] SELENIUM GET {url}: {e}", flush=True)
-                out.append({"url": url, "status": 0, "raw": None, "title": None})
-    finally:
-        try:
-            drv.quit()
-        except Exception:
-            pass
-
-    return out
-
-
-def main():
-    args = parse_args()
-    run_dir = ensure_run_dir()
-
-    seed = normalize_url(args.seed.strip(), args.force_https)
-    allowed_hosts = {h.strip().lower() for h in (args.allowed_domains or "").split(",") if h.strip()}
-    includes = list(args.include or [])
-    excludes = list(args.exclude or [])
-    # Nota: robots no se aplica en este crawler simple
-
-    sess = session(args.user_agent, args.timeout)
-
-    print(f"[INFO] strategy={args.strategy} seed={seed}", flush=True)
-    pages: List[Dict] = []
-
-    if args.strategy == "sitemap":
-        pages = [{"url": u, "status": 0, "raw": None, "title": None}
-                 for u in fetch_sitemap(seed, sess, args.max_pages)]
-        i = 0
-        for page in pages:
-            url = page["url"]
-            if not allowed(url, allowed_hosts, includes, excludes):
-                continue
-            try:
-                r = sess.get(url, timeout=sess.timeout)
-                page["status"] = r.status_code
-                if args.dump_html and r.ok:
-                    page["raw"] = save_raw(run_dir, i, url, r.content)
-            except Exception as e:
-                print(f"[ERR] GET {url}: {e}", flush=True)
-            i += 1
-
-    elif args.strategy == "requests":
-        pages = crawl_requests(seed, sess, allowed_hosts, includes, excludes,
-                               args.depth, args.max_pages, run_dir, args.dump_html)
-
-    elif args.strategy == "selenium":
-        pages = crawl_selenium(seed, args, allowed_hosts, includes, excludes,
-                               args.max_pages, run_dir, args.dump_html)
-
-    # Artefactos base
-    (run_dir / "fetch_index.json").write_text(
-        json.dumps(pages, ensure_ascii=False, indent=2), encoding="utf-8"
+    return render_template(
+        "admin/ingesta_web.html",
+        sources=sources,
+        runs=runs,
+        cfg_defaults=_default_config(),
     )
 
-    print(f"[INFO] fetched={len(pages)}", flush=True)
-    if args.preview:
-        for p in pages[:10]:
-            print(f"[PAGE] {p['status']} {p['url']}", flush=True)
+
+@bp_ingesta_web.route("/save", methods=["POST"])
+def save():
+    logger = _get_ingestion_logger()
+
+    src_id = request.form.get("id")
+    url = (request.form.get("url") or "").strip()
+    name = (request.form.get("name") or "").strip()
+    if not url:
+        flash("La URL es obligatoria", "danger")
+        return redirect(url_for("ingesta_web.index"))
+
+    # Construcción de config desde el form
+    cfg = _default_config()
+    cfg["strategy"] = request.form.get("strategy") or "sitemap"
+    cfg["depth"] = int(request.form.get("depth") or 1)
+    cfg["allowed_domains"] = [d.strip() for d in (request.form.get("allowed_domains") or "").split(",") if d.strip()]
+    cfg["include"] = [s.strip() for s in (request.form.get("include") or "").splitlines() if s.strip()]
+    cfg["exclude"] = [s.strip() for s in (request.form.get("exclude") or "").splitlines() if s.strip()]
+    cfg["robots_policy"] = request.form.get("robots_policy") or "strict"
+    cfg["ignore_robots_for"] = [d.strip() for d in (request.form.get("ignore_robots_for") or "").split(",") if d.strip()]
+    cfg["rate_per_host"] = float(request.form.get("rate_per_host") or 1.0)
+    cfg["timeout"] = int(request.form.get("timeout") or 15)
+    cfg["force_https"] = bool(request.form.get("force_https"))
+    cfg["user_agent"] = request.form.get("user_agent") or _default_config()["user_agent"]
+    cfg["max_pages"] = int(request.form.get("max_pages") or 100)
+    # Selenium
+    cfg["driver"] = request.form.get("driver") or "chrome"
+    cfg["window_size"] = request.form.get("window_size") or "1366,900"
+    cfg["render_wait_ms"] = int(request.form.get("render_wait_ms") or 3000)
+    cfg["wait_selector"] = request.form.get("wait_selector") or ""
+    cfg["no_headless"] = bool(request.form.get("no_headless"))
+    cfg["scroll"] = bool(request.form.get("scroll"))
+    cfg["scroll_steps"] = int(request.form.get("scroll_steps") or 4)
+    cfg["scroll_wait_ms"] = int(request.form.get("scroll_wait_ms") or 500)
+
+    with db.get_session() as s:
+        if src_id:
+            # EDITAR
+            src = s.get(Source, int(src_id))
+            if not src:
+                flash("Source no encontrado.", "danger")
+                return redirect(url_for("ingesta_web.index"))
+            src.url = url
+            src.type = "web"
+            if name:
+                src.name = name
+            src.config = {**(src.config or {}), **cfg}
+            action = "update"
+        else:
+            # CREAR
+            src = Source(url=url, name=(name or None), type="web", config=cfg)
+            s.add(src)
+            action = "create"
+        s.commit()
+
+    logger.info("[INGEST_WEB] source_%s id=%s url=%s name=%s", action, src.id, src.url, src.name or "")
+    flash("Fuente guardada", "success")
+    return redirect(url_for("ingesta_web.index"))
 
 
-if __name__ == "__main__":
+@bp_ingesta_web.route("/run/<int:source_id>", methods=["POST"])
+def run(source_id: int):
+    logger = _get_ingestion_logger()
+
+    # Crear run + leer cfg y seed_url
+    with db.get_session() as s:
+        src = s.get(Source, source_id)
+        if not src or src.type != "web":
+            flash("Fuente web no encontrada.", "danger")
+            return redirect(url_for("ingesta_web.index"))
+
+        cfg = {**(_default_config()), **(src.config or {})}
+        run = IngestionRun(source_id=src.id, status="running", meta={"web_config": cfg})
+        s.add(run)
+        s.commit()  # asegura run.id
+        seed_url = src.url
+
+    runs_web_root = RUNS_ROOT / "web"
+    runs_web_root.mkdir(parents=True, exist_ok=True)
+    fallback_run_dir = (runs_web_root / f"run_{run.id}").resolve()
+    fallback_run_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info(
+        "[INGEST_WEB] start run source_id=%s run_id=%s url=%s strategy=%s max_pages=%s",
+        source_id, run.id, seed_url, cfg.get("strategy"), cfg.get("max_pages"),
+    )
+
+    # Localizar script
+    candidates = [Path("scripts/ingest_web.py"), Path("ingest_web.py")]
+    script_path = next((p for p in candidates if p.exists()), None)
+    if not script_path:
+        try:
+            (fallback_run_dir / "stdout.txt").write_text(
+                "[NO_SCRIPT_FOUND] Revisa la ruta del script de ingesta web.\n", encoding="utf-8"
+            )
+        except Exception:
+            pass
+        _update_run_meta(
+            run_id=run.id,
+            status="error",
+            stdout="[NO_SCRIPT_FOUND] Ninguno de: " + ", ".join(str(p) for p in candidates),
+            extra={"cmd": "(sin comando)", "run_dir": str(fallback_run_dir)},
+        )
+        logger.error("[INGEST_WEB] run_id=%s ERROR no script found", run.id)
+        flash("No encuentro el script de ingesta web. Revisa la ruta.", "danger")
+        return redirect(url_for("ingesta_web.index"))
+
+    # Comando
+    py = sys.executable
+    args = [
+        py,
+        str(script_path),
+        "--seed", seed_url,
+        "--strategy", cfg.get("strategy", "sitemap"),
+        "--max-pages", str(cfg.get("max_pages", 100)),
+        "--timeout", str(cfg.get("timeout", 15)),
+        "--rate", str(cfg.get("rate_per_host", 1.0)),
+        "--user-agent", cfg.get("user_agent", _default_config()["user_agent"]),
+        "--dump-html",
+        "--preview",
+        "--verbose",
+        "--source-id", str(src.id),
+        "--run-id", str(run.id),
+    ]
+    if cfg.get("force_https"):
+        args.append("--force-https")
+
+    policy = cfg.get("robots_policy", "strict")
+    if policy == "ignore":
+        args.append("--no-robots")
+    else:
+        args += ["--robots-policy", policy]
+        if policy == "list" and cfg.get("ignore_robots_for"):
+            args += ["--ignore-robots-for", ",".join(cfg["ignore_robots_for"])]
+
+    if cfg.get("strategy") == "requests":
+        args += ["--depth", str(cfg.get("depth", 1))]
+
+    if cfg.get("allowed_domains"):
+        args += ["--allowed-domains", ",".join(cfg["allowed_domains"])]
+
+    for pat in cfg.get("include", []):
+        args += ["--include", pat]
+    for pat in cfg.get("exclude", []):
+        args += ["--exclude", pat]
+
+    project_root = Path(current_app.root_path).parent
+    cmd_shown = " ".join(shlex.quote(a) for a in args)
+
     try:
-        main()
-        sys.exit(0)
-    except Exception as e:
-        print(f"[FATAL] {type(e).__name__}: {e}", flush=True)
-        sys.exit(1)
+        logger.info("[INGEST_WEB] exec run_id=%s cmd=%s", run.id, cmd_shown)
+        proc = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=str(project_root),
+            env={**os.environ, "RUN_DIR": str(fallback_run_dir)},
+        )
+        out = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
 
-if __name__ == "__main__":
-    try:
-        main()
-        sys.exit(0)
+        # Detectar run_dir del script o usar fallback
+        detected = _extract_run_dir(out)
+        run_dir = detected or str(fallback_run_dir)
+        Path(run_dir).mkdir(parents=True, exist_ok=True)
+
+        # Guardar siempre stdout.txt en el run_dir
+        try:
+            (Path(run_dir) / "stdout.txt").write_text(out or "(sin salida)", encoding="utf-8")
+        except Exception:
+            pass
+
+        # 💾 Persistimos cuanto antes el run_dir (para que la UI deje de mostrar "Sin path del run")
+        _update_run_meta(
+            run_id=run.id,
+            status=("running" if proc.returncode == 0 else "error"),  # estado provisional
+            stdout=(out[-20000:] or "(sin salida del proceso)"),
+            extra={"returncode": proc.returncode, "cmd": cmd_shown, "run_dir": run_dir},
+        )
+
+        extra = {"returncode": proc.returncode, "cmd": cmd_shown, "run_dir": run_dir}
+
+        # Post-procesado: intentar construir summary_totals. Vía 1: nuestros helpers; Vía 2: summary.json del script.
+        totals = None
+        try:
+            summary_obj = _build_summary(Path(run_dir))
+            if summary_obj:
+                (Path(run_dir) / "summary.json").write_text(
+                    json.dumps(summary_obj, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
+                totals = summary_obj.get("totals")
+        except Exception as e:
+            extra["summary_error"] = f"{type(e).__name__}: {e}"
+
+        # Si no hay totals aún, intenta leer summary.json si lo generó el script
+        if not totals:
+            try:
+                script_summary = Path(run_dir) / "summary.json"
+                if script_summary.exists():
+                    data = json.loads(script_summary.read_text(encoding="utf-8"))
+                    if isinstance(data, dict) and "totals" in data:
+                        totals = data["totals"]
+            except Exception:
+                pass
+
+        if totals:
+            extra["summary_totals"] = totals
+            logger.info(
+                "[INGEST_WEB] run_id=%s totals pages=%s chunks=%s bytes=%s",
+                run.id, totals.get("pages", 0), totals.get("chunks", 0), totals.get("bytes", 0)
+            )
+
+        # Estado final
+        _update_run_meta(
+            run_id=run.id,
+            status=("done" if proc.returncode == 0 else "error"),
+            stdout=(out[-20000:] or "(sin salida del proceso)"),
+            extra=extra,
+        )
+
+        logger.info(
+            "[INGEST_WEB] finished run_id=%s returncode=%s run_dir=%s",
+            run.id, proc.returncode, run_dir or "(none)",
+        )
+
+        flash(
+            "Ingesta finalizada con éxito." if proc.returncode == 0 else "Ingesta finalizada con error. Revisa la salida.",
+            "success" if proc.returncode == 0 else "danger",
+        )
     except Exception as e:
-        print(f"[FATAL] {type(e).__name__}: {e}", flush=True)
-        sys.exit(1)
+        # En excepción, garantizamos igualmente stdout.txt mínimo
+        try:
+            fallback_run_dir.mkdir(parents=True, exist_ok=True)
+            (fallback_run_dir / "stdout.txt").write_text(f"[exception] {e}", encoding="utf-8")
+        except Exception:
+            pass
+
+        _update_run_meta(
+            run_id=run.id,
+            status="error",
+            stdout=f"[exception] {e}",
+            extra={"cmd": cmd_shown, "run_dir": str(fallback_run_dir)},
+        )
+        logger.exception("[INGEST_WEB] exception run_id=%s: %s", run.id, e)
+        flash(f"Fallo al ejecutar la ingesta: {e}", "danger")
+
+    return redirect(url_for("ingesta_web.index"))
+
+
+@bp_ingesta_web.route("/delete/<int:source_id>", methods=["POST"])
+def delete(source_id: int):
+    """
+    Eliminación robusta de una fuente WEB sin materializar objetos ORM.
+    Borra en orden: chunks -> documents -> ingestion_runs -> sources.
+    """
+    from sqlalchemy import text
+    logger = _get_ingestion_logger()
+
+    with db.get_session() as s:
+        src = s.get(Source, source_id)
+        if not src or src.type != "web":
+            flash("Fuente no encontrada.", "warning")
+            return redirect(url_for("ingesta_web.index"))
+
+        name, url = (src.name or ""), (src.url or "")
+
+        s.execute(
+            text("""
+                DELETE FROM chunks
+                 WHERE document_id IN (
+                       SELECT id FROM documents WHERE source_id = :sid
+                 )
+            """),
+            {"sid": source_id},
+        )
+        s.execute(text("DELETE FROM documents WHERE source_id = :sid"), {"sid": source_id})
+        s.execute(text("DELETE FROM ingestion_runs WHERE source_id = :sid"), {"sid": source_id})
+        s.execute(text("DELETE FROM sources WHERE id = :sid"), {"sid": source_id})
+        s.commit()
+
+    logger.info("[INGEST_WEB] delete source_id=%s name=%s url=%s", source_id, name, url)
+    flash("Fuente eliminada", "success")
+    return redirect(url_for("ingesta_web.index"))
+
+
+def _update_run_meta(run_id: int, *, status: str, stdout: str, extra: dict | None = None) -> None:
+    with db.get_session() as s:
+        run_db = s.get(IngestionRun, run_id)
+        if not run_db:
+            return
+        meta = dict(run_db.meta or {})
+        meta["stdout"] = stdout
+        if extra:
+            meta.update(extra)
+        run_db.meta = meta
+        run_db.status = status
+        s.commit()
+
+
+def _normalize_artifact_path(relpath: str) -> Path:
+    base = RUNS_ROOT.resolve()
+    rel = relpath.replace("\\", "/")
+    p = Path(rel)
+    if p.is_absolute():
+        cand = p.resolve()
+    else:
+        rel_no_base = rel
+        base_str = str(base).replace("\\", "/")
+        if rel_no_base.startswith(base_str):
+            rel_no_base = rel_no_base[len(base_str):].lstrip("/")
+        cand = (base / rel_no_base).resolve()
+    if not str(cand).startswith(str(base)):
+        raise PermissionError("Ruta fuera del directorio de runs")
+    return cand
+
+
+@bp_ingesta_web.route("/artifact/<path:relpath>")
+def artifact(relpath: str):
+    try:
+        file_path = _normalize_artifact_path(relpath)
+    except PermissionError:
+        abort(403)
+    except Exception:
+        flash("Ruta de artefacto inválida.", "warning")
+        return redirect(url_for("ingesta_web.index"))
+
+    if not file_path.exists() or not file_path.is_file():
+        flash("Archivo no encontrado.", "warning")
+        return redirect(url_for("ingesta_web.index"))
+
+    return send_file(file_path, as_attachment=True)
+
+
+@bp_ingesta_web.route("/preview/<int:run_id>")
+def preview(run_id: int):
+    with db.get_session() as s:
+        sources = (
+            s.query(Source).filter(Source.type == "web").order_by(Source.id.desc()).all()
+        )
+        runs = (
+            s.query(IngestionRun)
+            .join(Source, IngestionRun.source_id == Source.id)
+            .filter(Source.type == "web")
+            .order_by(IngestionRun.id.desc())
+            .limit(20)
+            .all()
+        )
+        run_obj = s.get(IngestionRun, run_id)
+
+    preview_text = ""
+    # 1) Prefer meta.stdout
+    if run_obj and run_obj.meta and "stdout" in run_obj.meta:
+        preview_text = str(run_obj.meta.get("stdout") or "")
+    # 2) Fallback: leer del archivo en run_dir
+    if not preview_text and run_obj and run_obj.meta and "run_dir" in run_obj.meta:
+        stdout_path = Path(str(run_obj.meta["run_dir"])) / "stdout.txt"
+        if stdout_path.exists():
+            preview_text = stdout_path.read_text(encoding="utf-8", errors="ignore")
+
+    return render_template(
+        "admin/ingesta_web.html",
+        sources=sources,
+        runs=runs,
+        cfg_defaults=_default_config(),
+        preview=preview_text,
+    )
+
+
+# --- Helpers ---
+
+def _extract_run_dir(proc_output: str) -> Optional[str]:
+    for line in proc_output.splitlines():
+        if line.strip().startswith("[RUN_DIR]"):
+            return line.replace("[RUN_DIR]", "").strip()
+    return None
+
+
+@dataclass
+class _SummaryTotals:
+    pages: int = 0
+    chunks: int = 0
+    bytes: int = 0
+
+
+def _build_summary(run_dir: Path) -> Optional[dict]:
+    """
+    Construye un summary mínimo a partir de fetch_index.json + raw/.
+    Si no están, devuelve None (y más tarde intentaremos leer summary.json del script).
+    """
+    index_path = run_dir / "fetch_index.json"
+    raw_dir = run_dir / "raw"
+    if not index_path.exists() or not raw_dir.exists():
+        return None
+
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        if not isinstance(index, list):
+            return None
+    except Exception:
+        return None
+
+    pages = []
+    totals = _SummaryTotals()
+
+    for rec in index:
+        raw_path = rec.get("raw")
+        url = rec.get("url")
+        title = rec.get("title")
+        status = rec.get("status")
+        b = 0
+        n_chunks = 0
+
+        if raw_path and os.path.exists(raw_path):
+            try:
+                b = os.path.getsize(raw_path)
+                html = Path(raw_path).read_text(encoding="utf-8", errors="ignore")
+                # chunking simple por longitud (~1200 chars)
+                n_chunks = _count_chunks_simple(html, max_chars=1200)
+            except Exception:
+                pass
+
+        pages.append(
+            {"url": url, "title": title, "status": status, "raw": raw_path, "bytes": b, "num_chunks": n_chunks}
+        )
+        totals.pages += 1
+        totals.chunks += n_chunks
+        totals.bytes += int(b or 0)
+
+    summary = {
+        "kind": "web",
+        "run_dir": str(run_dir),
+        "totals": {"pages": totals.pages, "chunks": totals.chunks, "bytes": totals.bytes},
+        "pages": pages,
+    }
+    return summary
+
+
+def _count_chunks_simple(html: str, max_chars: int = 1200) -> int:
+    html = re.sub(r"<(script|style)[\s\S]*?</\1>", " ", html, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", html)
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return 0
+    n = len(text)
+    return (n + max_chars - 1) // max_chars
