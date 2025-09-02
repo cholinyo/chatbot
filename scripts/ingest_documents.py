@@ -288,7 +288,7 @@ def main() -> int:
                         s.add(Chunk(
                             source_id=source_id,
                             document_id=doc.id,
-                            index=i,
+                            ordinal=i,
                             text=piece,
                             content=piece,
                             meta={"path": str(path)},

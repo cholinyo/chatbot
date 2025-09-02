@@ -131,7 +131,9 @@ def save():
     cfg["ignore_robots_for"] = [d.strip() for d in (request.form.get("ignore_robots_for") or "").split(",") if d.strip()]
     cfg["rate_per_host"] = float(request.form.get("rate_per_host") or 1.0)
     cfg["timeout"] = int(request.form.get("timeout") or 15)
-    cfg["force_https"] = bool(request.form.get("force_https"))
+    cfg["force_https"] = "force_https" in request.form
+    cfg["no_headless"] = "no_headless" in request.form
+    cfg["scroll"] = "scroll" in request.form
     cfg["user_agent"] = request.form.get("user_agent") or _default_config()["user_agent"]
     cfg["max_pages"] = int(request.form.get("max_pages") or 100)
     # Selenium
@@ -268,6 +270,25 @@ def run(source_id: int):
         args += ["--include", pat]
     for pat in cfg.get("exclude", []):
         args += ["--exclude", pat]
+        # Opciones específicas para Selenium
+if cfg.get("strategy") == "selenium":
+    args += [
+        "--driver", cfg.get("driver", "chrome"),
+        "--render-wait-ms", str(cfg.get("render_wait_ms", 3000)),
+        "--window-size", cfg.get("window_size", "1366,900"),
+    ]
+    if cfg.get("wait_selector"):
+        args += ["--wait-selector", cfg["wait_selector"]]
+
+    if cfg.get("no_headless"):
+        args.append("--no-headless")
+    if cfg.get("scroll"):
+        args.append("--scroll")
+        args += [
+            "--scroll-steps", str(cfg.get("scroll_steps", 4)),
+            "--scroll-wait-ms", str(cfg.get("scroll_wait_ms", 500)),
+        ]
+
 
     project_root = Path(current_app.root_path).parent
     cmd_shown = " ".join(shlex.quote(a) for a in args)

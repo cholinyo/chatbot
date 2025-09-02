@@ -1,256 +1,161 @@
+<!-- app/templates/admin/ingesta_docs.html -->
 {% extends "base.html" %}
+{% block title %}Ingesta Docs (RAG){% endblock %}
+
 {% block content %}
+<div class="container my-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category=='error' else category }} mb-2" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-<div class="container py-3">
+  <h3 class="mb-3">Ingesta de Documentos</h3>
 
-  <h2 class="mb-3">Ingesta de documentos</h2>
-
-  <!-- Resumen global -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title mb-3">Resumen</h5>
-      <div class="row">
-        <div class="col-md-3"><strong>Fuentes (docs):</strong> {{ stats_globales.sources_docs }}</div>
-        <div class="col-md-3"><strong>Documentos:</strong> {{ stats_globales.documents_total }}</div>
-        <div class="col-md-3"><strong>Chunks:</strong> {{ stats_globales.chunks_total }}</div>
-        <div class="col-md-3">
-          <strong>Últ. run OK/KO:</strong>
-          <span class="badge bg-success">{{ stats_globales.last_run_ok_sources }}</span>
-          /
-          <span class="badge bg-danger">{{ stats_globales.last_run_ko_sources }}</span>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-header">Nueva fuente DOCS</div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('ingesta_docs.save') }}">
+            <div class="mb-2">
+              <label class="form-label">Nombre</label>
+              <input name="name" class="form-control" placeholder="(opcional)">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Carpeta</label>
+              <input name="input_dir" class="form-control" placeholder="p.ej. D:\docs">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Patrón</label>
+              <input name="pattern" class="form-control" value="*.pdf,*.docx,*.txt">
+            </div>
+            <div class="row">
+              <div class="col-6 mb-2">
+                <label class="form-label">Chunk size</label>
+                <input type="number" name="chunk_size" class="form-control" value="512">
+              </div>
+              <div class="col-6 mb-2">
+                <label class="form-label">Overlap</label>
+                <input type="number" name="chunk_overlap" class="form-control" value="64">
+              </div>
+            </div>
+            <div class="d-grid mt-2">
+              <button class="btn btn-primary" type="submit">Guardar fuente</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Fuentes y métricas por carpeta -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title mb-3">Fuentes (carpetas) y métricas</h5>
-      <div class="table-responsive">
-        <table class="table table-sm align-middle">
-          <thead>
-            <tr>
-              <th>Fuente</th>
-              <th>Carpeta</th>
-              <th class="text-end">Docs</th>
-              <th class="text-end">Chunks</th>
-              <th>Últ. ejecución</th>
-              <th class="text-end">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for s in sources %}
-            {% set st = stats_by_source.get(s.id) %}
-            <tr>
-              <td>
-                <div class="fw-semibold">{{ s.name or "Sin nombre" }}</div>
-              </td>
-              <td><code>{{ s.url }}</code></td>
-              <td class="text-end">{{ st.documents_total if st else 0 }}</td>
-              <td class="text-end">{{ st.chunks_total if st else 0 }}</td>
-              <td>
-                {% if st and st.last_run %}
-                  {% if st.last_run.status == "done" and (st.last_run.returncode or 0) == 0 %}
-                    <span class="badge bg-success">done</span>
-                  {% else %}
-                    <span class="badge bg-danger">{{ st.last_run.status }}</span>
-                  {% endif %}
-                  {% if st.last_run.duration_sec %}
-                    <span class="text-muted ms-2">{{ st.last_run.duration_sec }}s</span>
-                  {% endif %}
-                  <div class="small">
-                    <a href="{{ url_for('ingesta_docs.run_stdout', run_id=st.last_run.id) }}" target="_blank">Ver salida</a>
-                    · <a href="{{ url_for('ingesta_docs.run_summary', run_id=st.last_run.id) }}" target="_blank">summary.json</a>
-                  </div>
-                {% else %}
-                  <span class="text-muted">—</span>
-                {% endif %}
-              </td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <form method="post" action="{{ url_for('ingesta_docs.run') }}">
-                    <input type="hidden" name="source_id" value="{{ s.id }}">
-                    <input type="hidden" name="input_dir" value="{{ s.config.input_dir or s.url }}">
-                    {# Garantizar string de patterns #}
-                    {% set pats = s.config.patterns %}
-                    {% if pats is sequence and pats is not string %}
-                      <input type="hidden" name="patterns" value="{{ pats|join(',') }}">
-                    {% else %}
-                      <input type="hidden" name="patterns" value="{{ pats or defaults.patterns }}">
-                    {% endif %}
-                    {% if s.config.recursive or defaults.recursive %}<input type="hidden" name="recursive" value="1">{% endif %}
-                    {% if s.config.only_new %}<input type="hidden" name="only_new" value="1">{% endif %}
-                    <button class="btn btn-sm btn-primary">Ejecutar</button>
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Fuentes DOCS</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>ID</th><th>Nombre</th><th>Carpeta</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for s in sources %}
+              <tr>
+                <td>{{ s.id }}</td>
+                <td>{{ s.name or '-' }}</td>
+                <td style="max-width: 420px; word-break: break-word">{{ s.url }}</td>
+                <td class="text-nowrap">
+                  <form method="post" action="{{ url_for('ingesta_docs.run', source_id=s.id) }}" class="d-inline">
+                    <button class="btn btn-success btn-sm">Ejecutar</button>
                   </form>
-
-                  <!-- Botón editar: abre modal -->
-                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalEdit{{ s.id }}">Editar</button>
-
-                  <!-- Botón eliminar: abre modal -->
-                  <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalDel{{ s.id }}">Eliminar</button>
-                </div>
-
-                <!-- Modal EDIT -->
-                <div class="modal fade" id="modalEdit{{ s.id }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content">
-                      <form method="post" action="{{ url_for('ingesta_docs.source_edit', source_id=s.id) }}">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Editar fuente</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body">
-                          <div class="row g-2">
-                            <div class="col-md-4">
-                              <label class="form-label">Nombre</label>
-                              <input name="name" class="form-control" value="{{ s.name or '' }}" placeholder="Nombre descriptivo">
-                            </div>
-                            <div class="col-md-8">
-                              <label class="form-label">Carpeta</label>
-                              <input name="input_dir" class="form-control" value="{{ s.config.input_dir or s.url }}">
-                            </div>
-                            <div class="col-md-8">
-                              <label class="form-label">Patrones</label>
-                              <input name="patterns" class="form-control" value="{{ s.config.patterns or defaults.patterns }}">
-                            </div>
-                            <div class="col-md-4">
-                              <div class="form-check mt-4">
-                                <input class="form-check-input" type="checkbox" name="recursive" id="rec{{ s.id }}" {% if s.config.recursive or defaults.recursive %}checked{% endif %}>
-                                <label class="form-check-label" for="rec{{ s.id }}">Recursivo</label>
-                              </div>
-                              <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="only_new" id="onlynew{{ s.id }}" {% if s.config.only_new %}checked{% endif %}>
-                                <label class="form-check-label" for="onlynew{{ s.id }}">Solo nuevos</label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                          <button class="btn btn-primary">Guardar cambios</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Modal DELETE -->
-                <div class="modal fade" id="modalDel{{ s.id }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <form method="post" action="{{ url_for('ingesta_docs.source_delete', source_id=s.id) }}">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Eliminar fuente</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body">
-                          <p class="mb-2">Vas a eliminar la fuente <strong>{{ s.name or s.url }}</strong>.</p>
-                          <p class="mb-2 text-danger">Se eliminarán también sus ejecuciones, documentos y chunks.</p>
-                          <div class="mb-2">
-                            Escribe <code>DELETE</code> para confirmar:
-                            <input name="confirm" class="form-control mt-1" placeholder="DELETE">
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                          <button class="btn btn-danger">Eliminar</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-
-              </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Crear fuente rápida (carpeta existente) -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title mb-3">Añadir fuente (carpeta existente)</h5>
-      <form method="post" action="{{ url_for('ingesta_docs.quick_save') }}">
-        <div class="row g-2 align-items-end">
-          <div class="col-md-3">
-            <label class="form-label">Nombre (opcional)</label>
-            <input name="name" class="form-control" placeholder="Nombre descriptivo">
-          </div>
-          <div class="col-md-5">
-            <label class="form-label">Carpeta</label>
-            <input name="input_dir" class="form-control" placeholder="C:\ruta\carpeta o /ruta/carpeta">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label">Patrones</label>
-            <input name="patterns" class="form-control" value="{{ defaults.patterns }}">
-          </div>
-          <div class="col-md-2">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="recursive" id="rec" {% if defaults.recursive %}checked{% endif %}>
-              <label class="form-check-label" for="rec">Recursivo</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="only_new" id="onlynew" {% if defaults.only_new %}checked{% endif %}>
-              <label class="form-check-label" for="onlynew">Solo nuevos</label>
-            </div>
-          </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="text-muted">Sin fuentes</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
         </div>
-        <div class="mt-3">
-          <button class="btn btn-success">Guardar fuente</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Ejecuciones recientes -->
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title mb-3">Ejecuciones recientes</h5>
-      <div class="table-responsive">
-        <table class="table table-sm align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fuente</th>
-              <th>Estado</th>
-              <th>Duración</th>
-              <th>Salida</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for r in runs %}
-            <tr>
-              <td>{{ r.id }}</td>
-              <td>{{ r.source_name }}</td>
-              <td>
-                {% if r.status == "done" %}
-                  <span class="badge bg-success">done</span>
-                {% elif r.status == "running" %}
-                  <span class="badge bg-warning text-dark">running</span>
-                {% else %}
-                  <span class="badge bg-danger">{{ r.status }}</span>
-                {% endif %}
-              </td>
-              <td>{{ r.duration_sec if r.duration_sec else "—" }}</td>
-              <td>
-                {% if r.has_stdout %}
-                  <a href="{{ url_for('ingesta_docs.run_stdout', run_id=r.id) }}" target="_blank">Ver salida</a>
-                {% else %}
-                  <span class="text-muted">(sin salida)</span>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
       </div>
+
+      <div class="card mb-3">
+        <div class="card-header">Ejecuciones recientes</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>ID</th><th>Source</th><th>Estado</th>
+                <th>Docs</th><th>Chunks</th><th>Duración</th>
+                <th>Preview</th><th>Artefactos</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for r in runs %}
+              {% set totals = (r.meta or {}).get('summary_totals') or {} %}
+              {% set run_dir = (r.meta or {}).get('run_dir') %}
+              {% set elapsed = (r.meta or {}).get('elapsed_sec') %}
+              <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.source_id }}</td>
+                <td>
+                  {% if r.status == 'done' %}
+                    <span class="badge bg-success">done</span>
+                  {% elif r.status == 'running' %}
+                    <span class="badge bg-secondary">running</span>
+                  {% else %}
+                    <span class="badge bg-danger">{{ r.status }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ totals.get('docs', 0) }}</td>
+                <td>{{ totals.get('chunks', 0) }}</td>
+                <td>
+                  {% if elapsed is not none %}
+                    {{ "%.2f"|format(elapsed) }}s
+                  {% elif r.finished_at and r.started_at %}
+                    {# Fallback si guardas timestamps #}
+                    {{ ((r.finished_at - r.started_at).total_seconds())|round(2) }}s
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td class="text-nowrap">
+                  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('ingesta_docs.preview', run_id=r.id) }}">Ver salida</a>
+                </td>
+                <td class="text-nowrap">
+                  {% if run_dir %}
+                    <a class="btn btn-outline-success btn-sm" href="{{ url_for('ingesta_docs.artifact', relpath=run_dir ~ '/stdout.txt') }}">stdout.txt</a>
+                    <a class="btn btn-outline-success btn-sm" href="{{ url_for('ingesta_docs.artifact', relpath=run_dir ~ '/summary.json') }}">summary.json</a>
+                  {% else %}
+                    <span class="text-muted">Sin path del run</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="8" class="text-muted">Sin ejecuciones</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if preview %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span>Salida del run</span>
+          <small class="text-muted">Mostrando últimos ~20k chars</small>
+        </div>
+        <div class="card-body">
+          <pre style="max-height: 50vh; overflow: auto; white-space: pre-wrap;">{{ preview }}</pre>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
-
 </div>
-
 {% endblock %}
