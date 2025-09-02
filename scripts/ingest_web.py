@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from collections import defaultdict
 from types import SimpleNamespace
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urlsplit
 
 from app import create_app
 from app.extensions.db import get_session
@@ -21,6 +21,14 @@ import requests
 NON_HTML_PREFIXES = (
     "application/pdf", "application/msword", "application/vnd",
     "image/", "audio/", "video/", "application/zip", "application/octet-stream"
+)
+
+BINARY_SUFFIXES = (
+    ".pdf",".doc",".docx",".xls",".xlsx",".ppt",".pptx",
+    ".zip",".rar",".7z",".tar",".gz",
+    ".jpg",".jpeg",".png",".gif",".svg",".webp",".ico",".bmp",
+    ".mp3",".m4a",".wav",".flac",".ogg",
+    ".mp4",".mkv",".avi",".mov",".wmv"
 )
 
 def now_utc():
@@ -179,6 +187,12 @@ def main():
 
                 pages = []
                 for url in urls[: cfg.max_pages]:
+                    # Skip by extension before fetching
+                    path_lower = urlsplit(url).path.lower()
+                    if any(path_lower.endswith(suf) for suf in BINARY_SUFFIXES):
+                        counters["skip_by_ext"] += 1
+                        log(f"[skip] sitemap.skip_by_ext url={url}")
+                        continue
                     try:
                         resp = requests.get(
                             url,
@@ -234,6 +248,7 @@ def main():
             # Procesar páginas → Document + Chunk
             total_chunks, total_bytes, total_pages = 0, 0, 0
             fetch_info = []
+            seen_urls = set()
 
             with get_session() as s:
                 for i, p in enumerate(pages, 1):
@@ -242,6 +257,19 @@ def main():
 
                     if not url:
                         log(f"[skip] Página sin URL en índice {i}")
+                        continue
+
+                    # De-dup exacto dentro del mismo run
+                    if url in seen_urls:
+                        counters["dup_url_skipped"] += 1
+                        log(f"[skip] duplicada en este run: {url}")
+                        continue
+                    seen_urls.add(url)
+
+                    # Salta por extensión binaria (doble red)
+                    if any(urlsplit(url).path.lower().endswith(suf) for suf in BINARY_SUFFIXES):
+                        counters["process_skip_by_ext"] += 1
+                        log(f"[skip] process.skip_by_ext url={url}")
                         continue
 
                     if not html.strip():
