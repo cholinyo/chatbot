@@ -21,7 +21,7 @@ class Chunk(Base):
     ordinal: Mapped[int | None] = mapped_column("index", Integer, nullable=True)
 
     # En tu esquema, content es NOT NULL y text puede ser NULL
-    text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     # JSON requerido en tu schema actual

@@ -236,13 +236,10 @@ def run(source_id: int):
         str(cfg.get("max_pages", 100)),
         "--timeout",
         str(cfg.get("timeout", 15)),
-        "--rate",
+        "--rate-per-host",
         str(cfg.get("rate_per_host", 1.0)),
         "--user-agent",
         cfg.get("user_agent", _default_config()["user_agent"]),
-        "--dump-html",
-        "--preview",
-        "--verbose",
         # ⚙️ Añadimos source y run para que el script cree Document/Chunk vinculados:
         "--source-id",
         str(src.id),
@@ -253,30 +250,19 @@ def run(source_id: int):
         args.append("--force-https")
 
     policy = cfg.get("robots_policy", "strict")
-    if policy == "ignore":
-        args.append("--no-robots")
-    else:
-        args += ["--robots-policy", policy]
-        if policy == "list" and cfg.get("ignore_robots_for"):
-            args += ["--ignore-robots-for", ",".join(cfg["ignore_robots_for"])]
-
-    if cfg.get("strategy") == "requests":
-        args += ["--depth", str(cfg.get("depth", 1))]
-
-    if cfg.get("allowed_domains"):
-        args += ["--allowed-domains", ",".join(cfg["allowed_domains"])]
-
+    args += ["--robots-policy", policy]
     for pat in cfg.get("include", []):
         args += ["--include", pat]
     for pat in cfg.get("exclude", []):
         args += ["--exclude", pat]
-        # Opciones específicas para Selenium
-if cfg.get("strategy") == "selenium":
-    args += [
-        "--driver", cfg.get("driver", "chrome"),
-        "--render-wait-ms", str(cfg.get("render_wait_ms", 3000)),
-        "--window-size", cfg.get("window_size", "1366,900"),
-    ]
+
+    # Opciones específicas para Selenium
+    if cfg.get("strategy") == "selenium":
+        args += [
+            "--driver", cfg.get("driver", "chrome"),
+            "--render-wait-ms", str(cfg.get("render_wait_ms", 3000)),
+            "--window-size", cfg.get("window_size", "1366,900"),
+        ]
     if cfg.get("wait_selector"):
         args += ["--wait-selector", cfg["wait_selector"]]
 

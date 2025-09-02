@@ -49,6 +49,7 @@ def build_parser():
     p.add_argument("--window-size", default="1366,900")
 
     return p
+    
 def main():
     args = build_parser().parse_args()
     app = create_app()
@@ -114,18 +115,16 @@ def main():
             elif args.strategy == "sitemap":
                 sitemaps = discover_sitemaps_from_robots(args.seed, force_https=cfg.force_https, user_agent=cfg.user_agent)
                 urls, _ = collect_all_pages(sitemaps, force_https=cfg.force_https, user_agent=cfg.user_agent)
-                pages = []
-                for url in urls[:cfg.max_pages]:
-                    try:
-                        html = requests.get(url, timeout=cfg.timeout_seconds, headers={"User-Agent": cfg.user_agent}).text
-                        if isinstance(p, dict):
-                            url = p["url"]
-                            html = p.get("html", "")
-                            status_code = p.get("status", 200)
-                        else:
-                            url = p.url
-                            html = p.html or ""
-                            status_code = p.status_code
+pages = []
+from types import SimpleNamespace
+for url in urls[:cfg.max_pages]:
+    try:
+        resp = requests.get(url, timeout=cfg.timeout_seconds, headers={"User-Agent": cfg.user_agent})
+        resp.raise_for_status()
+        pages.append(SimpleNamespace(url=url, html=(resp.text or ""), status_code=resp.status_code))
+    except Exception:
+        continue
+
 
                     except:
                         continue
@@ -175,6 +174,7 @@ def main():
                                 source_id=args.source_id,
                                 document_id=doc.id,
                                 ordinal=j,
+                                text=chunk,
                                 content=chunk,
                                 meta={"from": args.strategy, "run_id": args.run_id}
 
