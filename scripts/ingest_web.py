@@ -1,8 +1,9 @@
-# scripts/ingest_web.py
 import os, sys, json, time, argparse, traceback
 from pathlib import Path
 from datetime import datetime, timezone
 from collections import defaultdict
+from types import SimpleNamespace
+from urllib.parse import urlparse, urljoin
 
 from app import create_app
 from app.extensions.db import get_session
@@ -14,7 +15,13 @@ from app.rag.scrapers.selenium_fetcher import SeleniumScraper, SeleniumOptions
 from app.rag.scrapers.sitemap import discover_sitemaps_from_robots, collect_all_pages
 from app.rag.scrapers.web_normalizer import html_to_text
 
+from bs4 import BeautifulSoup
 import requests
+
+NON_HTML_PREFIXES = (
+    "application/pdf", "application/msword", "application/vnd",
+    "image/", "audio/", "video/", "application/zip", "application/octet-stream"
+)
 
 def now_utc():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -48,8 +55,48 @@ def build_parser():
     p.add_argument("--wait-selector", default="")
     p.add_argument("--window-size", default="1366,900")
 
+    # Advanced fallbacks
+    p.add_argument("--iframe-max", type=int, default=2, help="máximo de iframes a seguir si no hay texto")
     return p
-    
+
+def domain_allowed(url: str, allowed_domains: list[str]):
+    host = urlparse(url).netloc.lower()
+    return any(host.endswith(d.lower()) for d in allowed_domains) if allowed_domains else True
+
+def fetch_iframe_texts(html: str, base_url: str, cfg: ScrapeConfig, counters: dict, limit: int = 2) -> str:
+    """
+    Si la página no tiene texto útil, intenta seguir hasta `limit` iframes del mismo dominio permitido
+    y concatena su texto (solo text/html).
+    """
+    soup = BeautifulSoup(html or "", "html.parser")
+    frames = soup.find_all("iframe", src=True)[:limit]
+    texts = []
+    for fr in frames:
+        src = fr.get("src")
+        if not src:
+            continue
+        url = urljoin(base_url, src)
+        if not domain_allowed(url, cfg.allowed_domains):
+            counters["iframe_skipped_domain"] += 1
+            continue
+        try:
+            r = requests.get(url, timeout=cfg.timeout_seconds, headers={"User-Agent": cfg.user_agent})
+            if not r.ok:
+                counters["iframe_fetch_error"] += 1
+                continue
+            ct = (r.headers.get("Content-Type", "") or "").lower()
+            if any(ct.startswith(prefix) for prefix in NON_HTML_PREFIXES):
+                counters["iframe_skipped_non_html"] += 1
+                continue
+            t = html_to_text(r.text or "")
+            if t.strip():
+                texts.append(t)
+                counters["iframe_fetched"] += 1
+        except Exception:
+            counters["iframe_fetch_error"] += 1
+            continue
+    return "\n\n".join(texts).strip()
+
 def main():
     args = build_parser().parse_args()
     app = create_app()
@@ -69,7 +116,7 @@ def main():
 
     cfg = ScrapeConfig(
         seeds=[args.seed],
-        allowed_domains=args.allowed_domains.split(",") if args.allowed_domains else [],
+        allowed_domains=[d.strip() for d in args.allowed_domains.split(",") if d.strip()] if args.allowed_domains else [],
         include_url_patterns=args.include,
         exclude_url_patterns=args.exclude,
         force_https=args.force_https,
@@ -81,6 +128,7 @@ def main():
         robots_policy=args.robots_policy
     )
 
+    counters = defaultdict(int)
     app_created = False
     try:
         with app.app_context():
@@ -113,20 +161,72 @@ def main():
                 pages = SeleniumScraper(cfg, options).crawl()
 
             elif args.strategy == "sitemap":
-                sitemaps = discover_sitemaps_from_robots(args.seed, force_https=cfg.force_https, user_agent=cfg.user_agent)
-                urls, _ = collect_all_pages(sitemaps, force_https=cfg.force_https, user_agent=cfg.user_agent)
-pages = []
-from types import SimpleNamespace
-for url in urls[:cfg.max_pages]:
-    try:
-        resp = requests.get(url, timeout=cfg.timeout_seconds, headers={"User-Agent": cfg.user_agent})
-        resp.raise_for_status()
-        pages.append(SimpleNamespace(url=url, html=(resp.text or ""), status_code=resp.status_code))
-    except Exception:
-        continue
+                # Descubre los sitemaps a partir de la seed y colecciona URLs
+                try:
+                    sitemaps = discover_sitemaps_from_robots(
+                        args.seed,
+                        force_https=cfg.force_https,
+                        user_agent=cfg.user_agent
+                    )
+                    urls, _ = collect_all_pages(
+                        sitemaps,
+                        force_https=cfg.force_https,
+                        user_agent=cfg.user_agent
+                    )
+                except Exception as e:
+                    log(f"[error] sitemap.discovery: {e}")
+                    urls = []
 
-
-                    except:
+                pages = []
+                for url in urls[: cfg.max_pages]:
+                    try:
+                        resp = requests.get(
+                            url,
+                            timeout=cfg.timeout_seconds,
+                            headers={"User-Agent": cfg.user_agent}
+                        )
+                        resp.raise_for_status()
+                        ct = (resp.headers.get("Content-Type", "") or "").lower()
+                        # Salta contenido no HTML (pdf, imagen, binarios, etc.)
+                        if any(ct.startswith(prefix) for prefix in NON_HTML_PREFIXES):
+                            counters["non_html_skipped"] += 1
+                            log(f"[skip] sitemap.non_html url={url} ct={ct}")
+                            continue
+                        pages.append(SimpleNamespace(
+                            url=url,
+                            html=(resp.text or ""),
+                            status_code=resp.status_code
+                        ))
+                    except requests.HTTPError as e:
+                        status = getattr(e.response, "status_code", None)
+                        # Fallback: si la URL es http:// y terminamos en 404 tras redirección, probamos sin redirigir (HTTP plano)
+                        if status == 404 and url.startswith("http://"):
+                            try:
+                                r2 = requests.get(
+                                    url,
+                                    timeout=cfg.timeout_seconds,
+                                    headers={"User-Agent": cfg.user_agent},
+                                    allow_redirects=False
+                                )
+                                if r2.ok:
+                                    ct2 = (r2.headers.get("Content-Type", "") or "").lower()
+                                    if not any(ct2.startswith(prefix) for prefix in NON_HTML_PREFIXES):
+                                        pages.append(SimpleNamespace(
+                                            url=url,
+                                            html=(r2.text or ""),
+                                            status_code=r2.status_code
+                                        ))
+                                        counters["http_fallback_ok"] += 1
+                                        log(f"[info] sitemap.http_fallback.ok url={url} ct={ct2}")
+                                        continue
+                            except Exception as e2:
+                                log(f"[warn] sitemap.http_fallback.error url={url} err={e2}")
+                        counters["fetch_404" if status == 404 else "fetch_http_error"] += 1
+                        log(f"[warn] sitemap.fetch.error url={url} err={e}")
+                        continue
+                    except Exception as e:
+                        counters["fetch_error"] += 1
+                        log(f"[warn] sitemap.fetch.error url={url} err={e}")
                         continue
             else:
                 raise ValueError(f"Estrategia desconocida: {args.strategy}")
@@ -137,11 +237,16 @@ for url in urls[:cfg.max_pages]:
 
             with get_session() as s:
                 for i, p in enumerate(pages, 1):
-                    url = p.url
-                    html = p.html or ""
+                    url = getattr(p, "url", None)
+                    html = getattr(p, "html", "") or ""
+
+                    if not url:
+                        log(f"[skip] Página sin URL en índice {i}")
+                        continue
 
                     if not html.strip():
                         log(f"[skip] Página vacía: {url}")
+                        counters["empty_html"] += 1
                         continue
 
                     try:
@@ -149,6 +254,7 @@ for url in urls[:cfg.max_pages]:
                         raw_path.write_text(html, encoding="utf-8")
                     except Exception as e:
                         log(f"[error] No se pudo guardar raw: {e}")
+                        counters["raw_write_error"] += 1
                         continue
 
                     try:
@@ -167,6 +273,20 @@ for url in urls[:cfg.max_pages]:
                         s.flush()
 
                         text = html_to_text(html)
+
+                        # Fallback: si no hay texto, intenta seguir iframes del mismo dominio permitido
+                        if not text.strip():
+                            iframe_text = fetch_iframe_texts(html, url, cfg, counters, limit=args.iframe_max)
+                            if iframe_text:
+                                text = iframe_text
+                                counters["used_iframe_text"] += 1
+
+                        if not text.strip():
+                            log(f"[skip] Sin texto extraíble: {url}")
+                            counters["no_text"] += 1
+                            s.rollback()
+                            continue
+
                         chunks = [text[i:i+1000] for i in range(0, len(text), 800)]
 
                         for j, chunk in enumerate(chunks, 1):
@@ -177,7 +297,6 @@ for url in urls[:cfg.max_pages]:
                                 text=chunk,
                                 content=chunk,
                                 meta={"from": args.strategy, "run_id": args.run_id}
-
                             )
                             s.add(c)
 
@@ -189,7 +308,7 @@ for url in urls[:cfg.max_pages]:
 
                         fetch_info.append({
                             "url": url,
-                            "status": p.status_code,
+                            "status": getattr(p, "status_code", None),
                             "bytes": b,
                             "chunks": len(chunks),
                             "raw": str(raw_path)
@@ -197,6 +316,7 @@ for url in urls[:cfg.max_pages]:
 
                     except Exception as e:
                         log(f"[error] procesando {url}: {e}")
+                        counters["process_error"] += 1
                         s.rollback()
 
                 # Guardar summary
@@ -207,6 +327,7 @@ for url in urls[:cfg.max_pages]:
                         "chunks": total_chunks,
                         "bytes": total_bytes
                     },
+                    "counters": dict(counters),
                     "pages": fetch_info,
                     "finished_at": now_utc()
                 }
@@ -220,7 +341,8 @@ for url in urls[:cfg.max_pages]:
                     run.meta = run.meta or {}
                     run.meta.update({
                         "run_dir": str(run_dir),
-                        "summary_totals": summary["totals"]
+                        "summary_totals": summary["totals"],
+                        "summary_counters": summary["counters"]
                     })
                     s.add(run)
                     s.commit()
