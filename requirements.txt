@@ -11,4 +11,4 @@ selenium>=4.20
 sentence-transformers
 faiss-cpu
 numpy
-chromadb
+chromadb>=0.5

@@ -6,22 +6,22 @@ Indexación de Chunks a Vector Store (FAISS/Chroma)
 - Selecciona Chunk desde SQLite (vía SQLAlchemy) usando filtros (--run-id/--source-id/--limit).
 - Genera embeddings (Sentence-Transformers) por lotes.
 - Persiste en:
-    * FAISS: models/faiss/<collection>/{index.faiss, ids.npy, index_meta.json, index_manifest.json}
-    * Chroma: (pendiente) models/chroma/<collection>/...
+    * FAISS:  models/faiss/<collection>/{index.faiss, ids.npy, index_meta.json, index_manifest.json}
+    * Chroma: models/chroma/<collection>/{chroma.sqlite3, ... , index_meta.json, index_manifest.json}
 - NO toca el esquema de BD. El control de re-indexación se hace con manifest JSON en disco.
 
 Decisiones técnicas:
-- FAISS: IndexFlatIP + normalización L2 de embeddings para aproximar coseno.
+- FAISS: IndexFlatIP + normalización L2 de embeddings para aproximar coseno (IP).
+- Chroma: colección HNSW con métrica 'cosine'; enviamos los embeddings desde ST.
 - collection_name por defecto:
-    - si --run-id:  "run_<RUN>"
+    - si --run-id:     "run_<RUN>"
     - elif --source-id: "source_<SRC>"
-    - else: "chunks_default"
-- Filtrado por run_id se hace en Python leyendo Document.meta['run_id'] por compatibilidad SQLite,
-  evitando depender de JSON1; si el dataset crece, podremos optimizar con SQL nativo JSON1.
+    - else:             "chunks_default"
+- Filtrado por run_id se hace en Python leyendo Document.meta['run_id'] por compatibilidad SQLite.
 
 Requisitos:
     pip install sentence-transformers faiss-cpu numpy
-Opcional futuro:
+Opcional:
     pip install chromadb
 """
 
@@ -56,6 +56,14 @@ except Exception as e:
     print(json.dumps({"level": "ERROR", "event": "import.st.fail", "hint": "pip install sentence-transformers", "error": str(e)}))
     sys.exit(2)
 
+# Chroma opcional
+try:
+    import chromadb  # type: ignore
+    from chromadb import PersistentClient  # type: ignore
+    _CHROMA_AVAILABLE = True
+except Exception:
+    _CHROMA_AVAILABLE = False
+
 # --- SQLAlchemy y modelos de la app (no requiere app context)
 try:
     from sqlalchemy import create_engine, select
@@ -89,6 +97,11 @@ def log_err(event: str, **kw) -> None:
 def ensure_dir(p: Path) -> None:
     p.mkdir(parents=True, exist_ok=True)
 
+def rm_tree(p: Path) -> None:
+    import shutil
+    if p.exists():
+        shutil.rmtree(p)
+
 def load_json(path: Path, default):
     if path.exists():
         try:
@@ -105,6 +118,14 @@ def sha256_text(text: str) -> str:
     # Normalización ligera previa al hash (espacios)
     norm = " ".join((text or "").split())
     return hashlib.sha256(norm.encode("utf-8")).hexdigest()
+
+def time_iso_now() -> str:
+    # Hora local con offset (sin dependencias extra)
+    from datetime import datetime, timezone, timedelta
+    import time as _time
+    offset_sec = -_time.timezone + (3600 if _time.daylight and _time.localtime().tm_isdst > 0 else 0)
+    tz = timezone(offset=timedelta(seconds=offset_sec))
+    return datetime.now(tz).isoformat(timespec="seconds")
 
 # ---------------------------------------------------------------------
 # Selección de chunks
@@ -248,6 +269,64 @@ class FaissStore:
         return D, I
 
 # ---------------------------------------------------------------------
+# Chroma store (mismo “montaje” que FAISS a nivel de meta/manifest/logs)
+# ---------------------------------------------------------------------
+
+class ChromaStore:
+    """
+    Persistencia con Chroma, 1 carpeta por colección:
+      - models/chroma/<collection>/
+          - chroma.sqlite3, index/*, etc. (controlado por Chroma)
+          - index_meta.json
+          - index_manifest.json
+    """
+    def __init__(self, base_dir: Path, collection_name: str, rebuild: bool = False, metric: str = "cosine"):
+        if not _CHROMA_AVAILABLE:
+            raise RuntimeError("Chroma no disponible. Instala chromadb>=0.5")
+
+        self.base_dir = base_dir
+        self.collection_name = collection_name
+        self.meta_path = base_dir / "index_meta.json"
+        self.manifest_path = base_dir / "index_manifest.json"
+
+        if rebuild:
+            rm_tree(base_dir)
+        ensure_dir(base_dir)
+
+        # Un cliente por carpeta (1 DB por colección) para trazabilidad 1:1 con FAISS
+        self.client = PersistentClient(path=str(base_dir))
+        self.collection = self.client.get_or_create_collection(
+            name=collection_name,
+            metadata={"hnsw:space": metric, "vectorizer": "none"},
+            embedding_function=None,  # Enviamos embeddings ya calculados
+        )
+
+    def add(self, vectors: np.ndarray, chunk_ids: List[int], documents: List[str], batch_size: int = 4096) -> None:
+        ids_str = [str(i) for i in chunk_ids]
+        try:
+            self.collection.delete(ids=ids_str)
+        except Exception:
+            pass
+
+        if isinstance(vectors, np.ndarray):
+            vectors = vectors.astype("float32")
+
+        n = len(ids_str)
+        for i in range(0, n, batch_size):
+            sl = slice(i, min(i + batch_size, n))
+            metas = [{"chunk_id": sid} for sid in ids_str[sl]]
+            self.collection.add(
+                ids=ids_str[sl],
+                embeddings=vectors[sl].tolist(),
+                documents=[d for d in documents[sl]],
+                metadatas=metas,
+            )
+
+
+    def count(self) -> int:
+        return int(self.collection.count())
+
+# ---------------------------------------------------------------------
 # Manifest y Meta
 # ---------------------------------------------------------------------
 
@@ -263,11 +342,13 @@ def update_manifest(manifest: Dict, pairs: List[Tuple[int, str]]) -> Tuple[int, 
     hash_map: Dict[str, str] = manifest.get("hash_by_chunk_id", {})
 
     new = upd = skip = 0
+    have = set(str(x) for x in chunk_ids)
     for cid, h in pairs:
         s_cid = str(cid)
         if s_cid not in hash_map:
             hash_map[s_cid] = h
-            chunk_ids.append(cid)
+            if s_cid not in have:
+                chunk_ids.append(cid)
             new += 1
         else:
             if hash_map[s_cid] != h:
@@ -308,12 +389,11 @@ def smoke_test_faiss(
     top_chunk_ids = [int(store.ids[i]) for i in idxs if 0 <= i < len(store.ids)]
     # Recuperamos snippets para log (breves)
     if not top_chunk_ids:
-        log("smoke.empty")
+        log("smoke.results", k=k, query=query_text, results=[])
         return
 
     rows = session.query(Chunk, Document).join(Document, Document.id == Chunk.document_id)\
         .filter(Chunk.id.in_(top_chunk_ids)).all()
-    # Indexado por cid para ordenar
     by_id = {ch.id: (ch, doc) for ch, doc in rows}
     results = []
     for rank, (cid, score) in enumerate(zip(top_chunk_ids, scores), start=1):
@@ -325,9 +405,63 @@ def smoke_test_faiss(
             "rank": rank,
             "chunk_id": cid,
             "score": float(score),
-            "title": doc.title if doc else None,
-            "document_id": ch.document_id,
-            "source_id": ch.source_id,
+            "title": getattr(doc, "title", None),
+            "document_id": getattr(ch, "document_id", None),
+            "source_id": getattr(ch, "source_id", None),
+            "snippet": snippet
+        })
+    log("smoke.results", k=k, query=query_text, results=results)
+
+def smoke_test_chroma(
+    store: ChromaStore,
+    embedder: Embedder,
+    session: Session,
+    k: int,
+    query_text: str
+) -> None:
+    # Embedding de la query (sin normalizar; métrica cosine en Chroma)
+    qv = embedder._model.encode([query_text], convert_to_numpy=True, normalize_embeddings=False)[0]
+    res = store.collection.query(
+        query_embeddings=[qv.astype("float32").tolist()],
+        n_results=max(1, int(k)),
+        include=["distances", "metadatas"],  # NO 'ids' (Chroma 0.5 no lo permite en include)
+    )
+    # En Chroma 0.5, 'ids' viene SIEMPRE, pero no se puede pedir en include.
+    ids = (res.get("ids") or [[]])[0]
+    dists = (res.get("distances") or [[]])[0]
+    # Fallback: si por cualquier motivo no hay ids, intenta con metadatas.chunk_id
+    if not ids:
+        metas = (res.get("metadatas") or [[]])[0]
+        ids = [m.get("chunk_id") for m in metas if isinstance(m, dict) and m.get("chunk_id")]
+
+    # Mapeo de ids -> int
+    try:
+        top_chunk_ids = [int(x) for x in ids]
+    except Exception:
+        # Si por cualquier motivo no son enteros, devolvemos vacíos
+        log("smoke.results", k=k, query=query_text, results=[])
+        return
+
+    # Recuperamos desde BD para mantener mismo formato que FAISS
+    rows = session.query(Chunk, Document).join(Document, Document.id == Chunk.document_id)\
+        .filter(Chunk.id.in_(top_chunk_ids)).all()
+    by_id = {ch.id: (ch, doc) for ch, doc in rows}
+
+    results = []
+    for rank, (cid, dist) in enumerate(zip(top_chunk_ids, dists), start=1):
+        ch, doc = by_id.get(cid, (None, None))
+        if ch is None:
+            continue
+        snippet = " ".join((ch.text or "").split())[:160]
+        # Convertimos distancia cosine a "score" de similitud ~ (1 - distancia)
+        score = 1.0 - float(dist) if dist is not None else None
+        results.append({
+            "rank": rank,
+            "chunk_id": cid,
+            "score": score,
+            "title": getattr(doc, "title", None),
+            "document_id": getattr(ch, "document_id", None),
+            "source_id": getattr(ch, "source_id", None),
             "snippet": snippet
         })
     log("smoke.results", k=k, query=query_text, results=results)
@@ -365,6 +499,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.store == "faiss" and not _FAISS_AVAILABLE:
         log_err("faiss.unavailable", hint="pip install faiss-cpu")
         return 2
+    if args.store == "chroma" and not _CHROMA_AVAILABLE:
+        log_err("chroma.unavailable", hint="pip install chromadb>=0.5")
+        return 2
     if args.batch_size <= 0:
         log_err("args.invalid", field="batch-size", value=args.batch_size)
         return 2
@@ -392,11 +529,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         n_input = len(candidates)
         log("select.done", n_input_chunks=n_input)
 
-        # Si no hay trabajo, salir limpio
+        # Si no hay trabajo, salir limpio (crear meta/manifest vacíos para UI)
         if n_input == 0:
             meta_path = out_dir / "index_meta.json"
             manifest_path = out_dir / "index_manifest.json"
-            # Garantiza que existen archivos mínimos
             if not meta_path.exists():
                 save_json(meta_path, {
                     "collection": collection, "store": args.store, "model": args.model,
@@ -411,33 +547,28 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         # --- Manifest previo
         manifest = load_manifest(out_dir / "index_manifest.json")
-        # Hash previo por cid
         prev_hash = manifest.get("hash_by_chunk_id", {})
 
         # --- Preparar textos y hashes
         chunk_ids: List[int] = []
         texts: List[str] = []
         new_pairs: List[Tuple[int, str]] = []   # para update_manifest
-        to_embed_mask: List[bool] = []
 
         for cid, _src, text, _meta in candidates:
             h = sha256_text(text)
             prev = prev_hash.get(str(cid))
             if args.rebuild or prev is None or prev != h:
-                # Nuevo o actualizado -> re-embeder
                 chunk_ids.append(cid)
                 texts.append(text)
                 new_pairs.append((cid, h))
-                to_embed_mask.append(True)
             else:
-                # Ya indexado y sin cambios
-                to_embed_mask.append(False)
+                pass  # no reindex
 
         n_todo = len(texts)
         n_skip = n_input - n_todo
         log("plan", n_reindex=n_todo, n_skipped=n_skip, rebuild=args.rebuild)
 
-        # --- Sin nada que re-embeder -> aún podemos hacer smoke-test si se pide
+        # --- Embeddings
         embedder = Embedder(args.model, batch_size=args.batch_size)
         dim = embedder.dim
 
@@ -446,8 +577,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             store.load_or_init(dim=dim, rebuild=args.rebuild)
 
             if n_todo > 0:
-                # Embeddings
-                vecs = embedder.encode_iter(texts)  # (N, D) float32
+                vecs = embedder.encode_iter(texts)  # (N, D)
                 vecs = l2_normalize(vecs)
                 store.add(vecs, np.array(chunk_ids, dtype="int64"))
                 store.save()
@@ -485,24 +615,48 @@ def main(argv: Optional[List[str]] = None) -> int:
                 smoke_test_faiss(store, embedder, session, args.k, args.smoke_query)
 
         elif args.store == "chroma":
-            # Entrega intencionalmente pospuesta para el siguiente incremento.
-            raise NotImplementedError("Store 'chroma' pendiente en siguiente entrega.")
+            # Inicializa store Chroma (1 carpeta == 1 DB/colección para trazabilidad)
+            store = ChromaStore(out_dir, collection_name=collection, rebuild=bool(args.rebuild), metric="cosine")
+
+            if n_todo > 0:
+                vecs = embedder.encode_iter(texts)  # (N, D), sin normalizar (cosine lo maneja)
+                store.add(vecs, chunk_ids=chunk_ids, documents=texts)
+
+                # Manifest
+                n_new, n_upd, n_sk = update_manifest(manifest, new_pairs)
+                save_json(store.manifest_path, manifest)
+
+            # Meta: contrato idéntico al de FAISS (para tu template)
+            meta_path = out_dir / "index_meta.json"
+            meta = load_json(meta_path, {})
+            n_chunks_total = store.count()
+            meta.update({
+                "collection": collection,
+                "store": "chroma",
+                "model": args.model,
+                "dim": dim,
+                "n_chunks": n_chunks_total,
+                "built_at": time_iso_now(),
+                "duration_sec": round(time.time() - t0, 3),
+                "run_ids": [args.run_id] if args.run_id is not None else [],
+                "source_ids": [args.source_id] if args.source_id is not None else [],
+                "checksum": compute_checksum_from_manifest(manifest),
+                "notes": f"batched={args.batch_size}, metric=cosine"
+            })
+            save_json(meta_path, meta)
+
+            log("index.persist",
+                n_input=n_input,
+                n_reindex=n_todo,
+                n_skipped=n_skip,
+                out_dir=str(out_dir))
+
+            # Smoke test opcional (mismo formato de salida)
+            if args.smoke_query:
+                smoke_test_chroma(store, embedder, session, args.k, args.smoke_query)
 
     log("index.end", duration_ms=int((time.time() - t0) * 1000), n_chunks=n_input, dim=dim, out_dir=str(out_dir))
     return 0
-
-def time_iso_now() -> str:
-    # Hora local con offset (no dependemos de zona del SO)
-    from datetime import datetime, timezone
-    # Europe/Madrid es +02:00 en verano; +01:00 en invierno. Usamos offset del sistema si está configurado.
-    # Para no meter dependencias, anotamos naive localtime y dejamos Z si no hay tzinfo.
-    try:
-        import time as _time
-        offset_sec = -_time.timezone + (3600 if _time.daylight and _time.localtime().tm_isdst > 0 else 0)
-        tz = timezone(offset=__import__("datetime").timedelta(seconds=offset_sec))
-        return datetime.now(tz).isoformat(timespec="seconds")
-    except Exception:
-        return datetime.now().isoformat(timespec="seconds")
 
 if __name__ == "__main__":
     try:
