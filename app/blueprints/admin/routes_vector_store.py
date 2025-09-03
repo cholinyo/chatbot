@@ -90,19 +90,41 @@ def _load_runs_and_sources(limit_runs: int = 80):
 def _list_rebuild_history(store: str, max_items: int = 30):
     """
     Lee models/<store>/rebuild_*.json y devuelve entradas ordenadas desc por timestamp.
-    Cada entrada: { fname, ts, mode, model, batch_size, limit, k, dry_run, total_jobs, ok }
+    Cada entrada: {
+      fname, ts, store, mode, model, batch_size, limit, k, dry_run,
+      total_jobs, duration_sec, ok
+    }
     """
+    from datetime import datetime
     base = OUT_BASE / store
     items = []
     if not base.exists():
         return items
+
     for path in sorted(glob(str(base / "rebuild_*.json")), reverse=True)[:max_items]:
         try:
             data = json.loads(Path(path).read_text(encoding="utf-8"))
-            ok = all((r.get("return_code", 0) == 0) for r in data.get("results", []) if not data.get("dry_run", False))
+            # OK si todos los jobs retornan 0 (salvo DRY)
+            ok = all(
+                (r.get("return_code", 0) == 0)
+                for r in data.get("results", [])
+                if not data.get("dry_run", False)
+            )
+            started = data.get("started_at")
+            finished = data.get("finished_at")
+            duration_sec = None
+            try:
+                if started and finished:
+                    t0 = datetime.fromisoformat(str(started))
+                    t1 = datetime.fromisoformat(str(finished))
+                    duration_sec = round((t1 - t0).total_seconds(), 3)
+            except Exception:
+                duration_sec = None
+
             items.append({
                 "fname": Path(path).name,
-                "ts": data.get("finished_at") or data.get("started_at"),
+                "ts": finished or started,
+                "store": data.get("store") or store,
                 "mode": data.get("mode"),
                 "model": data.get("model"),
                 "batch_size": data.get("batch_size"),
@@ -110,14 +132,29 @@ def _list_rebuild_history(store: str, max_items: int = 30):
                 "k": data.get("k"),
                 "dry_run": data.get("dry_run", False),
                 "total_jobs": data.get("total_jobs", 0),
+                "duration_sec": duration_sec,
                 "ok": ok,
             })
         except Exception:
             # Si el JSON está corrupto, aún así listamos el nombre
-            items.append({"fname": Path(path).name, "ts": "?", "mode": "?", "model": "?", "total_jobs": "?", "ok": False, "dry_run": False})
+            items.append({
+                "fname": Path(path).name,
+                "ts": "?",
+                "store": store,
+                "mode": "?",
+                "model": "?",
+                "batch_size": "?",
+                "limit": "?",
+                "k": "?",
+                "dry_run": False,
+                "total_jobs": "?",
+                "duration_sec": None,
+                "ok": False
+            })
     return items
 
 
+@bp.route("/", methods=["GET"])
 @bp.route("/", methods=["GET"])
 def index():
     store = request.args.get("store", "faiss")
@@ -125,16 +162,19 @@ def index():
     meta_path = OUT_BASE / store / collection / "index_meta.json"
     meta = json.loads(meta_path.read_text("utf-8")) if meta_path.exists() else None
 
+    # Tamaño índice: recorrer recursivamente (Chroma guarda en subdirectorios)
     size_bytes = 0
     idx_dir = OUT_BASE / store / collection
     if idx_dir.exists():
-        for p in idx_dir.glob("*"):
+        for p in idx_dir.rglob("*"):
             if p.is_file():
-                size_bytes += p.stat().st_size
+                try:
+                    size_bytes += p.stat().st_size
+                except Exception:
+                    pass
 
     runs, sources = _load_runs_and_sources(limit_runs=80)
 
-    # === NUEVO HISTÓRICO: cargar lista para la tabla ===
     rebuild_history = _list_rebuild_history(store, max_items=30)
 
     return render_template(
@@ -145,8 +185,9 @@ def index():
         size_bytes=size_bytes,
         runs=runs,
         sources=sources,
-        rebuild_history=rebuild_history,  # <-- nuevo
+        rebuild_history=rebuild_history,
     )
+
 
 
 @bp.route("/build", methods=["POST"])

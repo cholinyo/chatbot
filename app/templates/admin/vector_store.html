@@ -3,6 +3,14 @@
 
 <h1 class="mb-3">Vector Store</h1>
 
+<!-- Hint de contexto: todo lo que ves abajo depende de ?store=... y ?collection=... -->
+<div class="alert alert-info py-2">
+  <strong>Contexto de la página:</strong> se determina por los parámetros de la URL
+  <code>?store={{ store }}&collection={{ collection }}</code>.
+  Al cambiar el <em>Store</em> o la <em>Collection</em> en los formularios, se actualiza la URL y, por tanto,
+  las <em>Métricas del índice</em> y el <em>Histórico de reconstrucciones</em>.
+</div>
+
 <form action="{{ url_for('vector_store.build') }}" method="post" class="card p-3 mb-4">
   <h3 class="mb-3">Construir índice</h3>
 
@@ -66,7 +74,7 @@
   <div class="row g-3 mt-1">
     <div class="col-md-3">
       <label for="collection_input" class="form-label">Collection</label>
-      <input id="collection_input" name="collection" class="form-control" placeholder="auto" aria-label="Nombre de la colección">
+      <input id="collection_input" name="collection" class="form-control" value="{{ collection }}" placeholder="auto" aria-label="Nombre de la colección">
     </div>
     <div class="col-md-2">
       <label for="limit_input" class="form-label">Limit</label>
@@ -89,7 +97,11 @@
   <div class="row g-3">
     <div class="col-md-2">
       <label for="store_eval" class="form-label">Store</label>
-      <input id="store_eval" name="store" class="form-control" value="{{ store }}" aria-label="Store para evaluación">
+      <!-- CAMBIO: antes era <input>; ahora <select> para evitar errores y sincronizar URL -->
+      <select id="store_eval" name="store" class="form-control" aria-label="Store para evaluación">
+        <option value="faiss" {% if store=='faiss' %}selected{% endif %}>faiss</option>
+        <option value="chroma" {% if store=='chroma' %}selected{% endif %}>chroma</option>
+      </select>
     </div>
     <div class="col-md-3">
       <label for="collection_eval" class="form-label">Collection</label>
@@ -130,7 +142,10 @@
         <option value="collections">Colecciones existentes</option>
         <option value="runs">Por runs (DB)</option>
       </select>
-      <small class="text-muted">Colecciones: recorre <code>models/{{ store }}</code>. Runs: usa <code>IngestionRun</code>.</small>
+      <small class="text-muted">
+        Colecciones: recorre <code>models/<span id="models_store_hint">{{ store }}</span></code>.
+        Runs: usa <code>IngestionRun</code>.
+      </small>
     </div>
 
     <div class="col-md-4">
@@ -193,6 +208,7 @@
     <p class="mb-0">No hay índice para esta colección todavía.</p>
   {% endif %}
 </div>
+
 <div class="card p-3 mt-4">
   <h3 class="mb-3">Histórico de reconstrucciones</h3>
   {% if rebuild_history and rebuild_history|length > 0 %}
@@ -202,6 +218,8 @@
           <tr>
             <th>Fecha</th>
             <th>Modo</th>
+            <th>Store</th>
+            <th>Duración (s)</th>
             <th>Modelo</th>
             <th>Batch</th>
             <th>Limit</th>
@@ -217,6 +235,8 @@
           <tr>
             <td>{{ h.ts or "?" }}</td>
             <td>{{ h.mode }}</td>
+            <td>{{ h.store or store }}</td>
+            <td>{{ h.duration_sec if h.duration_sec is not none else "—" }}</td>
             <td><code>{{ h.model }}</code></td>
             <td>{{ h.batch_size }}</td>
             <td>{{ h.limit if h.limit is not none else "—" }}</td>
@@ -247,59 +267,105 @@
   {% endif %}
 </div>
 
-<!-- JS mínimo: autorrelleno de run/source y persistencia de store/collection en la URL -->
+<!-- JS mínimo: autorrelleno y persistencia de store/collection en URL -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const runSelect   = document.getElementById('run_select');
-  const runInput    = document.getElementById('run_id_input');
-  const srcSelect   = document.getElementById('source_select');
-  const srcInput    = document.getElementById('source_id_input');
-  const storeBuild  = document.getElementById('store_select_build');
-  const collectionI = document.getElementById('collection_input');
-
-  // 1) Al seleccionar un run: rellena run_id y (si existe) source_id
-  if (runSelect && runInput) {
-    runSelect.addEventListener('change', function () {
-      const opt = runSelect.options[runSelect.selectedIndex];
-      runInput.value = opt.value || '';
-      const src = opt.getAttribute('data-source') || '';
-      if (src) {
-        srcInput.value = src;
-        if (srcSelect) {
-          for (const o of srcSelect.options) {
-            if (o.value === src) { srcSelect.value = src; break; }
+  document.addEventListener('DOMContentLoaded', function () {
+    const runSelect      = document.getElementById('run_select');
+    const runInput       = document.getElementById('run_id_input');
+    const srcSelect      = document.getElementById('source_select');
+    const srcInput       = document.getElementById('source_id_input');
+    const storeBuild     = document.getElementById('store_select_build');
+    const storeRebuild   = document.getElementById('store_rebuild');
+    const storeEval      = document.getElementById('store_eval');
+    const collectionI    = document.getElementById('collection_input');
+    const collectionEval = document.getElementById('collection_eval');
+  
+    const modelsStoreHint = document.getElementById('models_store_hint');
+  
+    function updateModelsHint(val) {
+      if (modelsStoreHint) modelsStoreHint.textContent = val || '';
+    }
+  
+    function setStoreEverywhere(val) {
+      if (storeBuild)  storeBuild.value  = val;
+      if (storeRebuild)storeRebuild.value= val;
+      if (storeEval)   storeEval.value   = val;
+      updateModelsHint(val);
+    }
+  
+    // Copia de valor de store desde la URL inicial (por si hay desajustes al renderizar)
+    setStoreEverywhere("{{ store }}");
+  
+    // 1) Al seleccionar un run: rellena run_id y (si existe) source_id
+    if (runSelect && runInput) {
+      runSelect.addEventListener('change', function () {
+        const opt = runSelect.options[runSelect.selectedIndex];
+        runInput.value = opt.value || '';
+        const src = opt.getAttribute('data-source') || '';
+        if (src) {
+          srcInput.value = src;
+          if (srcSelect) {
+            for (const o of srcSelect.options) {
+              if (o.value === src) { srcSelect.value = src; break; }
+            }
           }
         }
-      }
-    });
-  }
-
-  // 2) Al seleccionar un source: rellena source_id
-  if (srcSelect && srcInput) {
-    srcSelect.addEventListener('change', function () {
-      const opt = srcSelect.options[srcSelect.selectedIndex];
-      srcInput.value = opt.value || '';
-    });
-  }
-
-  // 3) Persistir store y collection en la URL (para no perder contexto al recargar)
-  function setQueryParam(key, value) {
-    const url = new URL(window.location.href);
-    if (value) { url.searchParams.set(key, value); } else { url.searchParams.delete(key); }
-    history.replaceState(null, '', url.toString());
-  }
-
-  if (storeBuild) {
-    storeBuild.addEventListener('change', function () {
-      setQueryParam('store', storeBuild.value);
-    });
-  }
-  if (collectionI) {
-    collectionI.addEventListener('blur', function () {
-      setQueryParam('collection', collectionI.value);
-    });
-  }
-});
-</script>
+      });
+    }
+  
+    // 2) Al seleccionar un source: rellena source_id
+    if (srcSelect && srcInput) {
+      srcSelect.addEventListener('change', function () {
+        const opt = srcSelect.options[srcSelect.selectedIndex];
+        srcInput.value = opt.value || '';
+      });
+    }
+  
+    // Helpers URL + recarga
+    function setQueryParamAndReload(key, value) {
+      const url = new URL(window.location.href);
+      if (value) { url.searchParams.set(key, value); } else { url.searchParams.delete(key); }
+      // Cambiamos URL y recargamos para refrescar métricas e histórico desde el servidor
+      window.location.assign(url.toString());
+    }
+    function setQueryParamNoReload(key, value) {
+      const url = new URL(window.location.href);
+      if (value) { url.searchParams.set(key, value); } else { url.searchParams.delete(key); }
+      history.replaceState(null, '', url.toString());
+    }
+  
+    // 3) STORE: al cambiar en cualquier área => sincroniza selects, actualiza hint, recarga
+    function onStoreChange(newStore) {
+      setStoreEverywhere(newStore);
+      setQueryParamAndReload('store', newStore);
+    }
+    if (storeBuild) {
+      storeBuild.addEventListener('change', function () { onStoreChange(storeBuild.value); });
+    }
+    if (storeRebuild) {
+      storeRebuild.addEventListener('change', function () { onStoreChange(storeRebuild.value); });
+    }
+    if (storeEval) {
+      storeEval.addEventListener('change', function () { onStoreChange(storeEval.value); });
+    }
+  
+    // 4) COLLECTION: al terminar de editar => persistimos y recargamos (para refrescar métricas)
+    function onCollectionDoneEditing(val) {
+      setQueryParamAndReload('collection', val);
+    }
+    if (collectionI) {
+      collectionI.addEventListener('blur', function () {
+        if (collectionEval) collectionEval.value = collectionI.value || '';
+        onCollectionDoneEditing(collectionI.value || '');
+      });
+    }
+    if (collectionEval) {
+      collectionEval.addEventListener('blur', function () {
+        if (collectionI) collectionI.value = collectionEval.value || '';
+        onCollectionDoneEditing(collectionEval.value || '');
+      });
+    }
+  });
+  </script>  
 
 {% endblock %}
