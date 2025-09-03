@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="mb-3">Vector Store</h1>
+
+<form action="{{ url_for('vector_store.build') }}" method="post" class="card p-3 mb-4">
+  <h3 class="mb-3">Construir índice</h3>
+
+  <div class="row g-3">
+    <div class="col-md-2">
+      <label for="store_select_build" class="form-label">Store</label>
+      <select id="store_select_build" name="store" class="form-control" aria-label="Store para indexación">
+        <option value="faiss" {% if store=='faiss' %}selected{% endif %}>faiss</option>
+        <option value="chroma" {% if store=='chroma' %}selected{% endif %}>chroma</option>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label for="model_input" class="form-label">Modelo</label>
+      <input id="model_input" name="model" class="form-control"
+             value="{{ meta.model if meta else 'sentence-transformers/all-MiniLM-L6-v2' }}"
+             placeholder="sentence-transformers/all-MiniLM-L6-v2" aria-label="Modelo de embeddings">
+    </div>
+
+    <div class="col-md-2">
+      <label for="batch_input" class="form-label">Batch size</label>
+      <input id="batch_input" name="batch_size" type="number" class="form-control" value="256" min="1" aria-label="Tamaño de lote">
+    </div>
+
+    <div class="col-md-2">
+      <label for="run_id_input" class="form-label">run_id</label>
+      <input id="run_id_input" name="run_id" type="number" class="form-control" placeholder="elige o escribe" aria-label="run_id">
+    </div>
+
+    <div class="col-md-2">
+      <label for="source_id_input" class="form-label">source_id</label>
+      <input id="source_id_input" name="source_id" type="number" class="form-control" placeholder="elige o escribe" aria-label="source_id">
+    </div>
+  </div>
+
+  <!-- Selectores con descripciones -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-6">
+      <label for="run_select" class="form-label">Seleccionar run disponible</label>
+      <select id="run_select" class="form-control" aria-label="Seleccionar run disponible">
+        <option value="">— Selecciona un run —</option>
+        {% for r in runs %}
+          <option value="{{ r.id }}" data-source="{{ r.source_id or '' }}">{{ r.label }}</option>
+        {% endfor %}
+      </select>
+      <small class="text-muted">Datos de <code>IngestionRun</code>: <em>id · src · status · páginas · fecha</em>.</small>
+    </div>
+
+    <div class="col-md-6">
+      <label for="source_select" class="form-label">Seleccionar source disponible</label>
+      <select id="source_select" class="form-control" aria-label="Seleccionar source disponible">
+        <option value="">— Selecciona un source —</option>
+        {% for s in sources %}
+          <option value="{{ s.id }}">{{ s.label }}</option>
+        {% endfor %}
+      </select>
+      <small class="text-muted">Datos de <code>Source</code>: <em>id · tipo · nombre</em>.</small>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-md-3">
+      <label for="collection_input" class="form-label">Collection</label>
+      <input id="collection_input" name="collection" class="form-control" placeholder="auto" aria-label="Nombre de la colección">
+    </div>
+    <div class="col-md-2">
+      <label for="limit_input" class="form-label">Limit</label>
+      <input id="limit_input" name="limit" type="number" class="form-control" aria-label="Límite de chunks">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="rebuild" id="rebuild">
+        <label class="form-check-label" for="rebuild">Rebuild</label>
+      </div>
+    </div>
+    <div class="col-md-5 d-flex align-items-end justify-content-end">
+      <button class="btn btn-primary">Construir índice</button>
+    </div>
+  </div>
+</form>
+
+<form action="{{ url_for('vector_store.eval_query') }}" method="post" class="card p-3 mb-4">
+  <h3 class="mb-3">Evaluación rápida</h3>
+  <div class="row g-3">
+    <div class="col-md-2">
+      <label for="store_eval" class="form-label">Store</label>
+      <input id="store_eval" name="store" class="form-control" value="{{ store }}" aria-label="Store para evaluación">
+    </div>
+    <div class="col-md-3">
+      <label for="collection_eval" class="form-label">Collection</label>
+      <input id="collection_eval" name="collection" class="form-control" value="{{ collection }}" aria-label="Colección a evaluar">
+    </div>
+    <div class="col-md-3">
+      <label for="model_eval" class="form-label">Modelo</label>
+      <input id="model_eval" name="model" class="form-control" value="{{ meta.model if meta else 'sentence-transformers/all-MiniLM-L6-v2' }}" aria-label="Modelo de embeddings">
+    </div>
+    <div class="col-md-1">
+      <label for="k_eval" class="form-label">k</label>
+      <input id="k_eval" name="k" type="number" class="form-control" value="5" min="1" aria-label="Top-k">
+    </div>
+    <div class="col-md-3">
+      <label for="smoke_eval" class="form-label">Smoke query</label>
+      <input id="smoke_eval" name="smoke_query" class="form-control" placeholder="ej: tasas basura voluminosos" aria-label="Consulta de prueba">
+    </div>
+  </div>
+  <div class="mt-3 text-end">
+    <button class="btn btn-secondary">Ejecutar evaluación</button>
+  </div>
+</form>
+
+<form action="{{ url_for('vector_store.rebuild_all') }}" method="post" class="card p-3 mb-4">
+  <h3 class="mb-3">Reconstrucción masiva</h3>
+  <div class="row g-3">
+    <div class="col-md-2">
+      <label for="store_rebuild" class="form-label">Store</label>
+      <select id="store_rebuild" name="store" class="form-control">
+        <option value="faiss" {% if store=='faiss' %}selected{% endif %}>faiss</option>
+        <option value="chroma" {% if store=='chroma' %}selected{% endif %}>chroma</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="mode_rebuild" class="form-label">Modo</label>
+      <select id="mode_rebuild" name="mode" class="form-control">
+        <option value="collections">Colecciones existentes</option>
+        <option value="runs">Por runs (DB)</option>
+      </select>
+      <small class="text-muted">Colecciones: recorre <code>models/{{ store }}</code>. Runs: usa <code>IngestionRun</code>.</small>
+    </div>
+
+    <div class="col-md-4">
+      <label for="model_rebuild" class="form-label">Modelo</label>
+      <input id="model_rebuild" name="model" class="form-control"
+             value="{{ meta.model if meta else 'sentence-transformers/all-MiniLM-L6-v2' }}">
+    </div>
+
+    <div class="col-md-2">
+      <label for="batch_rebuild" class="form-label">Batch size</label>
+      <input id="batch_rebuild" name="batch_size" type="number" class="form-control" value="256" min="1">
+    </div>
+
+    <div class="col-md-1">
+      <label for="k_rebuild" class="form-label">k</label>
+      <input id="k_rebuild" name="k" type="number" class="form-control" value="5" min="1">
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-md-3">
+      <label for="collection_prefix" class="form-label">Prefijo colección (modo runs)</label>
+      <input id="collection_prefix" name="collection_prefix" class="form-control" value="run_">
+      <small class="text-muted">Ej.: <code>run_20250902</code></small>
+    </div>
+    <div class="col-md-2">
+      <label for="limit_rebuild" class="form-label">Limit (opcional)</label>
+      <input id="limit_rebuild" name="limit" type="number" class="form-control">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="dry_run" id="dry_run">
+        <label class="form-check-label" for="dry_run">Dry-run</label>
+      </div>
+    </div>
+    <div class="col-md-5 d-flex align-items-end justify-content-end">
+      <button class="btn btn-danger">
+        <i class="fa-solid fa-rotate me-1"></i> Reconstruir todo
+      </button>
+    </div>
+  </div>
+</form>
+
+
+<div class="card p-3">
+  <h3 class="mb-3">Métricas del índice</h3>
+  {% if meta %}
+    <table class="table table-sm">
+      <tr><th>collection</th><td>{{ meta.collection }}</td></tr>
+      <tr><th>store</th><td>{{ meta.store }}</td></tr>
+      <tr><th>model</th><td>{{ meta.model }}</td></tr>
+      <tr><th>dim</th><td>{{ meta.dim }}</td></tr>
+      <tr><th>n_chunks</th><td>{{ meta.n_chunks }}</td></tr>
+      <tr><th>duration_sec</th><td>{{ meta.duration_sec }}</td></tr>
+      <tr><th>built_at</th><td>{{ meta.built_at }}</td></tr>
+      <tr><th>checksum</th><td><code>{{ meta.checksum }}</code></td></tr>
+      <tr><th>tamaño índice</th><td>{{ (size_bytes/1024/1024)|round(2) }} MB</td></tr>
+    </table>
+  {% else %}
+    <p class="mb-0">No hay índice para esta colección todavía.</p>
+  {% endif %}
+</div>
+<div class="card p-3 mt-4">
+  <h3 class="mb-3">Histórico de reconstrucciones</h3>
+  {% if rebuild_history and rebuild_history|length > 0 %}
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Modo</th>
+            <th>Modelo</th>
+            <th>Batch</th>
+            <th>Limit</th>
+            <th>k</th>
+            <th>Dry-run</th>
+            <th>Jobs</th>
+            <th>Estado</th>
+            <th>Artefacto</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for h in rebuild_history %}
+          <tr>
+            <td>{{ h.ts or "?" }}</td>
+            <td>{{ h.mode }}</td>
+            <td><code>{{ h.model }}</code></td>
+            <td>{{ h.batch_size }}</td>
+            <td>{{ h.limit if h.limit is not none else "—" }}</td>
+            <td>{{ h.k }}</td>
+            <td>
+              {% if h.dry_run %}<span class="badge bg-warning text-dark">DRY</span>{% else %}<span class="text-muted">no</span>{% endif %}
+            </td>
+            <td>{{ h.total_jobs }}</td>
+            <td>
+              {% if h.ok %}
+                <span class="badge bg-success">OK</span>
+              {% else %}
+                <span class="badge bg-danger">ERR</span>
+              {% endif %}
+            </td>
+            <td>
+              <a class="btn btn-link btn-sm" href="{{ url_for('vector_store.rebuild_file', store=store, fname=h.fname) }}">
+                {{ h.fname }}
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="mb-0">Sin reconstrucciones registradas en <code>models/{{ store }}/</code>.</p>
+  {% endif %}
+</div>
+
+<!-- JS mínimo: autorrelleno de run/source y persistencia de store/collection en la URL -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const runSelect   = document.getElementById('run_select');
+  const runInput    = document.getElementById('run_id_input');
+  const srcSelect   = document.getElementById('source_select');
+  const srcInput    = document.getElementById('source_id_input');
+  const storeBuild  = document.getElementById('store_select_build');
+  const collectionI = document.getElementById('collection_input');
+
+  // 1) Al seleccionar un run: rellena run_id y (si existe) source_id
+  if (runSelect && runInput) {
+    runSelect.addEventListener('change', function () {
+      const opt = runSelect.options[runSelect.selectedIndex];
+      runInput.value = opt.value || '';
+      const src = opt.getAttribute('data-source') || '';
+      if (src) {
+        srcInput.value = src;
+        if (srcSelect) {
+          for (const o of srcSelect.options) {
+            if (o.value === src) { srcSelect.value = src; break; }
+          }
+        }
+      }
+    });
+  }
+
+  // 2) Al seleccionar un source: rellena source_id
+  if (srcSelect && srcInput) {
+    srcSelect.addEventListener('change', function () {
+      const opt = srcSelect.options[srcSelect.selectedIndex];
+      srcInput.value = opt.value || '';
+    });
+  }
+
+  // 3) Persistir store y collection en la URL (para no perder contexto al recargar)
+  function setQueryParam(key, value) {
+    const url = new URL(window.location.href);
+    if (value) { url.searchParams.set(key, value); } else { url.searchParams.delete(key); }
+    history.replaceState(null, '', url.toString());
+  }
+
+  if (storeBuild) {
+    storeBuild.addEventListener('change', function () {
+      setQueryParam('store', storeBuild.value);
+    });
+  }
+  if (collectionI) {
+    collectionI.addEventListener('blur', function () {
+      setQueryParam('collection', collectionI.value);
+    });
+  }
+});
+</script>
+
+{% endblock %}

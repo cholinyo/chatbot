@@ -5,3 +5,10 @@ beautifulsoup4>=4.12
 lxml>=5
 python-dotenv>=1.0
 selenium>=4.20
+
+
+
+sentence-transformers
+faiss-cpu
+numpy
+chromadb

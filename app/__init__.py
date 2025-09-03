@@ -25,6 +25,8 @@ from app.blueprints.admin.routes_main import bp as bp_admin_home
 from app.blueprints.admin.routes_data_sources import bp_ds
 from app.blueprints.admin.routes_ingesta_docs import bp as bp_ingesta_docs
 from app.blueprints.admin.routes_ingesta_web import bp_ingesta_web
+# NUEVO: UI Vector Store (FAISS/Chroma)
+from app.blueprints.admin.routes_vector_store import bp as bp_vector_store
 
 
 def _load_settings(path: str = "config/settings.toml") -> Dict[str, Any]:
@@ -80,6 +82,9 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
     # 6) Engine/sesión + create_all
     if str(app.config["SQLALCHEMY_DATABASE_URI"]).startswith("sqlite"):
         Path("data/processed").mkdir(parents=True, exist_ok=True)
+        # (Opcional) preparar directorios de índices para evitar fallos de escritura
+        Path("models/faiss").mkdir(parents=True, exist_ok=True)
+        Path("models/chroma").mkdir(parents=True, exist_ok=True)
 
     engine = init_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     init_session(engine)
@@ -93,6 +98,8 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
     app.register_blueprint(bp_ds)
     app.register_blueprint(bp_ingesta_docs)
     app.register_blueprint(bp_ingesta_web)
+    # NUEVO: Vector Store (configuración, build y evaluación)
+    app.register_blueprint(bp_vector_store)
 
     try:
         from app.blueprints.ingestion.routes import bp as ingestion_bp  # type: ignore
