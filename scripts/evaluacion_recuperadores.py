@@ -230,7 +230,7 @@ class ChromaSearcher:
     def search(self, query: str, k: int) -> Tuple[List[str], List[float], float]:
         t0 = time.perf_counter()
         q_emb = self.model.encode([query], normalize_embeddings=True).tolist()
-        # En tu versión de Chroma, 'ids' puede no ser aceptado en include → usamos metadatas+distances
+        # En algunas versiones de Chroma, 'ids' no se admite en include → usamos metadatas+distances
         res = self.collection.query(
             query_embeddings=q_emb,
             n_results=k,
