@@ -1,0 +1,12 @@
+query,expected_chunk_id,expected_chunk_ids,expected_document_id,expected_document_title_contains,expected_text_contains
+empadronamiento,,20879|20880|20881|20882|20883,390,empadronamiento,empadronamiento
+licencia de obra menor,,20879|20880|20881|20882|20883,390,licencia de obra menor,licencia de obra menor
+bonificaciones IBI,,,,bonificaciones IBI,bonificaciones IBI
+registro electrónico sede,,,,registro electrónico sede,registro electrónico sede
+cita previa urbanismo,,,,cita previa urbanismo,cita previa urbanismo
+plazos de presentación,,43002|43003|43004|43005,118,plazos de presentación,plazos de presentación
+modelo de instancia general,,,,modelo de instancia general,modelo de instancia general
+tasas municipales,,33902|33903|33904|33905|33906,51,tasas municipales,tasas municipales
+subvenciones cultura,,,,subvenciones cultura,subvenciones cultura
+atención ciudadana cita presencial,,,,atención ciudadana cita presencial,atención ciudadana cita presencial
+presentación telemática,,30770|30771|30772|30773|30774,3,presentación telemática,presentación telemática
