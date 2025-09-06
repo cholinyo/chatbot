@@ -6,25 +6,14 @@ Genera data/validation/queries.csv con columnas:
   expected_document_id, expected_document_title_contains, expected_text_contains
 
 Fuentes:
-  (a) SQLite -> Document.title (distintos)
-  (b) SQLite -> frases cortas de Chunk.text (fallback)
-  (c) Artefactos de ingesta web: data/processed/runs/**/summary.json (campo "title") (opcional)
-
-Estrategia:
-  - Dedupe y normaliza espacios.
-  - Prefiere títulos completos (mejores queries).
-  - Si no alcanza --limit, extrae frases 2–4 tokens de Chunk.text sin stopwords básicas.
-
-Uso:
-  python -m scripts.make_queries_template --out data/validation/queries.csv --limit 50 --db data/processed/tracking.sqlite
-Opcionales:
-  --no-summaries          -> ignora summaries de web
-  --min-chunk-scan 2000   -> cuántos chunks leer como máximo para extraer frases
-  --prefill-doc-gold X    -> ('title'|'id'|'none') pre-rellena el oro a nivel documento
+  (a) SQLite -> Document(s).title
+  (b) SQLite -> frases cortas de Chunk(s).text/content (fallback)
+  (c) Artefactos de ingesta web: data/processed/runs/**/summary.json (title) (opcional)
 """
+
 import argparse, csv, json, re, sqlite3
 from pathlib import Path
-from typing import List, Set
+from typing import List, Set, Optional
 
 STOP = set("""
 de la del los las en el y o u a por para con sin una un al lo sus
@@ -37,6 +26,22 @@ TOKEN_RE = re.compile(r"[A-Za-zÁÉÍÓÚÜáéíóúüñÑ][\wÁÉÍÓÚÜáé�
 def normalize_ws(s: str) -> str:
     return " ".join((s or "").split())
 
+def get_existing_table(cur: sqlite3.Cursor, candidates: List[str]) -> str:
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    names = {r[0] for r in cur.fetchall()}
+    for c in candidates:
+        if c in names:
+            return c
+    return ""
+
+def get_existing_column(cur: sqlite3.Cursor, table: str, candidates: List[str]) -> str:
+    cur.execute(f"PRAGMA table_info({table})")
+    cols = {r[1] for r in cur.fetchall()}
+    for c in candidates:
+        if c in cols:
+            return c
+    return ""
+
 def from_sqlite_titles(db_path: Path, limit: int) -> List[str]:
     out: List[str] = []
     if not db_path or not db_path.exists():
@@ -44,13 +49,20 @@ def from_sqlite_titles(db_path: Path, limit: int) -> List[str]:
     con = sqlite3.connect(str(db_path))
     cur = con.cursor()
     try:
-        cur.execute("""
-            SELECT DISTINCT TRIM(title)
-            FROM Document
-            WHERE title IS NOT NULL AND TRIM(title) <> ''
-            ORDER BY LENGTH(TRIM(title)) DESC
+        t_docs = get_existing_table(cur, ["documents", "Document"])
+        if not t_docs:
+            return out
+        col_title = get_existing_column(cur, t_docs, ["title", "Title", "name", "Name", "titulo", "Titulo"])
+        if not col_title:
+            return out
+        sql = f"""
+            SELECT DISTINCT TRIM({col_title})
+            FROM {t_docs}
+            WHERE {col_title} IS NOT NULL AND TRIM({col_title}) <> ''
+            ORDER BY LENGTH(TRIM({col_title})) DESC
             LIMIT ?;
-        """, (limit,))
+        """
+        cur.execute(sql, (limit,))
         out = [normalize_ws(r[0]) for r in cur.fetchall() if r and r[0]]
     except Exception:
         out = []
@@ -87,6 +99,7 @@ def ngram_phrases(text: str, nmin=2, nmax=4) -> List[str]:
 def from_sqlite_chunks(db_path: Path, limit: int, max_scan: int = 2000) -> List[str]:
     """
     Extrae frases cortas de los primeros max_scan chunks como fallback.
+    Usa COALESCE(text, content, '') y detecta tabla chunks/Chunk.
     """
     if not db_path or not db_path.exists():
         return []
@@ -94,7 +107,15 @@ def from_sqlite_chunks(db_path: Path, limit: int, max_scan: int = 2000) -> List[
     cur = con.cursor()
     phrases: List[str] = []
     try:
-        cur.execute("SELECT text FROM Chunk LIMIT ?", (max_scan,))
+        t_chunks = get_existing_table(cur, ["chunks", "Chunk"])
+        if not t_chunks:
+            return []
+        col_text = get_existing_column(cur, t_chunks, ["text", "content", "Text", "Content"])
+        if not col_text:
+            sql = f"SELECT COALESCE(text, content, '') FROM {t_chunks} LIMIT ?"
+        else:
+            sql = f"SELECT COALESCE({col_text}, '') FROM {t_chunks} LIMIT ?"
+        cur.execute(sql, (max_scan,))
         for (txt,) in cur.fetchall():
             if not txt:
                 continue
@@ -119,7 +140,7 @@ def dedupe(items: List[str]) -> List[str]:
 
 def build_queries(db_path: Path, limit: int, use_summaries: bool, min_chunk_scan: int) -> List[str]:
     queries: List[str] = []
-    # 1) Títulos de Document
+    # 1) Títulos de Document(s)
     queries += from_sqlite_titles(db_path, limit*2)
     # 2) Summaries web (opcional)
     if use_summaries and len(queries) < limit:
@@ -156,14 +177,14 @@ def build_queries(db_path: Path, limit: int, use_summaries: bool, min_chunk_scan
 def main():
     ap = argparse.ArgumentParser(description="Genera data/validation/queries.csv (plantilla con campos de oro).")
     ap.add_argument("--out", default="data/validation/queries.csv")
-    ap.add_argument("--db", default="data/processed/tracking.sqlite", help="Ruta a la BD SQLite (para títulos y fallback de chunks).")
+    ap.add_argument("--db", default="data/processed/tracking.sqlite", help="Ruta a la BD SQLite.")
     ap.add_argument("--limit", type=int, default=50)
     ap.add_argument("--no-summaries", action="store_true", help="No usar summaries de ingesta web.")
     ap.add_argument("--min-chunk-scan", type=int, default=2000, help="Máx. chunks a escanear para frases fallback.")
     ap.add_argument("--prefill-doc-gold", "--prefill_doc_gold",
                     dest="prefill_doc_gold",
                     choices=["none","title","id"], default="title",
-                    help="Prefill de oro: 'title' -> expected_document_title_contains=query; 'id' -> mapear título EXACTO a Document.id; 'none' -> no rellena.")
+                    help="Prefill de oro: 'title' -> expected_document_title_contains=query; 'id' -> Document(s).id; 'none' -> no rellena.")
     args = ap.parse_args()
 
     out_path = Path(args.out)
@@ -172,16 +193,19 @@ def main():
 
     qs = build_queries(db_path, args.limit, use_summaries=(not args.no_summaries), min_chunk_scan=args.min_chunk_scan)
 
-    # (Opcional) prefill de “oro” para facilitar Recall/MRR
+    # (Opcional) prefill de “oro”
     id_by_title = {}
     if args.prefill_doc_gold == "id" and db_path and db_path.exists():
         try:
             con = sqlite3.connect(str(db_path))
             cur = con.cursor()
-            cur.execute("SELECT TRIM(title), id FROM Document WHERE title IS NOT NULL AND TRIM(title) <> ''")
-            for t, i in cur.fetchall():
-                if t:
-                    id_by_title[normalize_ws(t)] = i
+            t_docs = get_existing_table(cur, ["documents", "Document"])
+            col_title = get_existing_column(cur, t_docs, ["title","Title","name","Name","titulo","Titulo"]) if t_docs else ""
+            if t_docs and col_title:
+                cur.execute(f"SELECT TRIM({col_title}), id FROM {t_docs} WHERE {col_title} IS NOT NULL AND TRIM({col_title}) <> ''")
+                for t, i in cur.fetchall():
+                    if t:
+                        id_by_title[normalize_ws(t)] = i
             con.close()
         except Exception:
             id_by_title = {}

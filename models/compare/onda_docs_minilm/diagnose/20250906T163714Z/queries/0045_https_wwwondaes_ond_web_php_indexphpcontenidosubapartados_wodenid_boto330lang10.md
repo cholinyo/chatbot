@@ -1,0 +1,52 @@
+# [0045] https://www.onda.es/ond/web_php/index.php?contenido=subapartados_woden&id_boto=330&lang=10
+
+**Overlap chunks**: 17, **Jaccard**: 0.739  
+**Overlap docs**: 14, **Jaccard**: 0.778
+
+## FAISS (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 39673 | 0.6125 | 102 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf.pdf
+2 | 39619 | 0.6125 | 101 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf (1).pdf
+3 | 39565 | 0.6125 | 100 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf
+4 | 55434 | 0.6094 | 425 | MODEL_SOL·LICITUD_ESCOLETA_ESTIU_2025 (1).pdf
+5 | 46612 | 0.5933 | 209 | DECRETOS INTERVENCIÓN 1S 2024.PDF
+6 | 32727 | 0.5850 | 11 | 01808-2025-es.pdf
+7 | 59667 | 0.5783 | 565 | Ayuntamiento Onda - www.onda.es
+8 | 59666 | 0.5783 | 564 | Ayuntamiento Onda - www.onda.es
+9 | 57993 | 0.5694 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+10 | 51382 | 0.5659 | 375 | Justificación subvención Onda.pdf
+11 | 47323 | 0.5629 | 276 | INGRESOS_2025.pdf_1742285328954.pdf
+12 | 41587 | 0.5626 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+13 | 21492 | 0.5619 | 397 | Listado de Documento registro entre fechas.csv
+14 | 21448 | 0.5619 | 396 | Listado de Documento registro 20250730_0929.csv
+15 | 58027 | 0.5580 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+16 | 47240 | 0.5574 | 274 | GASTOS_ECONOMICA_2025.pdf_1742285328993.pdf
+17 | 41588 | 0.5545 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+18 | 59058 | 0.5532 | 513 | SOLICITUD INFORME ADECUACIÓN VIVIENDA.pdf
+19 | 59116 | 0.5529 | 515 | SOLICITUD TARJETAS DE ESTACIONAMIENTO.pdf
+20 | 41268 | 0.5524 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+
+## Chroma (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 55434 | 0.6094 | 425 | MODEL_SOL·LICITUD_ESCOLETA_ESTIU_2025 (1).pdf
+2 | 46612 | 0.5933 | 209 | DECRETOS INTERVENCIÓN 1S 2024.PDF
+3 | 32727 | 0.5850 | 11 | 01808-2025-es.pdf
+4 | 59666 | 0.5783 | 564 | Ayuntamiento Onda - www.onda.es
+5 | 59667 | 0.5783 | 565 | Ayuntamiento Onda - www.onda.es
+6 | 57993 | 0.5694 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+7 | 51382 | 0.5659 | 375 | Justificación subvención Onda.pdf
+8 | 47323 | 0.5629 | 276 | INGRESOS_2025.pdf_1742285328954.pdf
+9 | 41587 | 0.5626 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+10 | 21448 | 0.5619 | 396 | Listado de Documento registro 20250730_0929.csv
+11 | 21492 | 0.5619 | 397 | Listado de Documento registro entre fechas.csv
+12 | 58027 | 0.5580 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+13 | 47240 | 0.5574 | 274 | GASTOS_ECONOMICA_2025.pdf_1742285328993.pdf
+14 | 41588 | 0.5545 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+15 | 59058 | 0.5532 | 513 | SOLICITUD INFORME ADECUACIÓN VIVIENDA.pdf
+16 | 59116 | 0.5529 | 515 | SOLICITUD TARJETAS DE ESTACIONAMIENTO.pdf
+17 | 41268 | 0.5524 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+18 | 46734 | 0.5492 | 209 | DECRETOS INTERVENCIÓN 1S 2024.PDF
+19 | 40970 | 0.5490 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+20 | 54689 | 0.5477 | 417 | Memoria PAI Onda_documento fiinal.docx (1) (1).pdf

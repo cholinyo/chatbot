@@ -1,0 +1,52 @@
+# [0048] https://www.onda.es/ond/web_php/index.php?contenido=subapartados_woden&id_boto=154&lang=10
+
+**Overlap chunks**: 13, **Jaccard**: 0.481  
+**Overlap docs**: 6, **Jaccard**: 0.375
+
+## FAISS (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 39673 | 0.6085 | 102 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf.pdf
+2 | 39619 | 0.6085 | 101 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf (1).pdf
+3 | 39565 | 0.6085 | 100 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf
+4 | 46612 | 0.5741 | 209 | DECRETOS INTERVENCIÓN 1S 2024.PDF
+5 | 58027 | 0.5728 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+6 | 55434 | 0.5652 | 425 | MODEL_SOL·LICITUD_ESCOLETA_ESTIU_2025 (1).pdf
+7 | 32727 | 0.5598 | 11 | 01808-2025-es.pdf
+8 | 41268 | 0.5589 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+9 | 41587 | 0.5535 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+10 | 40970 | 0.5524 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+11 | 21591 | 0.5520 | 398 | Listado de Empleado 20250320_1240.csv
+12 | 41588 | 0.5514 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+13 | 21737 | 0.5501 | 398 | Listado de Empleado 20250320_1240.csv
+14 | 21721 | 0.5496 | 398 | Listado de Empleado 20250320_1240.csv
+15 | 21769 | 0.5485 | 398 | Listado de Empleado 20250320_1240.csv
+16 | 21818 | 0.5466 | 398 | Listado de Empleado 20250320_1240.csv
+17 | 49987 | 0.5446 | 365 | 4 3ª REVISIÓN AGENDA URBANA ONDA 2030_VF_infog.pdf
+18 | 37144 | 0.5446 | 54 | 4 3ª REVISIÓN AGENDA URBANA ONDA 2030_VF_infog.pdf
+19 | 36068 | 0.5446 | 53 | 4 3ª REVISIÓN AGENDA URBANA ONDA 2030_VF_infog (3).pdf
+20 | 34988 | 0.5446 | 52 | 4 3ª REVISIÓN AGENDA URBANA ONDA 2030_VF_infog (2).pdf
+
+## Chroma (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 46612 | 0.5741 | 209 | DECRETOS INTERVENCIÓN 1S 2024.PDF
+2 | 58027 | 0.5728 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+3 | 55434 | 0.5652 | 425 | MODEL_SOL·LICITUD_ESCOLETA_ESTIU_2025 (1).pdf
+4 | 32727 | 0.5598 | 11 | 01808-2025-es.pdf
+5 | 41268 | 0.5589 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+6 | 41587 | 0.5535 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+7 | 40970 | 0.5524 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+8 | 21591 | 0.5520 | 398 | Listado de Empleado 20250320_1240.csv
+9 | 41588 | 0.5514 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+10 | 21737 | 0.5501 | 398 | Listado de Empleado 20250320_1240.csv
+11 | 21721 | 0.5496 | 398 | Listado de Empleado 20250320_1240.csv
+12 | 21769 | 0.5485 | 398 | Listado de Empleado 20250320_1240.csv
+13 | 21818 | 0.5466 | 398 | Listado de Empleado 20250320_1240.csv
+14 | 21588 | 0.5441 | 398 | Listado de Empleado 20250320_1240.csv
+15 | 40971 | 0.5440 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+16 | 51382 | 0.5425 | 375 | Justificación subvención Onda.pdf
+17 | 57993 | 0.5411 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf
+18 | 21448 | 0.5396 | 396 | Listado de Documento registro 20250730_0929.csv
+19 | 21492 | 0.5396 | 397 | Listado de Documento registro entre fechas.csv
+20 | 58001 | 0.5386 | 487 | PROYECTO REHABILITACION PARQUE TRES CULTURAS.pdf

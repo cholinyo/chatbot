@@ -5,6 +5,7 @@ Etiqueta 'oro' (expected_document_id y expected_chunk_ids) en un CSV de queries 
 - Autodetección robusta de nombres de tablas/columnas:
   * Tablas: Document/Chunk (o documents/document, chunks/chunk)
   * Columnas: Document.title|name|titulo ; Chunk.text|content
+- Orden de chunks por documento: intenta usar "index"/"chunk_index"/"position"/"ord"/"order"/"seq"; si no, cae a id ASC.
 - Rellena también expected_document_title_contains y expected_text_contains con la query si estaban vacíos.
 - NO introduce frameworks nuevos.
 
@@ -14,18 +15,12 @@ Uso:
     --out data/validation/queries.csv ^
     --db  data/processed/tracking.sqlite ^
     --top-chunks 5
-
-Opciones:
-  --overwrite            Sobrescribe campos si ya estaban rellenos (por defecto NO).
-  --use title,text       Estrategias de matching (por defecto: title,text).
-  --min-tokens 1         Mínimo de tokens para matching por título.
 """
 
-import argparse, csv, sqlite3, re, unicodedata
+import argparse, csv, sqlite3, re, unicodedata, json
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
-# ------------------- utilidades de normalización -------------------
 def norm_ws(s: Optional[str]) -> str:
     return " ".join((s or "").split())
 
@@ -37,34 +32,25 @@ def to_key(s: Optional[str]) -> str:
     return strip_accents((s or "").casefold())
 
 TOKEN_RE = re.compile(r"\w+", flags=re.UNICODE)
-
 def tokens(s: str) -> List[str]:
     return [t for t in TOKEN_RE.findall(to_key(s)) if len(t) > 1]
 
-# ------------------- autodetección de esquema -------------------
 def detect_tables_and_columns(conn: sqlite3.Connection) -> Dict[str, Optional[str]]:
-    """
-    Devuelve dict con:
-      t_doc, t_chunk: nombres reales de tablas
-      col_title: columna de título en Document
-      col_text:  columna de texto en Chunk
-    """
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
     names = {r["name"].lower(): r["name"] for r in cur.fetchall()}
 
-    def pick(cands: List[str]) -> Optional[str]:
+    def pick_table(cands: List[str]) -> Optional[str]:
         for c in cands:
             if c.lower() in names:
                 return names[c.lower()]
         return None
 
-    t_doc = pick(["Document","Documents","document","documents"])
-    t_chunk = pick(["Chunk","Chunks","chunk","chunks"])
+    t_doc = pick_table(["Document","Documents","document","documents"])
+    t_chunk = pick_table(["Chunk","Chunks","chunk","chunks"])
 
-    col_title = None
-    col_text = None
+    col_title = col_text = col_order = None
 
     if t_doc:
         cur.execute(f"PRAGMA table_info({t_doc})")
@@ -81,16 +67,14 @@ def detect_tables_and_columns(conn: sqlite3.Connection) -> Dict[str, Optional[st
             if c in cols:
                 col_text = cols[c]
                 break
+        for c in ["index","chunk_index","position","ord","order","seq","seq_id"]:
+            if c in cols:
+                col_order = cols[c]
+                break
 
-    return {"t_doc": t_doc, "t_chunk": t_chunk, "col_title": col_title, "col_text": col_text}
+    return {"t_doc": t_doc, "t_chunk": t_chunk, "col_title": col_title, "col_text": col_text, "col_order": col_order}
 
-# ------------------- scoring y matching -------------------
 def title_score(doc_title: str, pattern: str) -> float:
-    """
-    Score simple de solapamiento de tokens:
-      score = (#tokens de pattern presentes en título) / (#tokens pattern)
-      +0.5 si el patrón completo es substring (sin tildes, casefold)
-    """
     if not pattern:
         return 0.0
     t = to_key(doc_title)
@@ -104,11 +88,7 @@ def title_score(doc_title: str, pattern: str) -> float:
         score += 0.5
     return score
 
-# ------------------- helpers CSV -------------------
 def ensure_headers(row: Dict[str, str]) -> Dict[str, str]:
-    """
-    Normaliza cabeceras comunes y garantiza presencia de todas las columnas esperadas.
-    """
     fieldnames = [
         "query",
         "expected_chunk_id",
@@ -118,7 +98,6 @@ def ensure_headers(row: Dict[str, str]) -> Dict[str, str]:
         "expected_text_contains",
     ]
     out = {k: row.get(k, "") for k in fieldnames}
-    # tolerar alias mínimos
     for k in list(row.keys()):
         lk = k.replace("\ufeff","").strip().lower().replace(" ", "_")
         if lk == "doc_title_contains" and not out["expected_document_title_contains"]:
@@ -127,13 +106,9 @@ def ensure_headers(row: Dict[str, str]) -> Dict[str, str]:
             out["expected_text_contains"] = row[k]
     return out
 
-# ------------------- consultas dependientes del esquema -------------------
-def choose_document_by_title(conn: sqlite3.Connection, pattern: str, t_doc: Optional[str], col_title: Optional[str],
+def choose_document_by_title(conn: sqlite3.Connection, pattern: str,
+                             t_doc: Optional[str], col_title: Optional[str],
                              min_tokens: int = 1) -> Optional[Tuple[int, str]]:
-    """
-    Devuelve (document_id, title) con mayor score para 'pattern', o None.
-    Requiere t_doc y col_title detectados.
-    """
     if not pattern or not t_doc or not col_title:
         return None
     ptoks = tokens(pattern)
@@ -148,15 +123,12 @@ def choose_document_by_title(conn: sqlite3.Connection, pattern: str, t_doc: Opti
         if sc > best_score:
             best_score = sc
             best = (int(did), title or "")
-    # umbral para evitar falsos positivos
     if best and best_score >= 0.6:
         return best
     return None
 
-def fallback_document_by_text(conn: sqlite3.Connection, phrase: str, t_chunk: Optional[str], col_text: Optional[str]) -> Optional[Tuple[int,int]]:
-    """
-    Busca LIKE '%phrase%' en Chunk.text; devuelve (document_id, chunk_id) del primer match.
-    """
+def fallback_document_by_text(conn: sqlite3.Connection, phrase: str,
+                              t_chunk: Optional[str], col_text: Optional[str]) -> Optional[Tuple[int,int]]:
     if not phrase or not t_chunk or not col_text:
         return None
     cur = conn.cursor()
@@ -169,14 +141,19 @@ def fallback_document_by_text(conn: sqlite3.Connection, phrase: str, t_chunk: Op
         pass
     return None
 
-def top_chunks_for_document(conn: sqlite3.Connection, doc_id: int, t_chunk: Optional[str], top_n: int = 5) -> List[int]:
+def top_chunks_for_document(conn: sqlite3.Connection, doc_id: int, t_chunk: Optional[str],
+                            top_n: int = 5, order_col: Optional[str] = None) -> List[int]:
     if not t_chunk:
         return []
     cur = conn.cursor()
-    cur.execute(f"SELECT id FROM {t_chunk} WHERE document_id=? ORDER BY id ASC LIMIT ?", (doc_id, top_n))
+    if order_col:
+        oc = f"\"{order_col}\"" if order_col.lower() == "index" else order_col
+        sql = f"SELECT id FROM {t_chunk} WHERE document_id=? ORDER BY {oc} ASC LIMIT ?"
+    else:
+        sql = f"SELECT id FROM {t_chunk} WHERE document_id=? ORDER BY id ASC LIMIT ?"
+    cur.execute(sql, (doc_id, top_n))
     return [int(r[0]) for r in cur.fetchall()]
 
-# ------------------- main -------------------
 def main():
     ap = argparse.ArgumentParser(description="Etiqueta oro (doc_id y chunk_ids) en queries.csv desde SQLite.")
     ap.add_argument("--in", dest="inp", required=True)
@@ -205,7 +182,7 @@ def main():
     conn = sqlite3.connect(str(dbp))
     schema = detect_tables_and_columns(conn)
     t_doc, t_chunk = schema["t_doc"], schema["t_chunk"]
-    col_title, col_text = schema["col_title"], schema["col_text"]
+    col_title, col_text, col_order = schema["col_title"], schema["col_text"], schema["col_order"]
 
     if not t_doc and not t_chunk:
         raise SystemExit("ERROR: no se detectan tablas Document/Chunk (ni variantes). Revisa la BD.")
@@ -257,14 +234,12 @@ def main():
                         found = True
                         stats["fallback_text"] += 1
 
-        # Escribir doc_id si procede
         if chosen_doc is not None and (args.overwrite or not doc_id_existing):
             row["expected_document_id"] = str(chosen_doc)
             stats["filled_doc_id"] += 1
 
-        # Escribir chunk_ids si procede
         if chosen_doc is not None and (args.overwrite or not chunk_ids_existing):
-            cids = top_chunks_for_document(conn, chosen_doc, t_chunk, args.top_chunks)
+            cids = top_chunks_for_document(conn, chosen_doc, t_chunk, args.top_chunks, order_col=col_order)
             if cids:
                 row["expected_chunk_ids"] = "|".join(str(c) for c in cids)
                 stats["filled_chunk_ids"] += 1
@@ -273,7 +248,6 @@ def main():
 
     conn.close()
 
-    # Persistir
     out.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
         "query",
@@ -289,13 +263,13 @@ def main():
         for r in updated:
             wr.writerow({k: r.get(k,"") for k in fieldnames})
 
-    print({
+    print(json.dumps({
         "ok": True,
         "in": str(inp),
         "out": str(out),
         "db": str(dbp),
         "stats": stats
-    })
+    }, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()

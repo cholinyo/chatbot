@@ -1,0 +1,52 @@
+# [0003] ACFrOgDJJmhdbkDbkajQdssK3daQXkfhC0YyEfdtJ14011fx2qMGeqAW_iTSiYlyzZY6ugfGNm-_QjtVtqtLqht36xadipiuNSGQ9_hCmfLpWILtKfuvHsM0favuUEZtjfIXs6frDIHsz1Kpm7ckQTPp5lD-5_a3Ug63mUTuPQ==.pdf
+
+**Overlap chunks**: 20, **Jaccard**: 1.000  
+**Overlap docs**: 7, **Jaccard**: 1.000
+
+## FAISS (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 48520 | 0.7401 | 305 | FORMULARIO_ACCESO_PID.pdf
+2 | 48516 | 0.7392 | 305 | FORMULARIO_ACCESO_PID.pdf
+3 | 48518 | 0.7376 | 305 | FORMULARIO_ACCESO_PID.pdf
+4 | 48521 | 0.7348 | 305 | FORMULARIO_ACCESO_PID.pdf
+5 | 48519 | 0.7226 | 305 | FORMULARIO_ACCESO_PID.pdf
+6 | 43679 | 0.7220 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+7 | 48517 | 0.7194 | 305 | FORMULARIO_ACCESO_PID.pdf
+8 | 43692 | 0.7004 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+9 | 43691 | 0.6713 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+10 | 43677 | 0.6605 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+11 | 43690 | 0.6604 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+12 | 39639 | 0.5911 | 102 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf.pdf
+13 | 39585 | 0.5911 | 101 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf (1).pdf
+14 | 39531 | 0.5911 | 100 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf
+15 | 21592 | 0.5893 | 398 | Listado de Empleado 20250320_1240.csv
+16 | 21971 | 0.5847 | 399 | Listado de Trabajador 20250320_1242.csv
+17 | 21873 | 0.5828 | 399 | Listado de Trabajador 20250320_1242.csv
+18 | 21850 | 0.5816 | 399 | Listado de Trabajador 20250320_1242.csv
+19 | 43678 | 0.5811 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+20 | 21864 | 0.5777 | 399 | Listado de Trabajador 20250320_1242.csv
+
+## Chroma (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 48520 | 0.7401 | 305 | FORMULARIO_ACCESO_PID.pdf
+2 | 48516 | 0.7392 | 305 | FORMULARIO_ACCESO_PID.pdf
+3 | 48518 | 0.7376 | 305 | FORMULARIO_ACCESO_PID.pdf
+4 | 48521 | 0.7348 | 305 | FORMULARIO_ACCESO_PID.pdf
+5 | 48519 | 0.7226 | 305 | FORMULARIO_ACCESO_PID.pdf
+6 | 43679 | 0.7220 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+7 | 48517 | 0.7194 | 305 | FORMULARIO_ACCESO_PID.pdf
+8 | 43692 | 0.7004 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+9 | 43691 | 0.6713 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+10 | 43677 | 0.6605 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+11 | 43690 | 0.6604 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+12 | 39531 | 0.5911 | 100 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf
+13 | 39585 | 0.5911 | 101 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf (1).pdf
+14 | 39639 | 0.5911 | 102 | ba15df666691b1e5961b681667a3bb0ca296991924138.pdf.pdf
+15 | 21592 | 0.5893 | 398 | Listado de Empleado 20250320_1240.csv
+16 | 21971 | 0.5847 | 399 | Listado de Trabajador 20250320_1242.csv
+17 | 21873 | 0.5828 | 399 | Listado de Trabajador 20250320_1242.csv
+18 | 21850 | 0.5816 | 399 | Listado de Trabajador 20250320_1242.csv
+19 | 43678 | 0.5811 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+20 | 21864 | 0.5777 | 399 | Listado de Trabajador 20250320_1242.csv

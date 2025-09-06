@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "n_docid_gold": 5,
+  "items": [
+    {
+      "idx": 1,
+      "query": "empadronamiento",
+      "expected_document_id": "390"
+    },
+    {
+      "idx": 2,
+      "query": "licencia de obra menor",
+      "expected_document_id": "390"
+    },
+    {
+      "idx": 6,
+      "query": "plazos de presentación",
+      "expected_document_id": "118"
+    },
+    {
+      "idx": 8,
+      "query": "tasas municipales",
+      "expected_document_id": "51"
+    },
+    {
+      "idx": 11,
+      "query": "presentación telemática",
+      "expected_document_id": "3"
+    }
+  ]
+}

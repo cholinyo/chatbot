@@ -1,0 +1,52 @@
+# [0003] ACFrOgDJJmhdbkDbkajQdssK3daQXkfhC0YyEfdtJ14011fx2qMGeqAW_iTSiYlyzZY6ugfGNm-_QjtVtqtLqht36xadipiuNSGQ9_hCmfLpWILtKfuvHsM0favuUEZtjfIXs6frDIHsz1Kpm7ckQTPp5lD-5_a3Ug63mUTuPQ==.pdf
+
+**Overlap chunks**: 18, **Jaccard**: 0.818  
+**Overlap docs**: 6, **Jaccard**: 0.667
+
+## FAISS (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 48517 | 0.9077 | 305 | FORMULARIO_ACCESO_PID.pdf
+2 | 48521 | 0.9072 | 305 | FORMULARIO_ACCESO_PID.pdf
+3 | 48516 | 0.9055 | 305 | FORMULARIO_ACCESO_PID.pdf
+4 | 48518 | 0.9031 | 305 | FORMULARIO_ACCESO_PID.pdf
+5 | 48520 | 0.9027 | 305 | FORMULARIO_ACCESO_PID.pdf
+6 | 43690 | 0.8876 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+7 | 43679 | 0.8851 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+8 | 51505 | 0.8827 | 379 | libroestilo_final_12ene.pdf
+9 | 51431 | 0.8811 | 379 | libroestilo_final_12ene.pdf
+10 | 48519 | 0.8802 | 305 | FORMULARIO_ACCESO_PID.pdf
+11 | 41479 | 0.8766 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+12 | 47342 | 0.8751 | 279 | RESUMEN_INGRESOS_2025.pdf_1742285328909.pdf
+13 | 51432 | 0.8747 | 379 | libroestilo_final_12ene.pdf
+14 | 51504 | 0.8732 | 379 | libroestilo_final_12ene.pdf
+15 | 51404 | 0.8731 | 379 | libroestilo_final_12ene.pdf
+16 | 43677 | 0.8716 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+17 | 40750 | 0.8701 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+18 | 54523 | 0.8694 | 415 | MEMORIA DESCRIPTIVA_ANEXOS_ONDA.pdf
+19 | 43692 | 0.8685 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+20 | 53383 | 0.8681 | 413 | MEMORIA DESCRIPTIVA_ANEXOS_ONDA (1) (2).pdf
+
+## Chroma (top-k)
+rank | chunk_id | score | document_id | title
+---:|---|---:|---:|---
+1 | 48517 | 0.9077 | 305 | FORMULARIO_ACCESO_PID.pdf
+2 | 48521 | 0.9072 | 305 | FORMULARIO_ACCESO_PID.pdf
+3 | 48516 | 0.9055 | 305 | FORMULARIO_ACCESO_PID.pdf
+4 | 48518 | 0.9031 | 305 | FORMULARIO_ACCESO_PID.pdf
+5 | 48520 | 0.9027 | 305 | FORMULARIO_ACCESO_PID.pdf
+6 | 43690 | 0.8876 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+7 | 43679 | 0.8851 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+8 | 51505 | 0.8827 | 379 | libroestilo_final_12ene.pdf
+9 | 51431 | 0.8811 | 379 | libroestilo_final_12ene.pdf
+10 | 48519 | 0.8802 | 305 | FORMULARIO_ACCESO_PID.pdf
+11 | 41479 | 0.8766 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+12 | 47342 | 0.8751 | 279 | RESUMEN_INGRESOS_2025.pdf_1742285328909.pdf
+13 | 51432 | 0.8747 | 379 | libroestilo_final_12ene.pdf
+14 | 51504 | 0.8732 | 379 | libroestilo_final_12ene.pdf
+15 | 51404 | 0.8731 | 379 | libroestilo_final_12ene.pdf
+16 | 43677 | 0.8716 | 160 | Consultas_y_peticiones2022CNSAJ4602226164S202204048883679.pdf
+17 | 40750 | 0.8701 | 109 | BORRADOR CUENTA GENERAL 2024 PARA WEB.pdf
+18 | 54523 | 0.8694 | 415 | MEMORIA DESCRIPTIVA_ANEXOS_ONDA.pdf
+19 | 52813 | 0.8681 | 412 | MEMORIA DESCRIPTIVA_ANEXOS_ONDA (1) (1).pdf
+20 | 53953 | 0.8681 | 414 | MEMORIA DESCRIPTIVA_ANEXOS_ONDA (1).pdf

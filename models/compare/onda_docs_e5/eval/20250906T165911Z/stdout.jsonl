@@ -1,0 +1,2 @@
+{"ts": "20250906T165911Z", "event": "compare.start", "stores": ["chroma", "faiss"], "ks": [10, 20, 40], "collection": "onda_docs_e5", "queries": 50}
+{"ts": "20250906T170050Z", "event": "compare.done", "out_dir": "C:\\Users\\vcaruncho\\CascadeProjects\\tfm_chatbot\\models\\compare\\onda_docs_e5\\eval\\20250906T165911Z", "n_cases": 6}
