@@ -26,8 +26,7 @@ from app.blueprints.admin.routes_data_sources import bp_ds
 from app.blueprints.admin.routes_ingesta_docs import bp as bp_ingesta_docs
 from app.blueprints.admin.routes_ingesta_web import bp_ingesta_web
 from app.blueprints.admin.routes_vector_store import bp as bp_vector_store
-from app.blueprints.admin.routes_chat import bp as bp_routes_chat   
-
+from app.blueprints.admin.rag_routes import admin_rag_bp
 
 def _load_settings(path: str = "config/settings.toml") -> Dict[str, Any]:
     p = Path(path)
@@ -99,7 +98,7 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
     app.register_blueprint(bp_ingesta_docs)
     app.register_blueprint(bp_ingesta_web)
     app.register_blueprint(bp_vector_store)
-    app.register_blueprint(bp_routes_chat)
+    app.register_blueprint(admin_rag_bp)
     try:
         from app.blueprints.ingestion.routes import bp as ingestion_bp  # type: ignore
         app.register_blueprint(ingestion_bp, url_prefix="/ingestion")

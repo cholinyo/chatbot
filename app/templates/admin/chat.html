@@ -152,6 +152,15 @@
                         <option value="">Cargando...</option>
                     </select>
                 </div>
+                <div id="rag-endpoints" data-collections="{{ url_for('admin_rag.list_collections') }}"></div>
+                <script src="{{ url_for('static', filename='js/admin_rag_collections.js') }}" defer></script>
+                <div id="rag-endpoints"
+     data-collections="{{ url_for('admin_rag.list_collections') }}"
+     data-query="{{ url_for('admin_rag.rag_query') }}"></div>
+
+<script src="{{ url_for('static', filename='js/admin_rag_collections.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/admin_rag_query.js') }}" defer></script>
+
 
                 <div class="mb-3">
                     <label for="kSelect" class="form-label">Resultados (k)</label>
@@ -214,39 +223,71 @@
     </div>
 </div>
 {% endblock %}
-
 {% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        console.log('Página cargada');
-        
-        // Cargar colecciones de forma simple
-        try {
-            const response = await fetch('/admin/rag/collections');
-            console.log('Response status:', response.status);
-            
-            const data = await response.json();
-            console.log('Colecciones obtenidas:', data.total);
-            
-            const select = document.getElementById('collectionSelect');
-            select.innerHTML = '';
-            
-            if (data.collections && data.collections.length > 0) {
-                data.collections.forEach(col => {
-                    const option = document.createElement('option');
-                    option.value = `${col.store}:${col.name}`;
-                    option.textContent = `${col.name} (${col.chunks} chunks)`;
-                    select.appendChild(option);
-                });
-                console.log('Select poblado con', data.collections.length, 'opciones');
-            } else {
-                select.innerHTML = '<option value="">No hay colecciones</option>';
-            }
-            
-        } catch (error) {
-            console.error('Error cargando colecciones:', error);
-            document.getElementById('collectionSelect').innerHTML = '<option value="">Error</option>';
+(function initAdminRag() {
+  const start = async () => {
+    console.log('[RAG] init');
+
+    const select = document.getElementById('collectionSelect');
+    const refreshBtn = document.getElementById('refreshCollections');
+    const chatMessages = document.getElementById('chatMessages');
+
+    const addMsg = (html) => {
+      const div = document.createElement('div');
+      div.className = 'message assistant';
+      div.innerHTML = `<div class="message-content">${html}</div>`;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    async function loadCollections() {
+      try {
+        const resp = await fetch('/admin/rag/collections', { credentials: 'include' });
+        if (!resp.ok) {
+          addMsg(`Error colecciones (HTTP ${resp.status})`);
+          select.innerHTML = '<option value="">Error</option>';
+          return;
         }
-    });
-    </script>
+        const ct = resp.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) {
+          addMsg('Respuesta no-JSON (¿login?)');
+          select.innerHTML = '<option value="">Login requerido</option>';
+          return;
+        }
+        const data = await resp.json();
+        console.log('[RAG] collections:', data);
+
+        const cols = data.collections || [];
+        select.innerHTML = '';
+        if (cols.length === 0) {
+          select.innerHTML = '<option value="">No hay colecciones</option>';
+        } else {
+          cols.forEach(col => {
+            const opt = document.createElement('option');
+            opt.value = `${col.store}:${col.name}`;
+            opt.textContent = `${col.name} (${col.chunks ?? '?' } chunks)`;
+            select.appendChild(opt);
+          });
+          addMsg(`Colecciones cargadas: ${cols.length}`);
+        }
+      } catch (e) {
+        console.error('[RAG] loadCollections error:', e);
+        select.innerHTML = '<option value="">Error</option>';
+        addMsg('Error cargando colecciones');
+      }
+    }
+
+    refreshBtn?.addEventListener('click', loadCollections);
+    await loadCollections(); // primera carga
+  };
+
+  // Arranque seguro: si ya cargó el DOM, ejecuta; si no, espera al evento
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+})();
+</script>   
 {% endblock %}
