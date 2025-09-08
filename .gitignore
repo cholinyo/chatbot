@@ -8,6 +8,8 @@ app/models/__pycache__
 *.log
 *.sqlite
 instance/
+venv/
+
 
 
 # Datos y modelos
