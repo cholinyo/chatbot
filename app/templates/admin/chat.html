@@ -1,293 +1,383 @@
 {% extends "base.html" %}
-
 {% block title %}Chat RAG{% endblock %}
 
 {% block extra_head %}
 <style>
-.chat-container {
-    height: calc(100vh - 200px);
-    min-height: 600px;
-}
-
-.chat-messages {
-    height: 70%;
-    overflow-y: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    margin-bottom: 1rem;
-}
-
-.message {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    max-width: 85%;
-}
-
-.message.user {
-    background-color: #007bff;
-    color: white;
-    margin-left: auto;
-    text-align: right;
-}
-
-.message.assistant {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    margin-right: auto;
-}
-
-.message-header {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.message-content {
-    line-height: 1.5;
-}
-
-.sources {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #dee2e6;
-}
-
-.source-item {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.source-score {
-    font-weight: 600;
-    color: #28a745;
-}
-
-.source-title {
-    font-weight: 600;
-    color: #495057;
-}
-
-.source-text {
-    color: #6c757d;
-    margin-top: 0.25rem;
-    font-style: italic;
-}
-
-.chat-input-section {
-    height: 25%;
-    display: flex;
-    flex-direction: column;
-}
-
-.settings-panel {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.loading {
-    text-align: center;
-    color: #6c757d;
-    font-style: italic;
-    padding: 1rem;
-}
-
-.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-    border-radius: 0.375rem;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.metrics {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-top: 0.5rem;
-}
-
-#queryInput {
-    resize: vertical;
-    min-height: 80px;
-}
+  .chat-container { height: calc(100vh - 200px); min-height: 600px; }
+  .chat-messages { height: 70%; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; background-color: #f8f9fa; margin-bottom: 1rem; }
+  .message { margin-bottom: 1rem; padding: 0.75rem; border-radius: 0.375rem; max-width: 85%; }
+  .message.user { background-color: #007bff; color: #fff; margin-left: auto; text-align: right; }
+  .message.assistant { background-color: #fff; border: 1px solid #dee2e6; margin-right: auto; }
+  .message-header { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .message-content { line-height: 1.5; white-space: pre-wrap; }
+  .sources { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #dee2e6; }
+  .source-item { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem; margin-bottom: 0.5rem; font-size: 0.875rem; }
+  .source-score { font-weight: 600; color: #28a745; }
+  .source-title { font-weight: 600; color: #495057; }
+  .source-text { color: #6c757d; margin-top: 0.25rem; font-style: italic; }
+  .chat-input-section { height: 25%; display: flex; flex-direction: column; }
+  .settings-panel { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1rem; }
+  .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem; }
+  .metrics { font-size: 0.75rem; color: #6c757d; margin-top: 0.5rem; }
+  #queryInput { resize: vertical; min-height: 80px; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <h2><i class="fa-solid fa-comments me-2"></i>Chat RAG</h2>
-            <p class="text-muted">Consulta tu conocimiento institucional mediante búsqueda semántica</p>
+  <div class="row">
+    <div class="col-md-12">
+      <h2><i class="fa-solid fa-comments me-2"></i>Chat RAG</h2>
+      <p class="text-muted">Consulta tu conocimiento institucional mediante búsqueda semántica</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Panel de configuración -->
+    <div class="col-md-3">
+      <div class="settings-panel">
+        <h5><i class="fa-solid fa-sliders me-2"></i>Configuración</h5>
+
+        <div class="mb-3">
+          <label for="storeSelect" class="form-label">Vector Store</label>
+          <select class="form-select" id="storeSelect">
+            <option value="chroma">ChromaDB</option>
+            <option value="faiss">FAISS</option>
+          </select>
         </div>
+
+        <div class="mb-3">
+          <label for="collectionSelect" class="form-label">Colección</label>
+          <select class="form-select" id="collectionSelect">
+            {% if collections and collections|length > 0 %}
+              {% for c in collections %}
+                <option value="{{ c.store }}:{{ c.name }}">
+                  {{ c.name }} ({{ c.chunks or '?' }} chunks)
+                </option>
+              {% endfor %}
+            {% else %}
+              <option value="">Cargando...</option>
+            {% endif %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="kSelect" class="form-label">Resultados (k)</label>
+          <select class="form-select" id="kSelect">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+          </select>
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="showDetails">
+            <label class="form-check-label" for="showDetails">
+              Detalles por fuente (debug)
+            </label>
+          </div>
+          
+
+        <!-- Toggle de enriquecimiento para pruebas puras de recuperación -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="enrichToggle" checked>
+          <label class="form-check-label" for="enrichToggle">
+            Enriquecer con BD (títulos, rutas)
+          </label>
+        </div>
+
+        <div class="mb-3">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshCollections">
+            <i class="fa-solid fa-sync"></i> Actualizar
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm" id="clearChat">
+            <i class="fa-solid fa-trash"></i> Limpiar
+          </button>
+        </div>
+
+        <div id="collectionInfo" class="mt-3" style="display:none;">
+          <h6>Información:</h6>
+          <div class="small text-muted" id="collectionDetails"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="row">
-        <!-- Panel de configuración -->
-        <div class="col-md-3">
-            <div class="settings-panel">
-                <h5><i class="fa-solid fa-sliders me-2"></i>Configuración</h5>
-                
-                <div class="mb-3">
-                    <label for="storeSelect" class="form-label">Vector Store</label>
-                    <select class="form-select" id="storeSelect">
-                        <option value="chroma">ChromaDB</option>
-                        <option value="faiss">FAISS</option>
-                    </select>
-                </div>
+    <!-- Chat principal -->
+    <div class="col-md-9">
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message assistant">
+            <div class="message-header"><i class="fa-solid fa-robot me-2"></i>Sistema RAG</div>
+            <div class="message-content">
+              ¡Hola! Soy tu asistente de conocimiento institucional.
+              Selecciona una colección y hazme cualquier pregunta sobre documentos administrativos.
+            </div>
+          </div>
+        </div>
 
-                <div class="mb-3">
-                    <label for="collectionSelect" class="form-label">Colección</label>
-                    <select class="form-select" id="collectionSelect">
-                        <option value="">Cargando...</option>
-                    </select>
-                </div>
-                <div id="rag-endpoints" data-collections="{{ url_for('admin_rag.list_collections') }}"></div>
-                <script src="{{ url_for('static', filename='js/admin_rag_collections.js') }}" defer></script>
-                <div id="rag-endpoints"
+        <div class="chat-input-section">
+          <div class="input-group">
+            <textarea class="form-control" id="queryInput"
+              placeholder="Escribe tu consulta aquí... (Ej: ¿Qué documentos necesito para una licencia de obra?)"
+              rows="3"></textarea>
+            <button class="btn btn-primary" type="button" id="sendBtn">
+              <i class="fa-solid fa-paper-plane"></i> Enviar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Endpoints (rutas seguras con url_for) -->
+<div id="rag-endpoints"
      data-collections="{{ url_for('admin_rag.list_collections') }}"
      data-query="{{ url_for('admin_rag.rag_query') }}"></div>
 
-<script src="{{ url_for('static', filename='js/admin_rag_collections.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/admin_rag_query.js') }}" defer></script>
-
-
-                <div class="mb-3">
-                    <label for="kSelect" class="form-label">Resultados (k)</label>
-                    <select class="form-select" id="kSelect">
-                        <option value="3">3</option>
-                        <option value="5" selected>5</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshCollections">
-                        <i class="fa-solid fa-sync"></i> Actualizar
-                    </button>
-                    <button type="button" class="btn btn-outline-danger btn-sm" id="clearChat">
-                        <i class="fa-solid fa-trash"></i> Limpiar
-                    </button>
-                </div>
-
-                <!-- Info de la colección -->
-                <div id="collectionInfo" class="mt-3" style="display: none;">
-                    <h6>Información:</h6>
-                    <div class="small text-muted" id="collectionDetails"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat principal -->
-        <div class="col-md-9">
-            <div class="chat-container">
-                <!-- Mensajes -->
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message assistant">
-                        <div class="message-header">
-                            <i class="fa-solid fa-robot me-2"></i>Sistema RAG
-                        </div>
-                        <div class="message-content">
-                            ¡Hola! Soy tu asistente de conocimiento institucional. 
-                            Selecciona una colección y hazme cualquier pregunta sobre documentos administrativos.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input de consulta -->
-                <div class="chat-input-section">
-                    <div class="input-group">
-                        <textarea 
-                            class="form-control" 
-                            id="queryInput" 
-                            placeholder="Escribe tu consulta aquí... (Ej: ¿Qué documentos necesito para una licencia de obra?)"
-                            rows="3"></textarea>
-                        <button class="btn btn-primary" type="button" id="sendBtn">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-{% block extra_scripts %}
 <script>
-(function initAdminRag() {
-  const start = async () => {
-    console.log('[RAG] init');
+(() => {
+  // ===== mini-store de colecciones con metadatos =====
+  const RAG = { colmap: {} }; // key "store:name" -> {store,name,model,dim,chunks}
 
-    const select = document.getElementById('collectionSelect');
-    const refreshBtn = document.getElementById('refreshCollections');
-    const chatMessages = document.getElementById('chatMessages');
+  // ===== utils UI =====
+  function addMsg(role, contentHTML, escapeUser=false) {
+    const log = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'message ' + role;
 
-    const addMsg = (html) => {
-      const div = document.createElement('div');
-      div.className = 'message assistant';
-      div.innerHTML = `<div class="message-content">${html}</div>`;
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    };
+    const header = document.createElement('div');
+    header.className = 'message-header';
+    header.innerHTML = role === 'user'
+      ? '<i class="fa-solid fa-user me-2"></i>Tú'
+      : '<i class="fa-solid fa-robot me-2"></i>RAG';
 
-    async function loadCollections() {
-      try {
-        const resp = await fetch('/admin/rag/collections', { credentials: 'include' });
-        if (!resp.ok) {
-          addMsg(`Error colecciones (HTTP ${resp.status})`);
-          select.innerHTML = '<option value="">Error</option>';
-          return;
+    const body = document.createElement('div');
+    body.className = 'message-content';
+    if (escapeUser) { body.textContent = contentHTML; } else { body.innerHTML = contentHTML; }
+
+    div.appendChild(header);
+    div.appendChild(body);
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function renderSources(results, elapsed, meta) {
+  const showDetails = document.getElementById('showDetails')?.checked;
+  const safe = Array.isArray(results) ? results : [];
+
+  const items = safe.map((r, i) => {
+    const sim = (r.similarity ?? r.score_raw ?? (r.distance != null ? 1 - Number(r.distance) : null));
+    const simTxt = sim == null ? '—' : Number(sim).toFixed(3);
+
+    const title = r.document_title || r.meta?.document_title || r.meta?.title || '(sin título)';
+    const path  = r.document_path  || r.meta?.document_path  || r.meta?.path  || r.meta?.uri || '—';
+    const cidx  = (r.chunk_index ?? r.meta?.chunk_index ?? r.meta?.index);
+    const cidxTxt = (cidx == null ? '—' : cidx);
+
+    const snippet = (r.text || r.meta?.text || r.meta?.chunk_text || r.meta?.summary || '');
+
+    const details = showDetails
+      ? `<pre style="white-space:pre-wrap; font-size:.8rem; background:#f6f6f6; padding:.5rem; border:1px dashed #ddd; border-radius:.25rem; margin-top:.5rem;">${escapeHTML(JSON.stringify(r, null, 2))}</pre>`
+      : '';
+
+    return `
+      <div class="source-item">
+        <div><span class="source-score">[${i+1}] sim:</span> ${simTxt}</div>
+        <div class="source-title">${escapeHTML(String(title))}</div>
+        <div class="metrics">doc: ${escapeHTML(String(path))} · chunk ${escapeHTML(String(cidxTxt))}</div>
+        ${
+          snippet
+            ? `<div class="source-text">${escapeHTML(String(snippet)).slice(0, 500)}${snippet.length > 500 ? '…' : ''}</div>`
+            : ''
         }
-        const ct = resp.headers.get('content-type') || '';
-        if (!ct.includes('application/json')) {
-          addMsg('Respuesta no-JSON (¿login?)');
-          select.innerHTML = '<option value="">Login requerido</option>';
-          return;
-        }
-        const data = await resp.json();
-        console.log('[RAG] collections:', data);
+        ${details}
+      </div>
+    `;
+  }).join('');
 
-        const cols = data.collections || [];
-        select.innerHTML = '';
-        if (cols.length === 0) {
-          select.innerHTML = '<option value="">No hay colecciones</option>';
-        } else {
-          cols.forEach(col => {
-            const opt = document.createElement('option');
-            opt.value = `${col.store}:${col.name}`;
-            opt.textContent = `${col.name} (${col.chunks ?? '?' } chunks)`;
-            select.appendChild(opt);
-          });
-          addMsg(`Colecciones cargadas: ${cols.length}`);
+  addMsg('assistant', `
+    <b>Fuentes</b> (${safe.length})
+    <div class="sources">${items}</div>
+    <div class="metrics">Tiempo: ${elapsed} ms · Modelo: ${meta?.model ?? '-'} · chunks: ${meta?.n_chunks ?? '-'}</div>
+  `);
+}
+
+// Utilidad simple para evitar XSS al imprimir detalles o textos
+function escapeHTML(s) {
+  return s.replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+  );
+}
+
+  // ===== panel de información =====
+  function updateCollectionInfoFromSelect() {
+    const sel = document.getElementById('collectionSelect');
+    const info = document.getElementById('collectionInfo');
+    const det  = document.getElementById('collectionDetails');
+    const storeSel = document.getElementById('storeSelect');
+    if (!sel || !info || !det) return;
+
+    const key = sel.value;
+    const meta = RAG.colmap[key];
+    if (!meta) { info.style.display = 'none'; det.innerText = ''; return; }
+
+    info.style.display = '';
+    det.innerText = `Modelo: ${meta.model ?? '-'} · dim: ${meta.dim ?? '-'} · chunks: ${meta.chunks ?? '-'} · store: ${meta.store}`;
+
+    // sincroniza selector de store con la colección realmente elegida
+    if (storeSel && storeSel.value !== meta.store) storeSel.value = meta.store;
+  }
+
+  // ===== carga de colecciones =====
+  async function loadCollections() {
+    const ep = document.getElementById('rag-endpoints');
+    const url = ep?.dataset.collections || '/admin/rag/collections';
+    const storeSel = document.getElementById('storeSelect');
+    const collSel  = document.getElementById('collectionSelect');
+
+    try {
+      const r = await fetch(url, { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const all = j.collections || [];
+      const list = (storeSel?.value ? all.filter(c => c.store === storeSel.value) : all)
+                    .sort((a,b) => String(a.name).localeCompare(String(b.name), 'es'));
+
+      RAG.colmap = {};
+      collSel.innerHTML = '';
+
+      if (!list.length) {
+        collSel.innerHTML = '<option value="">No hay colecciones</option>';
+      } else {
+        const opts = [];
+        for (const c of list) {
+          const key = `${c.store}:${c.name}`;
+          RAG.colmap[key] = c;
+          opts.push(
+            `<option value="${key}" data-store="${c.store}" data-name="${c.name}" data-model="${c.model ?? ''}" data-dim="${c.dim ?? ''}" data-chunks="${c.chunks ?? ''}">${c.name} (${c.chunks ?? '?' } chunks)</option>`
+          );
         }
-      } catch (e) {
-        console.error('[RAG] loadCollections error:', e);
-        select.innerHTML = '<option value="">Error</option>';
-        addMsg('Error cargando colecciones');
+        collSel.innerHTML = opts.join('');
       }
+
+      // Selecciona la primera y dispara 'change' para refrescar el panel
+      if (collSel.options.length) {
+        collSel.selectedIndex = 0;
+        collSel.dispatchEvent(new Event('change', {bubbles:true}));
+      } else {
+        updateCollectionInfoFromSelect();
+      }
+
+      console.log('[RAG] Colecciones:', list.length);
+    } catch (e) {
+      console.error('[RAG] Error colecciones', e);
+      collSel.innerHTML = '<option value="">Error cargando</option>';
+    }
+  }
+
+  // ===== consulta =====
+  async function onSend() {
+    const queryInput = document.getElementById('queryInput');
+    const storeSel   = document.getElementById('storeSelect');
+    const collSel    = document.getElementById('collectionSelect');
+    const kSel       = document.getElementById('kSelect');
+    const ep         = document.getElementById('rag-endpoints');
+    const btn        = document.getElementById('sendBtn');
+
+    const q = (queryInput.value || '').trim();
+    if (!q) return;
+    addMsg('user', q, /*escapeUser*/true);
+
+    // clave "store:name" → store y collection
+    const key = collSel?.value || '';
+    let store = storeSel?.value || 'chroma';
+    let collection = '';
+    if (key.includes(':')) { const [s, c] = key.split(':'); store = s; collection = c; } else { collection = key; }
+
+    // meta esperada para validación (muy importante para tests)
+    const meta = RAG.colmap[key] || {};
+    const expectedModel = meta.model || '';
+    if (!RAG.colmap[key]) {
+      addMsg('assistant', `<div class="error">No puedo leer metadatos de la colección seleccionada. Pulsa “Actualizar” y vuelve a intentar.</div>`);
+      return;
     }
 
-    refreshBtn?.addEventListener('click', loadCollections);
-    await loadCollections(); // primera carga
-  };
+    // sincroniza UI por si la colección elegida pertenece a otro store
+    if (storeSel && storeSel.value !== store) storeSel.value = store;
 
-  // Arranque seguro: si ya cargó el DOM, ejecuta; si no, espera al evento
+    btn.disabled = true; btn.textContent = 'Consultando…';
+    try {
+      const base = ep?.dataset.query || '/admin/rag/query';
+      const enrich = document.getElementById('enrichToggle')?.checked ? '1' : '0';
+      const url  = `${base}?store=${encodeURIComponent(store)}&collection=${encodeURIComponent(collection)}&expected_model=${encodeURIComponent(expectedModel)}&enrich=${enrich}`;
+      console.log('[RAG] query URL →', url);
+
+      const resp = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q, k: parseInt(kSel?.value || '5', 10) })
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        if (resp.status === 409 && data.model_info) {
+          addMsg('assistant', `<div class="error">
+            Desajuste de modelo.<br>
+            UI esperaba: <code>${expectedModel || '-'}</code><br>
+            Colección usa: <code>${data.model_info.model || '-'}</code>.<br>
+            Pulsa “Actualizar” o elige la colección correcta.
+          </div>`);
+        } else {
+          const msg = data.error || `HTTP ${resp.status}`;
+          addMsg('assistant', `<div class="error">Error: ${msg}</div>`);
+        }
+        return;
+      }
+
+      addMsg('assistant', `Consulta procesada. Resultados: <b>${data.total_results}</b>`);
+      renderSources(data.results, data.elapsed_ms, data.model_info);
+
+      // el backend es la fuente de verdad para el panel
+      const info = document.getElementById('collectionInfo');
+      const det  = document.getElementById('collectionDetails');
+      if (data.model_info && info && det) {
+        info.style.display = '';
+        det.innerText = `Modelo: ${data.model_info.model ?? '-'} · dim: ${data.model_info.dim ?? '-'} · chunks: ${data.model_info.n_chunks ?? '-'} · store: ${data.model_info.store}`;
+      }
+    } catch (e) {
+      addMsg('assistant', `<div class="error">Error de red: ${e}</div>`);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Enviar';
+      queryInput.value = '';
+    }
+  }
+
+  function onClear() {
+    const log = document.getElementById('chatMessages');
+    if (log) log.innerHTML = '';
+  }
+
+  // ===== init =====
+  function init() {
+    document.getElementById('refreshCollections')?.addEventListener('click', loadCollections);
+    document.getElementById('storeSelect')?.addEventListener('change', loadCollections);
+    document.getElementById('collectionSelect')?.addEventListener('change', updateCollectionInfoFromSelect);
+    document.getElementById('clearChat')?.addEventListener('click', onClear);
+    document.getElementById('sendBtn')?.addEventListener('click', onSend);
+    document.getElementById('queryInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); onSend(); }
+    });
+
+    loadCollections(); // primera carga
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
+    document.addEventListener('DOMContentLoaded', init, { once: true });
   } else {
-    start();
+    init();
   }
 })();
-</script>   
+</script>
 {% endblock %}
