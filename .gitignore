@@ -17,3 +17,10 @@ models/embeddings/
 # Configuración sensible
 .env
 config/settings.toml
+
+
+
+.venv/
+data/logs/
+data/tracking.sqlite
+tracking.sqlite
