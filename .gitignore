@@ -1,24 +1,19 @@
-﻿# Entornos y temporales
-.venv/
+﻿# Entorno virtual de Python
+venv/
+
+# Archivos temporales y de caché
 __pycache__/
-app/models/__pycache__
 *.pyc
 *.pyo
 *.pyd
-*.log
-*.sqlite
-instance/
-venv/
 
+# Archivos de datos y modelos
+data/processed/
+data/web/
+models/faiss/
+models/chroma/
+models/embeddings/
 
-
-# Datos y modelos
-data/processed/*
-data/web/*
-models/faiss/*
-models/chroma/*
-models/embeddings/*
-
-# Config
+# Configuración sensible
 .env
 config/settings.toml
