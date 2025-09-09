@@ -1,0 +1,258 @@
+# Estado del Proyecto (Módulo RAG)
+
+**Proyecto:** Prototipo Chatbot RAG · **Fecha:** 2025-09-09 · **Ámbito:** backend RAG (FAISS/Chroma), UI admin, evaluación y plan de mejoras de ingesta
+
+---
+
+## 1) Resumen ejecutivo
+
+El módulo RAG está operativo con:
+
+* Vector stores: **FAISS** (index.faiss + ids.npy) y **ChromaDB** (persistente).
+* **Detección y validación** del modelo por colección (evita inconsistencias en pruebas).
+* **Embeddings** con soporte para MiniLM, E5 y BGE, aplicando **prompts de instrucción** por modelo (E5/BGE) y **normalización** para similitud.
+* **UI Admin** en `/admin/rag/chat` con: selección de store/colección, k, enriquecimiento con BD, **MMR**, **Reranker**, detalles por fuente y panel de información.
+* **Endpoints** clave: `GET /collections`, `POST /query`, `GET /selftest`, `GET /eval` (mínimo útil para métricas).
+
+Incidencias recientes **resueltas**:
+
+* Error 500 por uso de `.trim()` → corregido a `.strip()`.
+* Enriquecimiento ahora usa `get_session()` (SQLAlchemy 2.x) en lugar de `db.session`.
+* En Chroma se **evita** pedir `ids` en `include` y se normalizan metadatos (`title/path/index/text`) + `documents` como snippet.
+* UI muestra **coverage** (título, ruta, chunk, texto) para evaluar trazabilidad.
+
+**Estado actual:** consultas y *self-tests* responden con resultados y metadatos; queda pendiente reforzar **ingesta** para elevar cobertura y calidad.
+
+---
+
+## 2) Arquitectura técnica (visión breve)
+
+1. **Indexación** → split en *chunks*, limpieza, embeddings por modelo, persistencia en FAISS/Chroma y registro de metadatos/BD.
+2. **Consulta** → embedding de la query (con instrucción por modelo) + búsqueda ANN.
+3. **Post-proc** → (opcional) MMR y Reranker.
+4. **Enriquecimiento** → BD (Chunk/Document) o `metadatas/documents` del store.
+5. **Presentación** → similitud, snippet y procedencia; coverage para control de calidad.
+
+---
+
+## 3) Pendientes y riesgos
+
+* **Cobertura de metadatos**: algunos resultados aún sin `title/path/chunk/texto` → mejora de **ingesta**.
+* **Consistencia de IDs**: alinear `chunk_id` FAISS, Chroma e IDs de BD.
+* **Descarga inicial de modelos pesados**: BGE puede provocar latencias en 1ª carga.
+* **Evaluación formal**: falta ejecutar el plan completo (ver §6) tras mejorar la ingesta.
+
+---
+
+## 4) Plan de mejoras de **ingesta** (prioridad alta)
+
+### 4.1 Metadatos canónicos (obligatorio en cada chunk)
+
+Guardar siempre (en BD **y** en Chroma `metadatas`; opcionalmente en `documents`):
+
+* `document_title` (string)
+* `document_path` (string normalizada/pseudonimizada si es sensible)
+* `chunk_index` (int secuencial)
+* `text` (contenido del chunk o snippet)
+* `db_chunk_id` (si el ID en el store no es numérico o no coincide con BD)
+
+**Criterio de aceptación (DoD):** coverage ≥ **k-1** para `title/path/chunk/text` en respuestas típicas.
+
+### 4.2 Consistencia de IDs
+
+* FAISS `ids.npy` ↔ BD `Chunk.id` ↔ Chroma `ids` (o `db_chunk_id` en metadatas).
+* Si Chroma usa strings, mantener `db_chunk_id` numérico como campo canónico.
+
+### 4.3 Chunking semántico y solape
+
+* Tamaño objetivo: **400–800** caracteres con **overlap 10–15%**.
+* Respetar límites naturales (títulos, listas, párrafos).
+* Evitar cortar referencias/definiciones a mitad.
+
+### 4.4 Limpieza y normalización
+
+* Quitar cabeceras/pies repetitivos, numeración de página, artefactos OCR.
+* Normalizar espacios, guiones blandos, bullets, tablas a texto legible.
+* Detectar idioma (`lang`) y guardarlo en metadatos.
+
+### 4.5 Dedupe
+
+* Hash por chunk (exacto) y minhash/simple Jaccard para *near-duplicates*.
+* Evitar indexar contenido redundante (reduce ruido y mejora MMR/reranker).
+
+### 4.6 Versionado y *index\_meta*
+
+* `index_meta.json` por colección: `{ model, dim, created_at, corpus_version, chunking, overlap, text_cleaning }`.
+* Incluir `source_system`/`connector` si hay múltiples orígenes.
+
+### 4.7 Reindexado incremental
+
+* Hash de documento; si cambia, reindexar solo ese doc. Mantener historial de versiones.
+
+**Entregables de ingesta:**
+
+* Script `ingest.py` (o pipeline) con CLI:
+
+  * `--src <carpeta|conector>`
+  * `--model <minilm|e5|bge>`
+  * `--store <faiss|chroma>`
+  * `--meta index_meta.json`
+  * `--rebuild / --incremental`
+* Informe de ingestión: nº docs, nº chunks, duplicados removidos, coverage esperado.
+
+---
+
+## 5) Nuevas fuentes a incorporar
+
+* **Documentación municipal adicional** (PDF/DOCX/HTML).
+* **Repositorios internos** (carpetas compartidas; cuidado con permisos y PII).
+* **Boletines/Normativa** (descarga batch y trazabilidad de fechas/versión).
+* (Opc.) **APIs**/portales abiertos con resoluciones y ordenanzas.
+
+**Conectores**: lector de ficheros + parsers (PDF, DOCX, HTML) y normalizador común.
+**Mapeo** a metadatos canónicos del §4.1.
+
+**Calidad mínima por fuente:** si coverage < 80% en pruebas de muestreo → revisar parser/mapeo antes de indexar masivamente.
+
+---
+
+## 6) Evaluación del RAG (plan a ejecutar tras la ingesta)
+
+### 6.1 Dataset (gold standard)
+
+* `models/eval/evalset.json` con 100–200 consultas representativas y `relevants` (ids de chunk).
+* Estratificación: corta/larga, procedimiento/normativa, multi-idioma si aplica.
+
+### 6.2 Escenarios experimentales
+
+* **Modelos**: MiniLM (384d) vs E5 (768d) vs BGE (1024d).
+* **Stores**: FAISS vs Chroma.
+* **k**: {5, 10, 15}.
+* **MMR**: OFF vs ON (λ = 0.3 / 0.5).
+* **Reranker**: OFF vs ON (top-10, modelo rápido CPU por defecto).
+
+### 6.3 Métricas
+
+* **Recall\@k**, **MRR**, **nDCG\@k**.
+* **Latencia** por fase (embed, búsqueda, MMR, reranker).
+* **Coverage** (título, ruta, chunk, texto) reportado por el backend.
+
+### 6.4 Ejecución básica (endpoints ya disponibles)
+
+* **Selftest** (sanidad de colección):
+
+  * `GET /admin/rag/selftest?store=chroma&collection=onda_docs_bgem3&q=empadronamiento&k=5`
+* **Evaluación agregada** (mínima):
+
+  * `GET /admin/rag/eval?store=faiss&collection=onda_docs_minilm&k=5&file=models/eval/evalset.json`
+  * `GET /admin/rag/eval?store=chroma&collection=onda_docs_bgem3&k=5&file=models/eval/evalset.json`
+* **MMR / Reranker**: iterar con `POST /admin/rag/query` variando `mmr=1&lambda=0.3` y `rerank=1` sobre el mismo evalset (script auxiliar; ver §8).
+
+### 6.5 Análisis y reporte
+
+* Tablas por configuración con métricas y latencias.
+* Gráfico (nDCG\@k por modelo/store; boxplot de latencias).
+* Casos cualitativos antes/después (MMR, reranker) con fuentes citadas.
+* (Opc.) Bootstrap para significancia entre top-2 configuraciones.
+
+---
+
+## 7) Roadmap por fases
+
+### Fase A — Ingesta (alta prioridad)
+
+1. Implementar metadatos canónicos y consistencia de IDs.
+2. Mejorar chunking, limpieza y dedupe.
+3. Escribir/actualizar `index_meta.json` por colección.
+4. Reindexado completo (y baseline parcial incremental).
+5. Sanidad: `selftest` + muestreo de coverage.
+
+**Criterio de salida:** coverage ≥ k-1 en título/ruta/chunk/texto, colecciones listadas correctamente, latencias aceptables.
+
+### Fase B — Nuevas fuentes
+
+1. Conectar y parsear nuevas fuentes → normalizador común.
+2. Mapeo a metadatos canónicos; QA por muestreo.
+3. Reindexado incremental.
+
+**Criterio de salida:** misma calidad/coverage que corpus base.
+
+### Fase C — Evaluación formal
+
+1. Completar `evalset.json` (100–200 queries).
+2. Ejecutar matriz de experimentos (modelos × stores × k × MMR × reranker).
+3. Guardar resultados (JSON/CSV), gráficos y conclusiones.
+
+**Criterio de salida:** informe de evaluación listo para la memoria.
+
+### Fase D — Observabilidad y UX (opcional)
+
+* Más trazas de fases y tiempos.
+* Panel de confianza (p.ej. media de similitudes top-k o score de reranker).
+* Accesibilidad y atajos.
+
+### Fase E — Seguridad/privacidad (continuo)
+
+* Pseudonimización de rutas.
+* Logging seguro sin PII.
+* Control de permisos por fuente.
+
+---
+
+## 8) Playbook de ejecución (paso a paso)
+
+**1) Reindexar tras mejoras de ingesta**
+
+* Ejecutar `ingest.py` para cada colección objetivo (MiniLM/E5/BGE; FAISS/Chroma).
+* Verificar `index_meta.json` y conteos (chunks/dimensiones).
+
+**2) Chequeos rápidos**
+
+* `GET /admin/rag/collections` → colecciones y metadatos.
+* `GET /admin/rag/selftest?...` por colección → sanity.
+
+**3) Smoke test de consulta**
+
+* `POST /admin/rag/query?store=...&collection=...&expected_model=...&enrich=1` con 2–3 queries típicas → revisar coverage.
+
+**4) Evaluación mínima**
+
+* `GET /admin/rag/eval?...` con `k ∈ {5,10,15}` y distintas colecciones.
+
+**5) Experimentos MMR/Reranker**
+
+* Script auxiliar que recorra el evalset llamando a `/query` con `mmr/rerank` y calcule métricas (pendiente de añadir si se requiere ahora).
+
+**6) Guardado de resultados**
+
+* Carpeta `eval_runs/YYYY-MM-DD_model-store/` con JSON/CSV + gráficos.
+
+---
+
+## 9) Criterios de aceptación (DoD) por incremento
+
+* **Ingesta v2**: coverage ≥ k-1 en `title/path/chunk/text`; IDs consistentes; `index_meta.json` completo.
+* **Nuevas fuentes v1**: mismas garantías que corpus base; sin caída de nDCG/MRR.
+* **Evaluación v1**: métricas agregadas por configuración (mini tabla) + latencias.
+* **Observabilidad v1**: logs de tiempos por fase en `rag_query()`.
+
+---
+
+## 10) Riesgos y mitigación
+
+* **Desalineación de modelos/colecciones** → validación `expected_model` (ya implementada).
+* **Latencias por descarga de modelos** → precarga inicial en despliegue, caché local.
+* **Datos sensibles en `document_path`** → pseudonimización y política de acceso.
+* **Drift del corpus** → reindexado incremental; versionado `corpus_version`.
+
+---
+
+## 11) Próximos pasos inmediatos
+
+1. Implementar **canonizador de metadatos** en la ingesta (§4.1) y asegurar IDs consistentes (§4.2).
+2. Reindexar **una** colección piloto (MiniLM/FAISS) y validar coverage.
+3. Extender a E5/BGE + Chroma.
+4. Incorporar una **nueva fuente** y repetir ciclo.
+5. Preparar `evalset.json` (mínimo 50 queries) para una primera pasada de métricas.
+
+> Con esto, el siguiente ciclo de evaluación reflejará mejoras reales del RAG sin cambiar todavía el modelo.

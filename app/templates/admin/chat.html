@@ -70,29 +70,27 @@
             <option value="15">15</option>
           </select>
         </div>
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="showDetails">
-            <label class="form-check-label" for="showDetails">
-              Detalles por fuente (debug)
-            </label>
-          </div>
-          
 
-        <!-- Toggle de enriquecimiento para pruebas puras de recuperación -->
-        <div class="form-check mb-3">
+        <!-- Flags de recuperación -->
+        <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" id="enrichToggle" checked>
-          <label class="form-check-label" for="enrichToggle">
-            Enriquecer con BD (títulos, rutas)
-          </label>
+          <label class="form-check-label" for="enrichToggle">Enriquecer con BD (títulos, rutas)</label>
         </div>
-
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="mmrToggle">
+          <label class="form-check-label" for="mmrToggle">Diversidad MMR</label>
+        </div>
         <div class="mb-3">
-          <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshCollections">
-            <i class="fa-solid fa-sync"></i> Actualizar
-          </button>
-          <button type="button" class="btn btn-outline-danger btn-sm" id="clearChat">
-            <i class="fa-solid fa-trash"></i> Limpiar
-          </button>
+          <label class="form-label">λ (MMR)</label>
+          <input type="range" class="form-range" id="mmrLambda" min="0" max="1" step="0.05" value="0.3">
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="rerankToggle">
+          <label class="form-check-label" for="rerankToggle">Reranking (cross-encoder)</label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="showDetails">
+          <label class="form-check-label" for="showDetails">Detalles por fuente (debug)</label>
         </div>
 
         <div id="collectionInfo" class="mt-3" style="display:none;">
@@ -130,17 +128,21 @@
   </div>
 </div>
 
-<!-- Endpoints (rutas seguras con url_for) -->
+<!-- Endpoints -->
 <div id="rag-endpoints"
      data-collections="{{ url_for('admin_rag.list_collections') }}"
      data-query="{{ url_for('admin_rag.rag_query') }}"></div>
 
 <script>
 (() => {
-  // ===== mini-store de colecciones con metadatos =====
-  const RAG = { colmap: {} }; // key "store:name" -> {store,name,model,dim,chunks}
+  const RAG = { colmap: {} };
 
-  // ===== utils UI =====
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, m =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+    );
+  }
+
   function addMsg(role, contentHTML, escapeUser=false) {
     const log = document.getElementById('chatMessages');
     const div = document.createElement('div');
@@ -162,55 +164,59 @@
     log.scrollTop = log.scrollHeight;
   }
 
-  function renderSources(results, elapsed, meta) {
-  const showDetails = document.getElementById('showDetails')?.checked;
-  const safe = Array.isArray(results) ? results : [];
+  function renderSources(results, elapsed, meta, coverage, warnings) {
+    const showDetails = document.getElementById('showDetails')?.checked;
+    const safe = Array.isArray(results) ? results : [];
 
-  const items = safe.map((r, i) => {
-    const sim = (r.similarity ?? r.score_raw ?? (r.distance != null ? 1 - Number(r.distance) : null));
-    const simTxt = sim == null ? '—' : Number(sim).toFixed(3);
+    const items = safe.map((r, i) => {
+      const sim = (r.similarity ?? r.score_raw ?? (r.distance != null ? 1 - Number(r.distance) : null));
+      const simTxt = sim == null ? '—' : Number(sim).toFixed(3);
 
-    const title = r.document_title || r.meta?.document_title || r.meta?.title || '(sin título)';
-    const path  = r.document_path  || r.meta?.document_path  || r.meta?.path  || r.meta?.uri || '—';
-    const cidx  = (r.chunk_index ?? r.meta?.chunk_index ?? r.meta?.index);
-    const cidxTxt = (cidx == null ? '—' : cidx);
+      const title = r.document_title || r.meta?.document_title || r.meta?.title || '(sin título)';
+      const path  = r.document_path  || r.meta?.document_path  || r.meta?.path  || r.meta?.uri || '—';
+      const cidx  = (r.chunk_index ?? r.meta?.chunk_index ?? r.meta?.index);
+      const cidxTxt = (cidx == null ? '—' : cidx);
 
-    const snippet = (r.text || r.meta?.text || r.meta?.chunk_text || r.meta?.summary || '');
+      const snippet = (r.text || r.meta?.text || r.meta?.chunk_text || r.meta?.summary || '');
 
-    const details = showDetails
-      ? `<pre style="white-space:pre-wrap; font-size:.8rem; background:#f6f6f6; padding:.5rem; border:1px dashed #ddd; border-radius:.25rem; margin-top:.5rem;">${escapeHTML(JSON.stringify(r, null, 2))}</pre>`
+      const details = showDetails
+        ? `<pre style="white-space:pre-wrap; font-size:.8rem; background:#f6f6f6; padding:.5rem; border:1px dashed #ddd; border-radius:.25rem; margin-top:.5rem;">${escapeHTML(JSON.stringify(r, null, 2))}</pre>`
+        : '';
+
+      return `
+        <div class="source-item">
+          <div><span class="source-score">[${i+1}] sim:</span> ${simTxt}</div>
+          <div class="source-title">${escapeHTML(String(title))}</div>
+          <div class="metrics">doc: ${escapeHTML(String(path))} · chunk ${escapeHTML(String(cidxTxt))}</div>
+          ${
+            snippet
+              ? `<div class="source-text">${escapeHTML(String(snippet)).slice(0, 500)}${snippet.length > 500 ? '…' : ''}</div>`
+              : ''
+          }
+          ${details}
+        </div>
+      `;
+    }).join('');
+
+    const warningsHtml = (warnings && warnings.length)
+      ? `<div class="error">Avisos: ${warnings.map(escapeHTML).join(' · ')}</div>`
       : '';
 
-    return `
-      <div class="source-item">
-        <div><span class="source-score">[${i+1}] sim:</span> ${simTxt}</div>
-        <div class="source-title">${escapeHTML(String(title))}</div>
-        <div class="metrics">doc: ${escapeHTML(String(path))} · chunk ${escapeHTML(String(cidxTxt))}</div>
-        ${
-          snippet
-            ? `<div class="source-text">${escapeHTML(String(snippet)).slice(0, 500)}${snippet.length > 500 ? '…' : ''}</div>`
-            : ''
-        }
-        ${details}
-      </div>
-    `;
-  }).join('');
+    const cov = coverage || {};
+    const covHtml = `
+      <div class="metrics">
+        Cobertura → título: ${cov.title || 0}, ruta: ${cov.path || 0}, chunk: ${cov.chunk_index || 0}, texto: ${cov.text || 0}
+      </div>`;
 
-  addMsg('assistant', `
-    <b>Fuentes</b> (${safe.length})
-    <div class="sources">${items}</div>
-    <div class="metrics">Tiempo: ${elapsed} ms · Modelo: ${meta?.model ?? '-'} · chunks: ${meta?.n_chunks ?? '-'}</div>
-  `);
-}
+    addMsg('assistant', `
+      ${warningsHtml}
+      <b>Fuentes</b> (${safe.length})
+      <div class="sources">${items}</div>
+      <div class="metrics">Tiempo: ${elapsed} ms · Modelo: ${meta?.model ?? '-'} · chunks: ${meta?.n_chunks ?? '-'}</div>
+      ${covHtml}
+    `);
+  }
 
-// Utilidad simple para evitar XSS al imprimir detalles o textos
-function escapeHTML(s) {
-  return s.replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
-  );
-}
-
-  // ===== panel de información =====
   function updateCollectionInfoFromSelect() {
     const sel = document.getElementById('collectionSelect');
     const info = document.getElementById('collectionInfo');
@@ -225,11 +231,9 @@ function escapeHTML(s) {
     info.style.display = '';
     det.innerText = `Modelo: ${meta.model ?? '-'} · dim: ${meta.dim ?? '-'} · chunks: ${meta.chunks ?? '-'} · store: ${meta.store}`;
 
-    // sincroniza selector de store con la colección realmente elegida
     if (storeSel && storeSel.value !== meta.store) storeSel.value = meta.store;
   }
 
-  // ===== carga de colecciones =====
   async function loadCollections() {
     const ep = document.getElementById('rag-endpoints');
     const url = ep?.dataset.collections || '/admin/rag/collections';
@@ -261,7 +265,6 @@ function escapeHTML(s) {
         collSel.innerHTML = opts.join('');
       }
 
-      // Selecciona la primera y dispara 'change' para refrescar el panel
       if (collSel.options.length) {
         collSel.selectedIndex = 0;
         collSel.dispatchEvent(new Event('change', {bubbles:true}));
@@ -276,7 +279,6 @@ function escapeHTML(s) {
     }
   }
 
-  // ===== consulta =====
   async function onSend() {
     const queryInput = document.getElementById('queryInput');
     const storeSel   = document.getElementById('storeSelect');
@@ -289,28 +291,28 @@ function escapeHTML(s) {
     if (!q) return;
     addMsg('user', q, /*escapeUser*/true);
 
-    // clave "store:name" → store y collection
     const key = collSel?.value || '';
     let store = storeSel?.value || 'chroma';
     let collection = '';
     if (key.includes(':')) { const [s, c] = key.split(':'); store = s; collection = c; } else { collection = key; }
 
-    // meta esperada para validación (muy importante para tests)
     const meta = RAG.colmap[key] || {};
     const expectedModel = meta.model || '';
     if (!RAG.colmap[key]) {
       addMsg('assistant', `<div class="error">No puedo leer metadatos de la colección seleccionada. Pulsa “Actualizar” y vuelve a intentar.</div>`);
       return;
     }
-
-    // sincroniza UI por si la colección elegida pertenece a otro store
     if (storeSel && storeSel.value !== store) storeSel.value = store;
+
+    const enrich = document.getElementById('enrichToggle')?.checked ? '1' : '0';
+    const mmr    = document.getElementById('mmrToggle')?.checked ? '1' : '0';
+    const lam    = document.getElementById('mmrLambda')?.value || '0.3';
+    const rerank = document.getElementById('rerankToggle')?.checked ? '1' : '0';
 
     btn.disabled = true; btn.textContent = 'Consultando…';
     try {
       const base = ep?.dataset.query || '/admin/rag/query';
-      const enrich = document.getElementById('enrichToggle')?.checked ? '1' : '0';
-      const url  = `${base}?store=${encodeURIComponent(store)}&collection=${encodeURIComponent(collection)}&expected_model=${encodeURIComponent(expectedModel)}&enrich=${enrich}`;
+      const url  = `${base}?store=${encodeURIComponent(store)}&collection=${encodeURIComponent(collection)}&expected_model=${encodeURIComponent(expectedModel)}&enrich=${enrich}&mmr=${mmr}&lambda=${encodeURIComponent(lam)}&rerank=${rerank}`;
       console.log('[RAG] query URL →', url);
 
       const resp = await fetch(url, {
@@ -331,23 +333,19 @@ function escapeHTML(s) {
           </div>`);
         } else {
           const msg = data.error || `HTTP ${resp.status}`;
-          addMsg('assistant', `<div class="error">Error: ${msg}</div>`);
+          addMsg('assistant', `<div class="error">Error: ${escapeHTML(msg)}</div>`);
         }
         return;
       }
 
-      addMsg('assistant', `Consulta procesada. Resultados: <b>${data.total_results}</b>`);
-      renderSources(data.results, data.elapsed_ms, data.model_info);
-
-      // el backend es la fuente de verdad para el panel
-      const info = document.getElementById('collectionInfo');
-      const det  = document.getElementById('collectionDetails');
-      if (data.model_info && info && det) {
-        info.style.display = '';
-        det.innerText = `Modelo: ${data.model_info.model ?? '-'} · dim: ${data.model_info.dim ?? '-'} · chunks: ${data.model_info.n_chunks ?? '-'} · store: ${data.model_info.store}`;
+      if (data.warnings?.length) {
+        addMsg('assistant', `<div class="error">Avisos: ${data.warnings.map(escapeHTML).join(' · ')}</div>`);
       }
+
+      addMsg('assistant', `Consulta procesada. Resultados: <b>${data.total_results}</b>`);
+      renderSources(data.results, data.elapsed_ms, data.model_info, data.coverage, data.warnings || []);
     } catch (e) {
-      addMsg('assistant', `<div class="error">Error de red: ${e}</div>`);
+      addMsg('assistant', `<div class="error">Error de red: ${escapeHTML(e)}</div>`);
     } finally {
       btn.disabled = false; btn.textContent = 'Enviar';
       queryInput.value = '';
@@ -359,7 +357,20 @@ function escapeHTML(s) {
     if (log) log.innerHTML = '';
   }
 
-  // ===== init =====
+  function updateCollectionInfoFromSelect() {
+    const sel = document.getElementById('collectionSelect');
+    const info = document.getElementById('collectionInfo');
+    const det  = document.getElementById('collectionDetails');
+    const storeSel = document.getElementById('storeSelect');
+    if (!sel || !info || !det) return;
+    const key = sel.value;
+    const meta = RAG.colmap[key];
+    if (!meta) { info.style.display = 'none'; det.innerText=''; return; }
+    info.style.display = '';
+    det.innerText = `Modelo: ${meta.model ?? '-'} · dim: ${meta.dim ?? '-'} · chunks: ${meta.chunks ?? '-'} · store: ${meta.store}`;
+    if (storeSel && storeSel.value !== meta.store) storeSel.value = meta.store;
+  }
+
   function init() {
     document.getElementById('refreshCollections')?.addEventListener('click', loadCollections);
     document.getElementById('storeSelect')?.addEventListener('change', loadCollections);
@@ -369,8 +380,7 @@ function escapeHTML(s) {
     document.getElementById('queryInput')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); onSend(); }
     });
-
-    loadCollections(); // primera carga
+    loadCollections();
   }
 
   if (document.readyState === 'loading') {
