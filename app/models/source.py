@@ -11,7 +11,22 @@ class Source(Base):
     name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     config: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
-    # Relaciones (imprescindibles para cuadrar back_populates)
-    runs = relationship("IngestionRun", back_populates="source", cascade="all, delete-orphan")
-    documents = relationship("Document", back_populates="source", cascade="all, delete-orphan")
-    chunks = relationship("Chunk", back_populates="source", cascade="all, delete-orphan")
+    # Relaciones (con lazy="selectin" para precargar en listas y evitar DetachedInstanceError en Jinja)
+    runs = relationship(
+        "IngestionRun",
+        back_populates="source",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    documents = relationship(
+        "Document",
+        back_populates="source",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    chunks = relationship(
+        "Chunk",
+        back_populates="source",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )

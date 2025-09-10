@@ -15,5 +15,9 @@ class IngestionRun(Base):
 
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    # Relaciones
-    source = relationship("Source", back_populates="runs")
+    # Relaciones (lazy="selectin" para que r.source esté disponible tras cerrar la sesión)
+    source = relationship(
+        "Source",
+        back_populates="runs",
+        lazy="selectin",
+    )

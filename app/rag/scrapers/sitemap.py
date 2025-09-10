@@ -1,9 +1,9 @@
 # app/rag/scrapers/sitemap.py
 from __future__ import annotations
 
-import io
 import logging
-from typing import List, Tuple, Set
+import re
+from typing import List, Tuple, Set, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 import requests
@@ -14,112 +14,147 @@ logger = logging.getLogger("ingestion.web.sitemap")
 XML_NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
 
-def _normalize_scheme(url: str, force_https: bool) -> str:
-    p = urlparse(url)
-    if force_https and p.scheme == "http":
-        p = p._replace(scheme="https")
-    return urlunparse(p)
-
-
-def _robots_url(base_url: str, force_https: bool) -> str:
-    p = urlparse(base_url)
-    p = p._replace(path="/robots.txt", params="", query="", fragment="")
-    return _normalize_scheme(urlunparse(p), force_https)
-
-
-def _default_sitemap(base_url: str, force_https: bool) -> str:
-    p = urlparse(base_url)
-    p = p._replace(path="/sitemap.xml", params="", query="", fragment="")
-    return _normalize_scheme(urlunparse(p), force_https)
-
-
-def _fetch(url: str, timeout: float = 20.0, headers: dict | None = None) -> tuple[int, str]:
-    r = requests.get(url, timeout=timeout, headers=headers or {})
-    return r.status_code, r.text or ""
-
-
-def discover_sitemaps_from_robots(base_url: str, *, force_https: bool, user_agent: str) -> List[str]:
+def _normalize_scheme(url: str, force_https: bool = False) -> str:
     """
-    Busca entradas 'Sitemap:' en robots.txt. Si no hay, vuelve con /sitemap.xml.
+    Normaliza el esquema de la URL. Si force_https=True, cambia http→https manteniendo host y path.
     """
-    robots = _robots_url(base_url, force_https)
     try:
-        code, body = _fetch(robots, headers={"User-Agent": user_agent})
-        if code == 200 and body:
-            sitemaps = []
-            for line in body.splitlines():
-                line_l = line.strip().lower()
-                if line_l.startswith("sitemap:"):
-                    raw = line.split(":", 1)[1].strip()
-                    if raw:
-                        sitemaps.append(_normalize_scheme(raw, force_https))
-            if sitemaps:
-                logger.info("sitemap.discovered.from.robots count=%d", len(sitemaps))
-                return sitemaps
-    except Exception as e:
-        logger.warning("sitemap.robots.error url=%s err=%s", robots, e)
-
-    default = _default_sitemap(base_url, force_https)
-    logger.info("sitemap.fallback default=%s", default)
-    return [default]
+        u = urlparse(url)
+        scheme = "https" if force_https else (u.scheme or "https")
+        return urlunparse((scheme, u.netloc, u.path or "/", u.params, u.query, u.fragment))
+    except Exception:
+        return url
 
 
-def parse_sitemap_or_index(url: str, *, user_agent: str) -> Tuple[List[str], List[str]]:
+def _get(url: str, *, user_agent: str, timeout: int = 15) -> requests.Response:
+    headers = {"User-Agent": user_agent or "Mozilla/5.0"}
+    resp = requests.get(url, headers=headers, timeout=timeout)
+    resp.raise_for_status()
+    return resp
+
+
+def parse_sitemap_or_index(url: str, *, user_agent: str, timeout: int = 15) -> Tuple[List[str], List[str]]:
     """
-    Devuelve:
-      pages -> URLs de <urlset>
-      subs  -> URLs de sitemaps hijos si era <sitemapindex>
+    Devuelve (pages, subsitemaps) leídos desde `url`, que puede ser un sitemap.xml o un sitemapindex.xml.
     """
-    code, xml = _fetch(url, headers={"User-Agent": user_agent})
-    if code != 200 or not xml.strip():
-        logger.warning("sitemap.fetch.error status=%s url=%s", code, url)
-        return [], []
     try:
-        root = ET.parse(io.StringIO(xml)).getroot()
+        r = _get(url, user_agent=user_agent, timeout=timeout)
     except Exception as e:
-        logger.warning("sitemap.parse.error url=%s err=%s", url, e)
+        logger.warning("sitemap.get error url=%s: %r", url, e)
         return [], []
+
+    content = r.content
+    try:
+        root = ET.fromstring(content)
+    except Exception as e:
+        logger.warning("sitemap.parse error url=%s: %r", url, e)
+        return [], []
+
+    pages: List[str] = []
+    subs: List[str] = []
 
     tag = root.tag.lower()
-    pages, subs = [], []
+    # namespaced tags often endwith 'urlset' or 'sitemapindex'
     if tag.endswith("urlset"):
-        for el in root.findall("sm:url/sm:loc", XML_NS):
-            if el.text:
-                pages.append(el.text.strip())
-        logger.info("sitemap.urlset pages=%d url=%s", len(pages), url)
+        for loc in root.findall(".//sm:url/sm:loc", XML_NS):
+            if loc.text:
+                pages.append(loc.text.strip())
     elif tag.endswith("sitemapindex"):
-        for el in root.findall("sm:sitemap/sm:loc", XML_NS):
-            if el.text:
-                subs.append(el.text.strip())
-        logger.info("sitemap.index subs=%d url=%s", len(subs), url)
+        for s in root.findall(".//sm:sitemap/sm:loc", XML_NS):
+            if s.text:
+                subs.append(s.text.strip())
     else:
-        logger.warning("sitemap.unknown.root tag=%s url=%s", root.tag, url)
+        # Intento genérico sin namespace
+        for loc in root.findall(".//url/loc"):
+            if loc.text:
+                pages.append(loc.text.strip())
+        for s in root.findall(".//sitemap/loc"):
+            if s.text:
+                subs.append(s.text.strip())
 
     return pages, subs
 
 
-def collect_all_pages(seed_sitemaps: List[str], *, force_https: bool, user_agent: str) -> Tuple[List[str], List[str]]:
+def collect_all_pages(
+    seed_sitemaps: Union[List[str], str],
+    *,
+    force_https: bool = False,
+    user_agent: str = "Mozilla/5.0",
+    allowed_domains: Optional[List[str]] = None,
+    include: Optional[Union[List[str], str]] = None,
+    exclude: Optional[Union[List[str], str]] = None,
+    max_pages: Optional[int] = None,
+    timeout: int = 15,
+) -> Tuple[List[str], List[str]]:
     """
     Recorre sitemapindex -> sitemaps -> urlset de forma recursiva.
-    Retorna (pages, visited_sitemaps).
+    Aplica filtrado por dominio y patrones, y limita con max_pages si se indica.
+    Retorna (pages_filtradas, visited_sitemaps).
     """
+    # Normalizar semillas
+    if isinstance(seed_sitemaps, str):
+        queue: List[str] = [seed_sitemaps]
+    else:
+        queue = list(seed_sitemaps or [])
+
+    # Normalizar filtros
+    allowed_domains = (allowed_domains or [])
+    if isinstance(include, str):
+        include = [include]
+    if isinstance(exclude, str):
+        exclude = [exclude]
+
+    def _normalize(url: str) -> str:
+        return _normalize_scheme(url, force_https)
+
+    def _domain_allowed(u: str) -> bool:
+        if not allowed_domains:
+            return True
+        host = urlparse(u).netloc.lower()
+        return any(host == d.lower() or host.endswith("." + d.lower()) for d in allowed_domains)
+
+    def _pattern_ok(u: str) -> bool:
+        # Usamos subcadenas o regex simples (compatibles con la UI)
+        def _match(pat: str, txt: str) -> bool:
+            # Si parece regex, usa re; si no, substring
+            if any(ch in pat for ch in ".*?[]()|\\"):
+                return re.search(pat, txt, re.IGNORECASE) is not None
+            return pat.lower() in txt.lower()
+        if include:
+            if not any(p and _match(p, u) for p in include):
+                return False
+        if exclude:
+            if any(p and _match(p, u) for p in exclude):
+                return False
+        return True
+
     visited: Set[str] = set()
-    out_pages: Set[str] = set()
-    queue: List[str] = list(seed_sitemaps)
+    out_pages: List[str] = []
 
     while queue:
-        sm = queue.pop()
-        sm = _normalize_scheme(sm, force_https)
+        sm = _normalize(queue.pop())
         if sm in visited:
             continue
         visited.add(sm)
 
-        pages, subs = parse_sitemap_or_index(sm, user_agent=user_agent)
+        pages, subs = parse_sitemap_or_index(sm, user_agent=user_agent, timeout=timeout)
+
+        # Añadir páginas filtradas (y cortar temprano si se alcanza max_pages)
         for p in pages:
-            out_pages.add(_normalize_scheme(p, force_https))
+            p = _normalize(p)
+            if _domain_allowed(p) and _pattern_ok(p):
+                out_pages.append(p)
+                if max_pages and max_pages > 0 and len(out_pages) >= max_pages:
+                    queue.clear()
+                    break
+
+        # Encolar sitemaps hijos
         for s in subs:
-            s = _normalize_scheme(s, force_https)
+            s = _normalize(s)
             if s not in visited:
                 queue.append(s)
 
-    return sorted(out_pages), sorted(visited)
+    # Asegurar límite si no se cortó antes
+    if max_pages and max_pages > 0 and len(out_pages) > max_pages:
+        out_pages = out_pages[:max_pages]
+    return out_pages, sorted(visited)

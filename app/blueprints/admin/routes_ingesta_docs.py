@@ -28,6 +28,9 @@ from flask import (
 import app.extensions.db as db
 from app.models import Source, IngestionRun
 
+# 👇 NUEVO: precarga relaciones para evitar DetachedInstanceError
+from sqlalchemy.orm import selectinload
+
 # Blueprint (se mantiene el nombre público "ingesta_docs")
 bp_ingesta_docs = Blueprint("ingesta_docs", __name__, url_prefix="/admin/ingesta-docs")
 
@@ -103,6 +106,7 @@ def index():
         runs = (
             s.query(IngestionRun)
             .join(Source, IngestionRun.source_id == Source.id)
+            .options(selectinload(IngestionRun.source))  # 👈 precarga Source
             .filter(Source.type == "docs")
             .order_by(IngestionRun.id.desc())
             .limit(25)
@@ -273,6 +277,7 @@ def preview(run_id: int):
         runs = (
             s.query(IngestionRun)
             .join(Source, IngestionRun.source_id == Source.id)
+            .options(selectinload(IngestionRun.source))  # 👈 precarga también aquí
             .filter(Source.type == "docs")
             .order_by(IngestionRun.id.desc())
             .limit(25)

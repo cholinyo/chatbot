@@ -4,11 +4,13 @@ import fnmatch
 import hashlib
 import json
 import logging
-log = logging.getLogger("ingestion")
-from dataclasses import asdict
+import re
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Iterable, List, Tuple
+from typing import Dict, Any, Iterable, List, Tuple, Optional
+
+log = logging.getLogger("ingestion")
 
 from app.extensions.db import get_session
 from app.models.source import Source
@@ -16,17 +18,167 @@ from app.models.document import Document
 from app.models.chunk import Chunk
 from app.models.ingestion_run import IngestionRun
 
-from app.rag.processing.cleaners import clean_text, text_sha256
-from app.rag.processing.splitters import SplitOptions, split_text
-from app.rag.loaders.pdf_loader import load_pdf
-from app.rag.loaders.docx_loader import load_docx
-from app.rag.loaders.txt_loader import load_txt
-from app.rag.loaders.csv_loader import load_csv
+# ============================
+# IMPORTS CONDICIONALES
+# ============================
+
+# Procesadores de texto
+try:
+    from app.rag.processing.cleaners import clean_text, text_sha256
+except ImportError as e:
+    log.warning("RAG cleaners not available: %s", e)
+    clean_text = None
+    text_sha256 = None
+
+try:
+    from app.rag.processing.splitters import SplitOptions, split_text
+except ImportError as e:
+    log.warning("RAG splitters not available: %s", e)
+    SplitOptions = None
+    split_text = None
+
+# Loaders por tipo de archivo
+try:
+    from app.rag.loaders.pdf_loader import load_pdf
+except ImportError as e:
+    log.warning("PDF loader not available - install PyPDF2: %s", e)
+    load_pdf = None
+
+try:
+    from app.rag.loaders.docx_loader import load_docx
+except ImportError as e:
+    log.warning("DOCX loader not available - install python-docx: %s", e)
+    load_docx = None
+
+try:
+    from app.rag.loaders.txt_loader import load_txt
+except ImportError as e:
+    log.warning("TXT loader not available: %s", e)
+    load_txt = None
+
+try:
+    from app.rag.loaders.csv_loader import load_csv
+except ImportError as e:
+    log.warning("CSV loader not available - install pandas: %s", e)
+    load_csv = None
+
+# ============================
+# FALLBACKS SIMPLES
+# ============================
+
+@dataclass
+class FallbackSplitOptions:
+    """Fallback para SplitOptions cuando no está disponible."""
+    chunk_size: int = 512
+    chunk_overlap: int = 64
+
+@dataclass
+class FallbackChunk:
+    """Fallback para chunks cuando split_text no está disponible."""
+    text: str
+    position: int
 
 
-# ------------------------------
-# Public API
-# ------------------------------
+def fallback_clean_text(text: str) -> str:
+    """Limpieza básica de texto cuando clean_text no está disponible."""
+    if not text:
+        return ""
+    
+    # Normalizar espacios en blanco
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip()
+    
+    # Remover caracteres de control
+    text = ''.join(char for char in text if ord(char) >= 32 or char in '\n\t')
+    
+    return text
+
+
+def fallback_text_sha256(text: str) -> str:
+    """Hash SHA256 básico cuando text_sha256 no está disponible."""
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+
+def fallback_split_text(text: str, options: Any) -> List[FallbackChunk]:
+    """División básica de texto cuando split_text no está disponible."""
+    if not text:
+        return []
+    
+    chunk_size = getattr(options, 'chunk_size', 512)
+    chunk_overlap = getattr(options, 'chunk_overlap', 64)
+    
+    chunks = []
+    start = 0
+    position = 0
+    
+    while start < len(text):
+        end = start + chunk_size
+        chunk_text = text[start:end]
+        
+        if chunk_text.strip():
+            chunks.append(FallbackChunk(text=chunk_text, position=position))
+            position += 1
+        
+        start = end - chunk_overlap if chunk_overlap > 0 else end
+    
+    return chunks
+
+
+def fallback_load_txt(file_path: Path, default_encoding: str = "utf-8") -> Tuple[str, Dict[str, Any]]:
+    """Carga básica de archivos de texto."""
+    try:
+        content = file_path.read_text(encoding=default_encoding, errors='ignore')
+        meta = {
+            "title": file_path.stem,
+            "loader": "fallback_txt",
+            "encoding": default_encoding
+        }
+        return content, meta
+    except Exception as e:
+        log.error("Error loading text file %s: %s", file_path, e)
+        return "", {"title": file_path.stem, "error": str(e)}
+
+
+def fallback_load_csv(file_path: Path, delimiter: str = ",", encoding: str = "utf-8", **kwargs) -> Tuple[str, Dict[str, Any]]:
+    """Carga básica de archivos CSV sin pandas."""
+    try:
+        content = file_path.read_text(encoding=encoding, errors='ignore')
+        
+        # Convertir CSV a texto plano
+        lines = content.splitlines()
+        if lines:
+            # Primera línea como cabecera
+            header = lines[0] if lines else ""
+            text_content = f"CSV Data from {file_path.name}\n"
+            text_content += f"Headers: {header}\n\n"
+            
+            # Algunas filas de muestra (máximo 20)
+            sample_lines = lines[1:21] if len(lines) > 1 else []
+            for i, line in enumerate(sample_lines, 1):
+                text_content += f"Row {i}: {line}\n"
+            
+            if len(lines) > 21:
+                text_content += f"\n... and {len(lines) - 21} more rows"
+        else:
+            text_content = f"Empty CSV file: {file_path.name}"
+            
+        meta = {
+            "title": file_path.stem,
+            "loader": "fallback_csv",
+            "rows": len(lines),
+            "delimiter": delimiter
+        }
+        return text_content, meta
+        
+    except Exception as e:
+        log.error("Error loading CSV file %s: %s", file_path, e)
+        return f"Error loading CSV: {e}", {"title": file_path.stem, "error": str(e)}
+
+
+# ============================
+# FUNCIONES PÚBLICAS
+# ============================
+
 def ingest_documents_by_source_id(source_id: str) -> IngestionRun:
     with get_session() as s:
         src = s.get(Source, source_id)
@@ -43,9 +195,10 @@ def ingest_documents(source: Source) -> IngestionRun:
         return _ingest_documents(s, src)
 
 
-# ------------------------------
-# Core implementation
-# ------------------------------
+# ============================
+# IMPLEMENTACIÓN PRINCIPAL
+# ============================
+
 def _ingest_documents(session, source: Source) -> IngestionRun:
     cfg = source.config or {}
     input_dir = Path(cfg.get("input_dir", "data/raw/documents")).resolve()
@@ -64,7 +217,7 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
     csv_columns = csv_cfg.get("columns", None)
     encoding_default = cfg.get("encoding_default", "utf-8")
 
-    # Start run
+    # Iniciar run
     run = IngestionRun(
         source_id=source.id,
         source_type=source.type,
@@ -73,9 +226,8 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
         status="running",
     )
     session.add(run)
-    session.flush()  # ensure run_id
+    session.flush()  # asegurar run_id
 
-    # LOG: inicio del run
     log.info(
         "run.start source_id=%s scope=%s policy=%s include_ext=%s recursive=%s",
         source.id, str(input_dir), policy, include_ext, recursive
@@ -89,62 +241,100 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
         "failed": 0,
         "total_chunks": 0,
         "errors": [],
+        "warnings": [],
     }
+
+    # Verificar disponibilidad de dependencias críticas
+    missing_deps = []
+    if clean_text is None:
+        missing_deps.append("rag.processing.cleaners")
+        stats["warnings"].append("Using fallback text cleaning - install rag processing modules")
+    
+    if split_text is None:
+        missing_deps.append("rag.processing.splitters")
+        stats["warnings"].append("Using fallback text splitting - install rag processing modules")
+
+    if missing_deps:
+        log.warning("Missing RAG dependencies: %s - using fallbacks", missing_deps)
 
     try:
         files = _enumerate_files(input_dir, recursive, include_ext, exclude_patterns)
-        # LOG: resumen de enumeración
         log.debug("enumerate files=%d dir=%s", len(files), str(input_dir))
 
         for file_path in files:
             stats["scanned"] += 1
-            # LOG: comienzo por fichero
             log.debug("scan file=%s", str(file_path))
 
             try:
                 changed, doc_meta = _should_process(session, source, file_path, policy)
                 if not changed:
                     stats["skipped_unchanged"] += 1
-                    # LOG: skip por no cambiado
                     log.info("skip.unchanged file=%s", str(file_path))
                     continue
 
-                # Extract text + metadata
+                # Extraer texto y metadatos
                 ext = file_path.suffix.lower().lstrip(".")
+                raw_text, meta = "", {}
+                mime = "application/octet-stream"
+
                 if ext == "pdf":
+                    if load_pdf is None:
+                        raise ValueError("PDF processing not available - install PyPDF2")
                     raw_text, meta = load_pdf(file_path)
                     mime = "application/pdf"
+                    
                 elif ext == "docx":
+                    if load_docx is None:
+                        raise ValueError("DOCX processing not available - install python-docx")
                     raw_text, meta = load_docx(file_path)
                     mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    
                 elif ext == "txt":
-                    raw_text, meta = load_txt(file_path, default_encoding=encoding_default)
+                    if load_txt is not None:
+                        raw_text, meta = load_txt(file_path, default_encoding=encoding_default)
+                    else:
+                        raw_text, meta = fallback_load_txt(file_path, encoding_default)
                     mime = "text/plain"
+                    
                 elif ext == "csv":
-                    raw_text, meta = load_csv(
-                        file_path,
-                        delimiter=csv_delim,
-                        quotechar=csv_quote,
-                        header=csv_header,
-                        columns=csv_columns,
-                        encoding=encoding_default,
-                    )
+                    if load_csv is not None:
+                        raw_text, meta = load_csv(
+                            file_path,
+                            delimiter=csv_delim,
+                            quotechar=csv_quote,
+                            header=csv_header,
+                            columns=csv_columns,
+                            encoding=encoding_default,
+                        )
+                    else:
+                        raw_text, meta = fallback_load_csv(
+                            file_path, 
+                            delimiter=csv_delim, 
+                            encoding=encoding_default
+                        )
                     mime = "text/csv"
+                    
                 else:
                     raise ValueError(f"Unsupported extension: .{ext}")
 
-                # LOG: tras cargar el fichero
                 log.info(
                     "process file=%s ext=%s size=%s",
                     str(file_path), ext,
                     (file_path.stat().st_size if file_path.exists() else None)
                 )
 
-                # Clean & hash
-                cleaned = clean_text(raw_text)
-                normalized_hash = text_sha256(cleaned)
+                # Limpiar y hashear
+                if clean_text is not None:
+                    cleaned = clean_text(raw_text)
+                else:
+                    cleaned = fallback_clean_text(raw_text)
+                    
+                if text_sha256 is not None:
+                    normalized_hash = text_sha256(cleaned)
+                else:
+                    normalized_hash = fallback_text_sha256(cleaned)
 
-                # Build/refresh Document row
+                # Construir/actualizar Document
                 doc_id = _stable_doc_id(source, input_dir, file_path)
                 doc = session.get(Document, doc_id)
                 is_new = doc is None
@@ -157,7 +347,7 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
                     )
 
                 doc.title = meta.get("title") if isinstance(meta, dict) else None
-                doc.lang = None  # optional: language detection later
+                doc.lang = None
                 doc.mime = mime
                 doc.version = None
                 doc.collected_at = run.started_at
@@ -165,20 +355,28 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
                 doc.origin_hash = doc_meta["origin_hash"]
                 doc.normalized_hash = normalized_hash
 
-                # Replace chunks
+                # Reemplazar chunks
                 if not is_new:
                     for c in list(doc.chunks):
                         session.delete(c)
 
-                # Split into chunks
+                # Dividir en chunks
                 rag_cfg = (source.config.get("rag", {}) if isinstance(source.config, dict) else {}) or {}
-                split_opts = SplitOptions(
-                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
-                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
-                )
-                pieces = split_text(cleaned, split_opts)
+                
+                if SplitOptions is not None and split_text is not None:
+                    split_opts = SplitOptions(
+                        chunk_size=int(rag_cfg.get("chunk_size", 512)),
+                        chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
+                    )
+                    pieces = split_text(cleaned, split_opts)
+                else:
+                    # Usar fallback
+                    split_opts = FallbackSplitOptions(
+                        chunk_size=int(rag_cfg.get("chunk_size", 512)),
+                        chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
+                    )
+                    pieces = fallback_split_text(cleaned, split_opts)
 
-                # LOG: tras split
                 log.info("split file=%s chunks=%d", str(file_path), len(pieces))
 
                 for ch in pieces:
@@ -196,23 +394,25 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
                             provenance={
                                 "run_id": run.run_id,
                                 "loader": ext,
-                                "cleaner": "default",
-                                "split": asdict(split_opts),
+                                "cleaner": "fallback" if clean_text is None else "default",
+                                "split": asdict(split_opts) if hasattr(split_opts, '__dict__') else {
+                                    "chunk_size": split_opts.chunk_size,
+                                    "chunk_overlap": split_opts.chunk_overlap
+                                },
                             },
                         )
                     )
 
                 session.add(doc)
-                # LOG: actualizar stats “en vivo” y flush (para poder ver progreso vía API)
                 stats["total_chunks"] += len(pieces)
                 if is_new:
                     stats["new_docs"] += 1
                 else:
                     stats["updated_docs"] += 1
-                run.stats = stats  # ← progreso en tiempo real
+                run.stats = stats  # progreso en tiempo real
                 session.flush()
 
-                # Optional: write artifacts
+                # Escribir artefactos opcionales
                 _append_jsonl(
                     Path("data/processed/documents/docs.jsonl"),
                     {
@@ -237,37 +437,36 @@ def _ingest_documents(session, source: Source) -> IngestionRun:
 
             except Exception as e:
                 stats["failed"] += 1
+                error_msg = f"file={str(file_path)} error={str(e)}"
                 stats["errors"].append({"file": str(file_path), "error": str(e)})
-                # LOG: traza completa por fichero
-                log.exception("process.error file=%s", str(file_path))
+                log.exception("process.error %s", error_msg)
                 session.flush()
                 continue
 
         run.status = "success" if stats["failed"] == 0 else ("partial" if stats["new_docs"] + stats["updated_docs"] > 0 else "failed")
-    except Exception:
+        
+    except Exception as e:
         run.status = "failed"
-        stats["errors"].append({"fatal": "See logs"})
-        # LOG: traza fatal del run
+        stats["errors"].append({"fatal": str(e)})
         log.exception("run.fatal source_id=%s", source.id)
         raise
     finally:
         run.stats = stats
         run.ended_at = datetime.utcnow()
         session.flush()
-        # LOG: fin del run
         log.info(
-            "run.end source_id=%s status=%s scanned=%d new=%d updated=%d skipped=%d failed=%d chunks=%d",
+            "run.end source_id=%s status=%s scanned=%d new=%d updated=%d skipped=%d failed=%d chunks=%d warnings=%d",
             source.id, run.status, stats["scanned"], stats["new_docs"], stats["updated_docs"],
-            stats["skipped_unchanged"], stats["failed"], stats["total_chunks"]
+            stats["skipped_unchanged"], stats["failed"], stats["total_chunks"], len(stats.get("warnings", []))
         )
 
     return run
 
 
+# ============================
+# FUNCIONES DE UTILIDAD
+# ============================
 
-# ------------------------------
-# Helpers
-# ------------------------------
 def _enumerate_files(root: Path, recursive: bool, include_ext: List[str], exclude_patterns: Iterable[str]) -> List[Path]:
     if not root.exists():
         return []
@@ -286,7 +485,7 @@ def _enumerate_files(root: Path, recursive: bool, include_ext: List[str], exclud
 
 
 def _stable_doc_id(source: Source, input_dir: Path, file_path: Path) -> str:
-    # Use a stable id from source.id + relative path (lowercased)
+    """Generar ID estable desde source.id + ruta relativa."""
     try:
         rel = file_path.relative_to(input_dir)
     except Exception:
@@ -296,15 +495,23 @@ def _stable_doc_id(source: Source, input_dir: Path, file_path: Path) -> str:
 
 
 def _origin_sha256(path: Path) -> str:
+    """Hash SHA256 del archivo original."""
     h = hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            h.update(chunk)
-    return h.hexdigest()
+    try:
+        with path.open("rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except Exception as e:
+        log.error("Error calculating hash for %s: %s", path, e)
+        # Fallback: usar timestamp + tamaño
+        stat = path.stat()
+        fallback_data = f"{path.name}:{stat.st_size}:{stat.st_mtime}"
+        return hashlib.sha256(fallback_data.encode()).hexdigest()
 
 
 def _should_process(session, source: Source, path: Path, policy: str) -> Tuple[bool, Dict[str, Any]]:
-    """Return (changed?, meta) for this path under the selected policy."""
+    """Determinar si procesar este archivo bajo la política seleccionada."""
     origin = _origin_sha256(path)
     base_dir = Path(source.config.get("input_dir", "data/raw/documents")).resolve() if isinstance(source.config, dict) else Path("data/raw/documents").resolve()
     doc_id = _stable_doc_id(source, base_dir, path)
@@ -317,13 +524,17 @@ def _should_process(session, source: Source, path: Path, policy: str) -> Tuple[b
         return (doc.origin_hash != origin), {"doc_id": doc_id, "origin_hash": origin}
 
     if policy == "mtime":
-        # Placeholder for future mtime-based logic
+        # Placeholder para lógica futura basada en mtime
         return True, {"doc_id": doc_id, "origin_hash": origin}
 
     return True, {"doc_id": doc_id, "origin_hash": origin}
 
 
 def _append_jsonl(path: Path, row: Dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    """Append línea JSON a archivo."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except Exception as e:
+        log.error("Error writing to JSONL %s: %s", path, e)

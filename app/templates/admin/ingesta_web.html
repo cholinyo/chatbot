@@ -1,6 +1,5 @@
-<!-- File: app/templates/admin/ingesta_web.html -->
 {% extends "base.html" %}
-{% block title %}Ingesta Web (RAG){% endblock %}
+{% block title %}Ingesta Web (Admin){% endblock %}
 
 {% block content %}
 <div class="container my-3">
@@ -14,235 +13,226 @@
     {% endif %}
   {% endwith %}
 
-  <h3 class="mb-3">Ingesta Web (RAG)</h3>
+  <h3 class="mb-3 text-center">Ingesta Web</h3>
 
-  <div class="row">
-    <!-- Config / Fuente -->
-    <div class="col-md-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+      <!-- Crear/editar fuente -->
       <div class="card mb-3">
-        <div class="card-header">Configurar fuente</div>
+        <div class="card-header">Fuente web</div>
         <div class="card-body">
-          <form method="post" action="{{ url_for('ingesta_web.save') }}">
-            <input type="hidden" name="id" value="{{ request.args.get('id','') }}">
-            <div class="mb-2">
-              <label class="form-label">Nombre</label>
-              <input name="name" class="form-control" value="">
-            </div>
-            <div class="mb-2">
-              <label class="form-label">URL base</label>
-              <input name="url" class="form-control" value="">
+          <form method="post" action="{{ url_for('ingesta_web.save') }}" id="src-form">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">URL semilla</label>
+                <input type="url" name="seed" class="form-control" placeholder="https://www.example.com/" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="name" class="form-control" placeholder="Mi fuente">
+              </div>
             </div>
 
-            <div class="row">
-              <div class="col-6 mb-2">
-                <label class="form-label">Strategy</label>
-                <select name="strategy" class="form-select">
-                  <option value="sitemap" selected>Sitemap</option>
-                  <option value="requests">Depth (requests)</option>
-                  <option value="selenium">Selenium</option>
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <label class="form-label">Estrategia</label>
+                <select name="strategy" id="strategy" class="form-select">
+                  <option value="sitemap">sitemap</option>
+                  <option value="requests">requests</option>
+                  <option value="selenium">selenium</option>
                 </select>
               </div>
-              <div class="col-6 mb-2">
-                <label class="form-label">Depth (requests)</label>
-                <input type="number" name="depth" class="form-control" value="{{ cfg_defaults.depth }}">
+              <div class="col-md-4">
+                <label class="form-label">Máx. páginas</label>
+                <input type="number" name="max_pages" class="form-control" value="{{ cfg_defaults.max_pages }}" min="1">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Timeout (s)</label>
+                <input type="number" name="timeout" class="form-control" value="{{ cfg_defaults.timeout }}" min="1">
               </div>
             </div>
 
-            <div class="mb-2">
-              <label class="form-label">Allowed domains (coma)</label>
-              <input name="allowed_domains" class="form-control" placeholder="dominio.com,www.dominio.com">
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <label class="form-label">Rate por host (req/seg)</label>
+                <input type="number" step="0.1" name="rate_per_host" class="form-control" value="{{ cfg_defaults.rate_per_host }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">User-Agent</label>
+                <input type="text" name="user_agent" class="form-control" value="{{ cfg_defaults.user_agent }}">
+              </div>
+              <div class="col-md-4 d-flex align-items-center">
+                <div class="form-check mt-3">
+                  <input class="form-check-input" type="checkbox" name="force_https" id="force_https" {% if cfg_defaults.force_https %}checked{% endif %}>
+                  <label class="form-check-label" for="force_https">Forzar HTTPS</label>
+                </div>
+              </div>
             </div>
 
-            <div class="mb-2">
-              <label class="form-label">Include (1 por línea)</label>
-              <textarea name="include" class="form-control" rows="2"></textarea>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Exclude (1 por línea)</label>
-              <textarea name="exclude" class="form-control" rows="2"></textarea>
-            </div>
-
-            <div class="row">
-              <div class="col-6 mb-2">
-                <label class="form-label">Robots</label>
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <label class="form-label">Robots policy</label>
                 <select name="robots_policy" class="form-select">
                   <option value="strict" selected>strict</option>
-                  <option value="list">list</option>
                   <option value="ignore">ignore</option>
                 </select>
               </div>
-              <div class="col-6 mb-2">
-                <label class="form-label">Timeout (s)</label>
-                <input type="number" name="timeout" class="form-control" value="{{ cfg_defaults.timeout }}">
+              <div class="col-md-8">
+                <label class="form-label">Allowed domains (uno por línea o CSV)</label>
+                <textarea name="allowed_domains" class="form-control" rows="2" placeholder="example.com&#10;www.example.com"></textarea>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-6 mb-2">
-                <label class="form-label">Max pages</label>
-                <input type="number" name="max_pages" class="form-control" value="{{ cfg_defaults.max_pages }}">
+            <div class="row g-3 mt-1">
+              <div class="col-md-6">
+                <label class="form-label">Include (regex, una por línea)</label>
+                <textarea name="include" class="form-control" rows="2" placeholder="/blog/&#10;.*docs.*"></textarea>
               </div>
-              <div class="col-6 mb-2">
-                <label class="form-label">Rate/host</label>
-                <input type="number" step="0.1" name="rate_per_host" class="form-control" value="{{ cfg_defaults.rate_per_host }}">
+              <div class="col-md-6">
+                <label class="form-label">Exclude (regex, una por línea)</label>
+                <textarea name="exclude" class="form-control" rows="2" placeholder="\\.(png|jpg|jpeg|gif|css|js|pdf)$"></textarea>
               </div>
             </div>
 
-            <div class="mb-2 form-check">
-              <input class="form-check-input" type="checkbox" name="force_https" id="force_https" checked>
-              <label class="form-check-label" for="force_https">Forzar https</label>
+            <!-- Sólo para requests/selenium -->
+            <div class="row g-3 mt-1 strat-rs d-none">
+              <div class="col-md-4">
+                <label class="form-label">Depth</label>
+                <input type="number" name="depth" class="form-control" value="{{ cfg_defaults.depth }}" min="0">
+              </div>
             </div>
 
-            <!-- Selenium options -->
-            <hr>
-            <h6 class="text-muted">Selenium</h6>
-            <div class="row">
-              <div class="col-6 mb-2">
+            <!-- Selenium -->
+            <div class="row g-3 mt-1 strat-sel d-none">
+              <div class="col-md-3">
                 <label class="form-label">Driver</label>
-                <input name="driver" class="form-control" value="{{ cfg_defaults.driver }}">
+                <input type="text" name="driver" class="form-control" value="chrome">
               </div>
-              <div class="col-6 mb-2">
+              <div class="col-md-3">
                 <label class="form-label">Window size</label>
-                <input name="window_size" class="form-control" value="{{ cfg_defaults.window_size }}">
+                <input type="text" name="window_size" class="form-control" value="1366,900">
               </div>
-            </div>
-            <div class="row">
-              <div class="col-6 mb-2">
+              <div class="col-md-3">
                 <label class="form-label">Render wait (ms)</label>
-                <input type="number" name="render_wait_ms" class="form-control" value="{{ cfg_defaults.render_wait_ms }}">
+                <input type="number" name="render_wait_ms" class="form-control" value="3000" min="0">
               </div>
-              <div class="col-6 mb-2">
-                <label class="form-label">Wait selector</label>
-                <input name="wait_selector" class="form-control" value="">
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-4 mb-2">
-                <div class="form-check">
+              <div class="col-md-3 d-flex align-items-center">
+                <div class="form-check mt-3">
                   <input class="form-check-input" type="checkbox" name="no_headless" id="no_headless">
-                  <label class="form-check-label" for="no_headless">Sin headless</label>
+                  <label class="form-check-label" for="no_headless">No headless</label>
                 </div>
               </div>
-              <div class="col-4 mb-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="scroll" id="scroll">
-                  <label class="form-check-label" for="scroll">Scroll</label>
-                </div>
-              </div>
-              <div class="col-2 mb-2">
-                <label class="form-label">Steps</label>
-                <input type="number" name="scroll_steps" class="form-control" value="{{ cfg_defaults.scroll_steps }}">
-              </div>
-              <div class="col-2 mb-2">
-                <label class="form-label">Wait</label>
-                <input type="number" name="scroll_wait_ms" class="form-control" value="{{ cfg_defaults.scroll_wait_ms }}">
+              <div class="col-md-6">
+                <label class="form-label">Wait selector (opcional)</label>
+                <input type="text" name="wait_selector" class="form-control" placeholder="#content .ready">
               </div>
             </div>
 
-            <div class="d-grid mt-2">
+            <div class="d-grid mt-3">
               <button class="btn btn-primary" type="submit">Guardar fuente</button>
             </div>
           </form>
         </div>
       </div>
-    </div>
 
-    <!-- Listas -->
-    <div class="col-md-8">
+      <!-- Fuentes -->
       <div class="card mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
           <span>Fuentes Web</span>
+          <small class="text-muted">{{ sources|length }} fuente(s)</small>
         </div>
         <div class="table-responsive">
           <table class="table table-sm mb-0">
-            <thead>
-              <tr>
-                <th>ID</th><th>Nombre</th><th>URL</th><th>Strategy</th><th>Robots</th><th>Acciones</th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th>ID</th><th>Nombre</th><th>URL</th><th>Estrategia</th><th>Máx. páginas</th><th>Acciones</th>
+            </tr></thead>
             <tbody>
-            {% for s in sources %}
+              {% for s in sources %}
               <tr>
                 <td>{{ s.id }}</td>
                 <td>{{ s.name or '-' }}</td>
-                <td style="max-width:340px; word-break:break-word">{{ s.url }}</td>
-                <td>{{ (s.config or {}).get('strategy','-') }}</td>
-                <td>{{ (s.config or {}).get('robots_policy','-') }}</td>
+                <td style="max-width: 420px; word-break: break-word;"><small>{{ s.url }}</small></td>
+                <td>{{ (s.config or {}).get('strategy', 'sitemap') }}</td>
+                <td>{{ (s.config or {}).get('max_pages', '-') }}</td>
                 <td class="text-nowrap">
                   <form method="post" action="{{ url_for('ingesta_web.run', source_id=s.id) }}" class="d-inline">
-                    <button class="btn btn-success btn-sm">Ejecutar</button>
-                  </form>
-                  <form method="post" action="{{ url_for('ingesta_web.delete', source_id=s.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar fuente y runs asociados?');">
-                    <button class="btn btn-outline-danger btn-sm">Eliminar</button>
+                    <button class="btn btn-success btn-sm" type="submit">Ejecutar</button>
                   </form>
                 </td>
               </tr>
-            {% else %}
-              <tr><td colspan="6" class="text-muted">Sin fuentes</td></tr>
-            {% endfor %}
+              {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
 
+      <!-- Runs -->
       <div class="card mb-3">
-        <div class="card-header">Ejecuciones recientes</div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Ejecuciones recientes</span>
+          <small class="text-muted">{{ runs|length }} run(s)</small>
+        </div>
         <div class="table-responsive">
           <table class="table table-sm mb-0">
             <thead>
-              <tr>
-                <th>ID</th><th>Source</th><th>Estado</th>
-                <th>Páginas</th><th>Chunks</th><th>Bytes</th>
-                <th>Preview</th><th>Artefactos</th>
-              </tr>
+              <tr><th>Run ID</th><th>Source</th><th>Estado</th><th>Páginas</th><th>Chunks</th><th>Bytes</th><th>Acciones</th></tr>
             </thead>
             <tbody>
-            {% for r in runs %}
-              {% set totals = (r.meta or {}).get('summary_totals') or {} %}
-              {% set run_dir = (r.meta or {}).get('run_dir') %}
+              {% for r in runs %}
+              {% set meta = r.meta or {} %}
+              {% set totals = meta.get('summary_totals') or (meta.get('summary') or {}).get('totals') or {} %}
               <tr>
                 <td>{{ r.id }}</td>
                 <td>{{ r.source_id }}</td>
-                <td>
-                  {% if r.status == 'done' %}
-                    <span class="badge bg-success">done</span>
-                  {% elif r.status == 'running' %}
-                    <span class="badge bg-secondary">running</span>
-                  {% else %}
-                    <span class="badge bg-danger">{{ r.status }}</span>
-                  {% endif %}
-                </td>
-                <td>{{ totals.get('pages', 0) }}</td>
-                <td>{{ totals.get('chunks', 0) }}</td>
-                <td>{{ totals.get('bytes', 0) }}</td>
+                <td>{{ r.status }}</td>
+                <td>{{ totals.get('pages') or '-' }}</td>
+                <td>{{ totals.get('chunks') or '-' }}</td>
+                <td>{{ totals.get('bytes') or '-' }}</td>
                 <td class="text-nowrap">
-                  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('ingesta_web.preview', run_id=r.id) }}">Ver salida</a>
-                </td>
-                <td class="text-nowrap">
-                  {% if run_dir %}
-                    <a class="btn btn-outline-success btn-sm" href="{{ url_for('ingesta_web.artifact', relpath=run_dir ~ '/stdout.txt') }}">stdout.txt</a>
-                    <a class="btn btn-outline-success btn-sm" href="{{ url_for('ingesta_web.artifact', relpath=run_dir ~ '/summary.json') }}">summary.json</a>
-                  {% else %}
-                    <span class="text-muted">Sin path del run</span>
-                  {% endif %}
+                  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('ingesta_web.preview', run_id=r.id) }}">Preview</a>
+                  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('ingesta_web.preview', run_id=r.id, show='artifacts') }}">Ver artefactos</a>
                 </td>
               </tr>
-            {% else %}
-              <tr><td colspan="8" class="text-muted">Sin ejecuciones</td></tr>
-            {% endfor %}
+              {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
 
-      {% if preview %}
-      <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between">
-          <span>Salida del run</span>
-          <small class="text-muted">Mostrando últimos ~20k chars</small>
+      {% if preview or artifacts %}
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Run {{ selected_run or '' }} — {{ 'Artefactos' if show == 'artifacts' else 'Preview' }}</span>
+          {% if selected_run %}
+            <small><a href="{{ url_for('ingesta_web.preview', run_id=selected_run, show='artifacts') }}">Ver artefactos</a> · <a href="{{ url_for('ingesta_web.preview', run_id=selected_run) }}">Ver preview</a></small>
+          {% endif %}
         </div>
         <div class="card-body">
-          <pre style="max-height: 50vh; overflow: auto; white-space: pre-wrap;">{{ preview }}</pre>
+          {% if show == 'artifacts' %}
+            {% if artifacts %}
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead><tr><th>Archivo</th><th>Tamaño</th><th></th></tr></thead>
+                  <tbody>
+                    {% for a in artifacts %}
+                      <tr>
+                        <td><code>{{ a.name }}</code></td>
+                        <td><small>{{ a.size }}</small></td>
+                        <td class="text-nowrap">
+                          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('ingesta_web.artifact', relpath=a.rel) }}">Descargar</a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <em>No se encontraron artefactos.</em>
+            {% endif %}
+          {% else %}
+            <pre class="mb-0" style="white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow: auto;">{{ preview or '' }}</pre>
+          {% endif %}
         </div>
       </div>
       {% endif %}
@@ -250,4 +240,21 @@
     </div>
   </div>
 </div>
+
+<script>
+(function () {
+  const strat = document.getElementById('strategy');
+  const rs = document.querySelectorAll('.strat-rs');
+  const sel = document.querySelectorAll('.strat-sel');
+  function sync() {
+    const v = strat.value;
+    const showRS = (v === 'requests' || v === 'selenium');
+    const showSEL = (v === 'selenium');
+    rs.forEach(el => el.classList.toggle('d-none', !showRS));
+    sel.forEach(el => el.classList.toggle('d-none', !showSEL));
+  }
+  strat.addEventListener('change', sync);
+  sync();
+})();
+</script>
 {% endblock %}
