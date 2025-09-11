@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 Sitemap strategy con soporte de PDFs + fallbacks robustos.
 
-- Usa tus helpers si existen (local sitemap.py o app.rag.scrapers.sitemap).
+- Usa helpers si existen (local sitemap.py o app.rag.scrapers.sitemap).
 - Si no existen o devuelven vacío, descubre sitemaps leyendo robots.txt y/o
-  probando rutas típicas: /sitemap.xml, /sitemap_index.xml y sus variantes .gz.
+  probando rutas típicas: /sitemap.xml, /sitemap_index.xml y variantes .gz.
 - Recolecta URLs HTML y PDF desde <urlset> y también recorre <sitemapindex> (hasta 1–2 niveles).
 - Descarga HTML en .content (str) y PDF en .content_bytes (bytes).
+- Si include_pdfs=True, INTERCALA PDF/HTML para asegurar presencia de PDFs con max_pages.
+- Fallback: si no hay PDFs en sitemaps y include_pdfs=True, detecta PDFs enlazados desde HTML.
 """
 
 from __future__ import annotations
@@ -239,6 +241,55 @@ def _collect_urls_from_sitemaps(
     return urls
 
 
+# ----------- fallback: descubrir PDFs desde HTML --------------
+
+def _collect_pdf_links_from_html(
+    html_urls: t.List[str],
+    *,
+    user_agent: str,
+    timeout: int,
+    allowed_domains: t.List[str],
+    include: t.List[str],
+    exclude: t.List[str],
+    limit_scan_pages: int = 20,     # cuántas HTML escaneamos como máximo
+    max_pdfs: int = 100             # límite duro de pdfs detectados
+) -> t.List[str]:
+    try:
+        from bs4 import BeautifulSoup
+    except Exception:
+        return []
+
+    pdfs: t.List[str] = []
+    seen: set[str] = set()
+    for u in html_urls[:limit_scan_pages]:
+        try:
+            resp = _fetch(u, timeout=timeout, user_agent=user_agent)
+            if resp.status_code != 200:
+                continue
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for a in soup.select("a[href]"):
+                href = (a.get("href") or "").strip()
+                if not href:
+                    continue
+                nxt = urljoin(u, href)
+                if not _is_http(nxt):
+                    continue
+                lu = nxt.lower()
+                if not lu.endswith(".pdf"):
+                    continue
+                if not _should_visit(nxt, allowed_domains, include, exclude):
+                    continue
+                if nxt in seen:
+                    continue
+                pdfs.append(nxt)
+                seen.add(nxt)
+                if len(pdfs) >= max_pdfs:
+                    return pdfs
+        except Exception:
+            continue
+    return pdfs
+
+
 # -------------------- entrada principal --------------------
 
 def collect_pages(cfg, args, log, counters):
@@ -256,6 +307,7 @@ def collect_pages(cfg, args, log, counters):
     timeout = int(_cfg_get(cfg, "timeout", args.timeout) or 15)
     rate_per_host = float(_cfg_get(cfg, "rate_per_host", args.rate_per_host) or 1.0)
     force_https = bool(_cfg_get(cfg, "force_https", args.force_https))
+    include_pdfs = bool(_cfg_get(cfg, "include_pdfs", getattr(args, "include_pdfs", False)))
 
     # 1) HTML vía helper (si existe)
     html_urls: t.List[str] = []
@@ -276,7 +328,7 @@ def collect_pages(cfg, args, log, counters):
         except Exception:
             html_urls = []
 
-    # 2) PDFs parseando sitemaps (siempre)
+    # 2) PDFs parseando sitemaps (siempre intentamos)
     pdf_urls = _collect_urls_from_sitemaps(
         seed,
         allowed_domains=allowed_domains,
@@ -307,29 +359,74 @@ def collect_pages(cfg, args, log, counters):
         if html_urls:
             log(f"[sitemap] HTML via parse: {len(html_urls)} urls")
 
-    # 4) unión sin duplicados (HTML primero)
-    seen, merged = set(), []
-    for u in html_urls + pdf_urls:
-        if u not in seen:
+    # 3b) Fallback: si include_pdfs=True y pdf_urls vacío, intentar descubrir PDFs enlazados desde HTML
+    if include_pdfs and not pdf_urls and html_urls:
+        pdf_from_html = _collect_pdf_links_from_html(
+            html_urls,
+            user_agent=user_agent, timeout=timeout,
+            allowed_domains=allowed_domains, include=include, exclude=exclude,
+            limit_scan_pages=min(20, max_pages),
+            max_pdfs=max_pages
+        )
+        if pdf_from_html:
+            log(f"[sitemap] PDFs via HTML: {len(pdf_from_html)} urls")
+            pdf_urls = pdf_from_html
+
+    # 4) Unión con presupuesto:
+    #    - include_pdfs=True -> intercalamos PDF/HTML para garantizar presencia de PDFs
+    #    - include_pdfs=False -> priorizamos HTML
+    seen: set[str] = set()
+    merged: list[str] = []
+
+    def _add(u: str):
+        if u and u not in seen:
             merged.append(u); seen.add(u)
+
+    if include_pdfs:
+        from itertools import zip_longest
+        for pu, hu in zip_longest(pdf_urls, html_urls):
+            if len(merged) >= max_pages: break
+            if pu:
+                _add(pu)
+            if len(merged) >= max_pages: break
+            if hu:
+                _add(hu)
+            if len(merged) >= max_pages: break
+        # relleno si queda hueco
+        if len(merged) < max_pages:
+            for rest in pdf_urls + html_urls:
+                if len(merged) >= max_pages: break
+                _add(rest)
+        log(f"[sitemap] merge interleaved -> total={len(merged)} (pdf={len(pdf_urls)}, html={len(html_urls)})")
+    else:
+        for u in html_urls:
+            if len(merged) >= max_pages: break
+            _add(u)
+        log(f"[sitemap] merge html-only -> total={len(merged)} (html={len(html_urls)})")
 
     if not merged:
         log("[sitemap] no se encontraron URLs en sitemap(s)")
         return []
 
-    # 5) descarga
+    # 5) Descarga con rate limit + SNIFFING de PDF REAL (%PDF-)
     pages: t.List[SimpleNamespace] = []
     for u in merged[:max_pages]:
         try:
             _rate_sleep(rate_per_host)
             resp = _fetch(u, timeout=timeout, user_agent=user_agent)
             hdrs = dict(resp.headers or {})
-            if u.lower().endswith(".pdf") or "application/pdf" in hdrs.get("Content-Type", "").lower():
+            content = resp.content or b""
+            starts_pdf = content[:5] == b"%PDF-"  # firma PDF real
+
+            if starts_pdf:
                 pages.append(SimpleNamespace(
-                    url=u, content_bytes=resp.content, status_code=resp.status_code,
+                    url=u, content_bytes=content, status_code=resp.status_code,
                     headers=hdrs, is_binary=True, ext=".pdf"
                 ))
             else:
+                # Aunque termine en .pdf, si no empieza por %PDF-, lo guardamos como HTML (texto)
+                if u.lower().endswith(".pdf"):
+                    log(f"[sitemap] WARN no es PDF real -> {u} ct='{hdrs.get('Content-Type','')[:60]}' sample={content[:10]!r}")
                 pages.append(SimpleNamespace(
                     url=u, content=resp.text, status_code=resp.status_code, headers=hdrs
                 ))

@@ -70,6 +70,12 @@
                   <label class="form-check-label" for="force_https">Forzar HTTPS (sitemap)</label>
                 </div>
               </div>
+              <div class="col-md-4 d-flex align-items-center">
+                <div class="form-check mt-3">
+                  <input class="form-check-input" type="checkbox" name="include_pdfs" id="include_pdfs">
+                  <label class="form-check-label" for="include_pdfs">Incluir PDFs (solo sitemap)</label>
+                </div>
+              </div>
             </div>
 
             <div class="row g-3 mt-2">
@@ -294,6 +300,8 @@
       form.querySelector('input[name="rate_per_host"]').value = (cfg.rate_per_host ?? {{ cfg_defaults.rate_per_host }});
       form.querySelector('input[name="user_agent"]').value = (cfg.user_agent || '{{ cfg_defaults.user_agent|e }}');
       form.querySelector('input[name="force_https"]').checked = !!cfg.force_https;
+      form.querySelector('input[name="include_pdfs"]').checked = !!cfg.include_pdfs;
+
 
       form.querySelector('select[name="robots_policy"]').value = (cfg.robots_policy || 'strict');
 

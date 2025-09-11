@@ -66,6 +66,7 @@ def _default_config() -> Dict[str, Any]:
         "rate_per_host": 1.0,
         "timeout": 15,
         "force_https": True,  # útil en sitemap
+        "include_pdfs": False,  # activar PDFs solo en sitemap
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/124.0 Safari/537.36",
         "max_pages": 100,
         # Selenium
@@ -331,6 +332,7 @@ def save():
     cfg["rate_per_host"] = float(request.form.get("rate_per_host") or 1.0)
     cfg["timeout"] = int(request.form.get("timeout") or 15)
     cfg["force_https"] = ("force_https" in request.form)
+    cfg["include_pdfs"] = bool(request.form.get("include_pdfs"))
     cfg["user_agent"] = request.form.get("user_agent") or _default_config()["user_agent"]
     cfg["max_pages"] = int(request.form.get("max_pages") or 100)
 
@@ -436,6 +438,9 @@ def run(source_id: int):
         args += ["--exclude", exc]
     if cfg.get("force_https") and cfg.get("strategy") == "sitemap":
         args.append("--force-https")
+    # PDFs solo sitemap (flag explícito)
+    if cfg.get("strategy") == "sitemap" and cfg.get("include_pdfs"):
+        args.append("--include-pdfs")
     if cfg.get("strategy") in ("requests", "selenium"):
         args += ["--depth", str(cfg.get("depth", 1))]
     if cfg.get("strategy") == "selenium":

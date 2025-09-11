@@ -3,10 +3,12 @@
 
 import os, sys, json, argparse, logging, traceback, importlib.util
 from pathlib import Path
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List, Dict
 import io
+
+# Extracción de texto en PDFs (para generar raw/NNNNN.pdf.txt)
 try:
     from pypdf import PdfReader
 except Exception:
@@ -33,6 +35,7 @@ logger.addHandler(handler)
 
 def log(msg: str):
     logger.info(str(msg).replace("→", "->"))
+
 
 # ---------------------------------------------------------------------
 # Import de estrategias especializadas (requests / selenium / sitemap)
@@ -85,6 +88,24 @@ def _try_import_strategies():
         except Exception as e_file:
             log(f"[WARN] No se pudieron importar estrategias (paquete y archivo): {e_pkg!r} ; {e_file!r}")
 
+def _debug_log_loaded_strategies():
+    try:
+        if collect_sitemap:
+            log(f"[strategies] sitemap module: {getattr(collect_sitemap, '__module__', '?')}")
+            log(f"[strategies] sitemap file  : {collect_sitemap.__code__.co_filename}")
+        if collect_requests:
+            log(f"[strategies] requests file : {collect_requests.__code__.co_filename}")
+        if collect_selenium:
+            log(f"[strategies] selenium file : {collect_selenium.__code__.co_filename}")
+    except Exception as e:
+        log(f"[strategies] debug failed: {e}")
+
+def main():
+    _try_import_strategies()
+    _debug_log_loaded_strategies()
+    args = build_parser().parse_args()
+    ...
+
 # ---------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------
@@ -104,6 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--include", default="")
     p.add_argument("--exclude", default=r"\.(png|jpg|jpeg|gif|css|js|pdf)$")
     p.add_argument("--robots-policy", choices=["strict", "ignore"], default="strict")
+    p.add_argument("--include-pdfs", action="store_true", help="Permitir PDF (recomendado solo en sitemap)")
     # Selenium
     p.add_argument("--driver", default="chrome")
     p.add_argument("--no-headless", action="store_true")
@@ -121,6 +143,7 @@ def split_csv(s: str):
 def ensure_run_dirs(run_dir: Path):
     (run_dir / "raw").mkdir(parents=True, exist_ok=True)
 
+
 # ---------------------------------------------------------------------
 # Artefactos (contrato con la plantilla/rutas)
 # ---------------------------------------------------------------------
@@ -132,19 +155,13 @@ class PageArtifact:
     bytes: int
 
 def write_artifacts(run_dir: Path, pages: List[SimpleNamespace]) -> Dict:
-    """
-    Guarda artefactos en run_dir/raw:
-      - HTML -> 00001.html (utf-8)
-      - PDF  -> 00001.pdf  (binario) y 00001.pdf.txt (texto extraído, si es posible)
-    Y escribe fetch_index.json, summary.json y stdout.txt.
-    """
     ensure_run_dirs(run_dir)
     fetch_index = []
     total_bytes = 0
     lines_stdout = []
 
     def _guess_ext_and_binary(p: SimpleNamespace) -> tuple[str, bool]:
-        # Import local: evita NameError si no está en cabecera
+        # Import local: evita NameError si no está en la cabecera
         from urllib.parse import urlparse as _urlparse
         # prioridad: marca explícita -> cabecera -> URL
         if getattr(p, "ext", None):
@@ -186,11 +203,15 @@ def write_artifacts(run_dir: Path, pages: List[SimpleNamespace]) -> Dict:
                     data = content if isinstance(content, (bytes, bytearray)) else bytes(str(content), "utf-8", errors="ignore")
                 raw_path.write_bytes(data)
 
-                # Si es PDF: intenta extraer texto y guardar .pdf.txt
+                # Si es PDF: solo intentamos extraer si parece PDF real (%PDF-)
                 if ext == ".pdf":
-                    txt = _extract_pdf_text_bytes(data)
-                    if txt:
-                        (run_dir / "raw" / f"{i:05d}.pdf.txt").write_text(txt, encoding="utf-8", errors="ignore")
+                    if isinstance(data, (bytes, bytearray)) and data[:5] == b"%PDF-":
+                        txt = _extract_pdf_text_bytes(data)
+                        if txt:
+                            (run_dir / "raw" / f"{i:05d}.pdf.txt").write_text(txt, encoding="utf-8", errors="ignore")
+                    else:
+                        # Evita warnings/errores de pypdf con falsos PDF
+                        pass
             else:
                 html = getattr(p, "content", "")
                 if not isinstance(html, str):
@@ -232,6 +253,30 @@ def write_artifacts(run_dir: Path, pages: List[SimpleNamespace]) -> Dict:
     return summary
 
 
+
+# ---------------------------------------------------------------------
+# Helpers para PDFs en sitemap: limpiar 'pdf' del exclude si se pide
+# ---------------------------------------------------------------------
+def _strip_pdf_from_exclude(patterns: List[str]) -> List[str]:
+    """
+    Elimina 'pdf' de patrones típicos de exclusión (regexs) p.ej.:
+      r"\.(png|jpg|jpeg|gif|css|js|pdf)$" -> r"\.(png|jpg|jpeg|gif|css|js)$"
+    Conserva otros patrones tal cual.
+    """
+    import re
+    out: List[str] = []
+    for pat in patterns:
+        p2 = pat
+        # eliminaciones directas de 'pdf' en alternancias
+        p2 = p2.replace('|pdf', '').replace('pdf|', '')
+        # limpia paréntesis vacíos o dobles pipes
+        p2 = p2.replace('(|', '(').replace('|)', ')').replace('||', '|')
+        p2 = re.sub(r'\(\)', '', p2)
+        p2 = p2.replace('.()', '.')
+        out.append(p2)
+    return out
+
+
 # ---------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------
@@ -247,6 +292,11 @@ def main():
     include = split_csv(args.include)
     exclude = split_csv(args.exclude)
 
+    # PDFs: solo los permitimos explícitamente en sitemap
+    if args.include_pdfs and args.strategy == "sitemap":
+        exclude = _strip_pdf_from_exclude(exclude)
+        log(f"[sitemap] include_pdfs=ON -> exclude ajustado: {exclude}")
+
     # Config compacta que los especialistas pueden usar
     cfg = SimpleNamespace(
         seed=args.seed,
@@ -260,6 +310,7 @@ def main():
         force_https=bool(args.force_https),
         rate_per_host=float(args.rate_per_host),
         robots_policy=args.robots_policy,
+        include_pdfs=bool(args.include_pdfs),
         # Selenium (por si lo usa el especialista)
         driver=args.driver,
         headless=not args.no_headless,
@@ -306,6 +357,7 @@ def main():
     summary = write_artifacts(run_dir, pages)
     log(f"FIN: páginas={summary['n_pages']} bytes={summary['bytes']}")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
