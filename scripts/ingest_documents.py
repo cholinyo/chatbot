@@ -57,6 +57,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # Proyecto
     p.add_argument("--project-root", default=".", help="Ruta del proyecto (donde está app/)")
+
+    # Fuerza reprocesados
+    p.add_argument("--rechunk", action="store_true",
+                   help="Forzar re-chunk aunque el fichero no haya cambiado (ignora 'unchanged' para el particionado)")
+    p.add_argument("--rebuild", action="store_true",
+                   help="Reconstruir el Source: borra Document/Chunk asociados y limpia manifest para este input-dir")
     return p
 
 def _sha256_file(path: Path) -> str:
@@ -227,6 +233,24 @@ def main() -> int:
             s.flush()
         source_id = src.id
 
+        if args.rebuild:
+            # Elimina chunks y documentos del Source y purga manifest de este input-dir
+            logging.info("REBUILD activado: eliminando Document/Chunk del Source id=%s y purgando manifest…", source_id)
+            s.query(Chunk).filter(Chunk.source_id == source_id).delete(synchronize_session=False)
+            s.query(Document).filter(Document.source_id == source_id).delete(synchronize_session=False)
+            s.commit()
+            base_prefix = str(base)
+            new_manifest = {}
+            for k, v in manifest.items():
+                try:
+                    keep = not k.startswith(base_prefix)
+                except Exception:
+                    keep = True
+                if keep:
+                    new_manifest[k] = v
+            manifest = new_manifest
+            logging.info("REBUILD: purgado manifest. Entradas restantes=%d", len(manifest))
+
     files = list(_iter_files(base, patterns, args.recursive))
     files = sorted({f.resolve() for f in files if f.is_file()})
     logging.info("Enumerados %d ficheros", len(files))
@@ -247,6 +271,10 @@ def main() -> int:
             key = str(path)
             prev = manifest.get(key)
             unchanged = bool(prev and prev.get("fp") == fp)
+
+            # Forzar re-chunk aunque no cambie el fichero
+            if args.rechunk:
+                unchanged = False
 
             if args.only_new and unchanged:
                 stats["skipped_unchanged"] += 1
@@ -378,6 +406,8 @@ def main() -> int:
         "policy": args.policy,
         "recursive": bool(args.recursive),
         "only_new": bool(args.only_new),
+        "rechunk": bool(args.rechunk),
+        "rebuild": bool(args.rebuild),
         "elapsed_sec": round(elapsed, 3),
         "run_dir": str(run_dir.resolve()),
     }
