@@ -1,0 +1,14 @@
+{
+  "chunk-4a5a76e6db4270fe971a81d92f9827eb": {
+    "content": "Sensor 0004A30B00C781A1 ubicado en asset-unknown-0004A30B00C781A1 (0.0,0.0). Mide: —.",
+    "source_id": "iotsens:0004A30B00C781A1",
+    "tokens": 42,
+    "chunk_order_index": 0,
+    "full_doc_id": "iotsens:0004A30B00C781A1",
+    "file_path": "smartcity/iotsens",
+    "status": "processed",
+    "llm_cache_list": [],
+    "update_time": 1758392141,
+    "_id": "chunk-4a5a76e6db4270fe971a81d92f9827eb"
+  }
+}

@@ -1,0 +1,59 @@
+base_path: ""
+
+# --- Catálogo (según Swagger aportado) ---
+devices_org: "/v1/catalog/tenants/{tenantUuid}/organizations/{organizationUuid}/devices"
+devices_tenant: "/v1/catalog/tenants/{tenantUuid}/devices"
+
+device_details_org: "/v1/catalog/tenants/{tenantUuid}/organizations/{organizationUuid}/devices/{deviceUuid}"
+device_details_tenant: "/v1/catalog/tenants/{tenantUuid}/devices/{deviceUuid}"
+
+assets_org: "/v1/catalog/tenants/{tenantUuid}/organizations/{organizationUuid}/assets"
+assets_tenant: "/v1/catalog/tenants/{tenantUuid}/assets"
+asset_details_org: "/v1/catalog/tenants/{tenantUuid}/organizations/{organizationUuid}/assets/{assetUuid}"
+asset_details_tenant: "/v1/catalog/tenants/{tenantUuid}/assets/{assetUuid}"
+
+# --- Timeseries (pendiente de confirmar en Swagger) ---
+measurements_by_device_org: null
+measurements_by_device_tenant: null
+
+auth:
+  mode: "headers"              # "headers" | "query"
+  api_key_header: "Authorization"
+  api_key_prefix: "ApiKey "
+  tenant_header: "X-Tenant-UUID"
+  org_header: "X-Organization-UUID"
+  tenant_param: "tenantUuid"
+  org_param: "organizationUuid"
+
+pagination:
+  scheme: "page_size"
+  page_param: "page"
+  size_param: "size"
+  offset_param: "offset"
+  limit_param: "limit"
+
+time_filters:
+  from_param: "from"
+  to_param: "to"
+  format: "iso8601"
+
+mappings:
+  device:
+    id: ["uuid","deviceUuid","id","guid","device_id"]   # ← ampliado
+    serial: ["serialNumber","serial","sn"]
+    alias: ["alias","name"]
+    category: ["deviceCategory.name","category.name","category"]
+    current_asset_uuid: ["currentAsset.uuid","assetUuid"]
+  asset:
+    id: ["uuid","id","guid"]
+    alias: ["alias","name"]
+    lat: ["latitude","lat"]
+    lon: ["longitude","lon"]
+    timezone: ["timezone"]
+  measure:
+    ts: ["timestamp","ts","date","time"]
+    value: ["value","val"]
+    magnitude: ["magnitude","type","name"]
+    quality: ["quality","q","status"]
+  list_container_keys: ["items","data","results","content"]
+  list_container_paths: ["data.items","data.content","result.items","page.content"]

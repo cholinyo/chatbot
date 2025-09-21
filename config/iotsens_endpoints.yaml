@@ -1,0 +1,39 @@
+﻿devices: "/v1/devices"
+measurements_by_device: "/v1/devices/{id}/measures"
+
+auth:
+  mode: "headers"             # "headers" | "query"
+  api_key_header: "Authorization"
+  api_key_prefix: "ApiKey "
+  tenant_header: "X-Tenant-UUID"
+  org_header: "X-Organization-UUID"
+  tenant_param: "tenantUuid"
+  org_param: "organizationUuid"
+
+pagination:
+  scheme: "page_size"         # "page_size" | "offset_limit"
+  page_param: "page"
+  size_param: "size"
+  index_base: 0                 # <<<<<< índice base de página (Spring usa 0)
+  offset_param: "offset"
+  limit_param: "limit"
+
+time_filters:
+  from_param: "from"
+  to_param: "to"
+  format: "iso8601"
+
+mappings:
+  device:
+    id: ["id","deviceId"]
+    type: ["type"]
+    unit: ["unit"]
+    site_id: ["siteId","locationId"]
+    lat: ["lat","latitude"]
+    lon: ["lon","longitude"]
+  measure:
+    ts: ["timestamp","ts"]
+    value: ["value","val"]
+    magnitude: ["magnitude","type"]
+    quality: ["quality","q"]
+  list_container_keys: ["items","data"]

@@ -1,0 +1,4014 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d11" for="edge" attr.name="created_at" attr.type="long"/>
+<key id="d10" for="edge" attr.name="file_path" attr.type="string"/>
+<key id="d9" for="edge" attr.name="source_id" attr.type="string"/>
+<key id="d8" for="edge" attr.name="keywords" attr.type="string"/>
+<key id="d7" for="edge" attr.name="description" attr.type="string"/>
+<key id="d6" for="edge" attr.name="weight" attr.type="double"/>
+<key id="d5" for="node" attr.name="created_at" attr.type="long"/>
+<key id="d4" for="node" attr.name="file_path" attr.type="string"/>
+<key id="d3" for="node" attr.name="source_id" attr.type="string"/>
+<key id="d2" for="node" attr.name="description" attr.type="string"/>
+<key id="d1" for="node" attr.name="entity_type" attr.type="string"/>
+<key id="d0" for="node" attr.name="entity_id" attr.type="string"/>
+<graph edgedefault="undirected"><node id="0004A30B00C781A1">
+  <data key="d0">0004A30B00C781A1</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C781A1' [Sound] site_id=asset-unknown-0004A30B00C781A1 lat=0.0 lon=0.0 serial=0004A30B00C781A1</data>
+  <data key="d3">chunk-3a36389c247aa123d05cd9b9086f6300</data>
+  <data key="d4"></data>
+  <data key="d5">1758446585</data>
+</node>
+<node id="asset-unknown-0004A30B00C781A1">
+  <data key="d0">asset-unknown-0004A30B00C781A1</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C781A1' id=asset-unknown-0004A30B00C781A1 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446585</data>
+</node>
+<node id="device:0004a30b00c781a1">
+  <data key="d0">device:0004a30b00c781a1</data>
+  <data key="d3">chunk-3a36389c247aa123d05cd9b9086f6300</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396651</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c781a1">
+  <data key="d0">site:asset-unknown-0004a30b00c781a1</data>
+  <data key="d3">chunk-3a36389c247aa123d05cd9b9086f6300</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396651</data>
+</node>
+<node id="0004A30B00C7844E">
+  <data key="d0">0004A30B00C7844E</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C7844E' [Sound] site_id=asset-unknown-0004A30B00C7844E lat=0.0 lon=0.0 serial=0004A30B00C7844E</data>
+  <data key="d3">chunk-8a537e2b9fec4cc0618b876240cf0ebe</data>
+  <data key="d4"></data>
+  <data key="d5">1758446586</data>
+</node>
+<node id="asset-unknown-0004A30B00C7844E">
+  <data key="d0">asset-unknown-0004A30B00C7844E</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C7844E' id=asset-unknown-0004A30B00C7844E lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446586</data>
+</node>
+<node id="device:0004a30b00c7844e">
+  <data key="d0">device:0004a30b00c7844e</data>
+  <data key="d3">chunk-8a537e2b9fec4cc0618b876240cf0ebe</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396652</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c7844e">
+  <data key="d0">site:asset-unknown-0004a30b00c7844e</data>
+  <data key="d3">chunk-8a537e2b9fec4cc0618b876240cf0ebe</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396652</data>
+</node>
+<node id="0004A30B00C7EC84">
+  <data key="d0">0004A30B00C7EC84</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C7EC84' [Sound] site_id=asset-unknown-0004A30B00C7EC84 lat=0.0 lon=0.0 serial=0004A30B00C7EC84</data>
+  <data key="d3">chunk-1ad7c6faceee7899ee43aee1824f4396</data>
+  <data key="d4"></data>
+  <data key="d5">1758446586</data>
+</node>
+<node id="asset-unknown-0004A30B00C7EC84">
+  <data key="d0">asset-unknown-0004A30B00C7EC84</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C7EC84' id=asset-unknown-0004A30B00C7EC84 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446586</data>
+</node>
+<node id="device:0004a30b00c7ec84">
+  <data key="d0">device:0004a30b00c7ec84</data>
+  <data key="d3">chunk-1ad7c6faceee7899ee43aee1824f4396</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396652</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c7ec84">
+  <data key="d0">site:asset-unknown-0004a30b00c7ec84</data>
+  <data key="d3">chunk-1ad7c6faceee7899ee43aee1824f4396</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396652</data>
+</node>
+<node id="0004A30B00C7CDA7">
+  <data key="d0">0004A30B00C7CDA7</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C7CDA7' [Sound] site_id=asset-unknown-0004A30B00C7CDA7 lat=0.0 lon=0.0 serial=0004A30B00C7CDA7</data>
+  <data key="d3">chunk-eb6e77331b23c68cbacfb1de69d142a1</data>
+  <data key="d4"></data>
+  <data key="d5">1758446587</data>
+</node>
+<node id="asset-unknown-0004A30B00C7CDA7">
+  <data key="d0">asset-unknown-0004A30B00C7CDA7</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C7CDA7' id=asset-unknown-0004A30B00C7CDA7 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446587</data>
+</node>
+<node id="device:0004a30b00c7cda7">
+  <data key="d0">device:0004a30b00c7cda7</data>
+  <data key="d3">chunk-eb6e77331b23c68cbacfb1de69d142a1</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396653</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c7cda7">
+  <data key="d0">site:asset-unknown-0004a30b00c7cda7</data>
+  <data key="d3">chunk-eb6e77331b23c68cbacfb1de69d142a1</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396653</data>
+</node>
+<node id="0004A30B00C77DAF">
+  <data key="d0">0004A30B00C77DAF</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C77DAF' [Air Quality] site_id=asset-unknown-0004A30B00C77DAF lat=0.0 lon=0.0 serial=0004A30B00C77DAF</data>
+  <data key="d3">chunk-f70257fc5392023943a1e88e4e0fc67e</data>
+  <data key="d4"></data>
+  <data key="d5">1758446588</data>
+</node>
+<node id="asset-unknown-0004A30B00C77DAF">
+  <data key="d0">asset-unknown-0004A30B00C77DAF</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C77DAF' id=asset-unknown-0004A30B00C77DAF lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446588</data>
+</node>
+<node id="device:0004a30b00c77daf">
+  <data key="d0">device:0004a30b00c77daf</data>
+  <data key="d3">chunk-f70257fc5392023943a1e88e4e0fc67e</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396654</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c77daf">
+  <data key="d0">site:asset-unknown-0004a30b00c77daf</data>
+  <data key="d3">chunk-f70257fc5392023943a1e88e4e0fc67e</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396654</data>
+</node>
+<node id="0004A30B00C77EF1">
+  <data key="d0">0004A30B00C77EF1</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C77EF1' [Air Quality] site_id=asset-unknown-0004A30B00C77EF1 lat=0.0 lon=0.0 serial=0004A30B00C77EF1</data>
+  <data key="d3">chunk-1f68e55cabb017cdbd3a82c77ecb50b1</data>
+  <data key="d4"></data>
+  <data key="d5">1758446588</data>
+</node>
+<node id="asset-unknown-0004A30B00C77EF1">
+  <data key="d0">asset-unknown-0004A30B00C77EF1</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C77EF1' id=asset-unknown-0004A30B00C77EF1 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446588</data>
+</node>
+<node id="device:0004a30b00c77ef1">
+  <data key="d0">device:0004a30b00c77ef1</data>
+  <data key="d3">chunk-1f68e55cabb017cdbd3a82c77ecb50b1</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396654</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c77ef1">
+  <data key="d0">site:asset-unknown-0004a30b00c77ef1</data>
+  <data key="d3">chunk-1f68e55cabb017cdbd3a82c77ecb50b1</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396654</data>
+</node>
+<node id="0004A30B00C7859C">
+  <data key="d0">0004A30B00C7859C</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C7859C' [Air Quality] site_id=asset-unknown-0004A30B00C7859C lat=0.0 lon=0.0 serial=0004A30B00C7859C</data>
+  <data key="d3">chunk-efa37330eebd3a98f0139831e93f7da5</data>
+  <data key="d4"></data>
+  <data key="d5">1758446589</data>
+</node>
+<node id="asset-unknown-0004A30B00C7859C">
+  <data key="d0">asset-unknown-0004A30B00C7859C</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C7859C' id=asset-unknown-0004A30B00C7859C lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446589</data>
+</node>
+<node id="device:0004a30b00c7859c">
+  <data key="d0">device:0004a30b00c7859c</data>
+  <data key="d3">chunk-efa37330eebd3a98f0139831e93f7da5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396655</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c7859c">
+  <data key="d0">site:asset-unknown-0004a30b00c7859c</data>
+  <data key="d3">chunk-efa37330eebd3a98f0139831e93f7da5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396655</data>
+</node>
+<node id="0004A30B00C78E5B">
+  <data key="d0">0004A30B00C78E5B</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B00C78E5B' [Air Quality] site_id=asset-unknown-0004A30B00C78E5B lat=0.0 lon=0.0 serial=0004A30B00C78E5B</data>
+  <data key="d3">chunk-72593016b5cd420ea62c89a0d78a6b43</data>
+  <data key="d4"></data>
+  <data key="d5">1758446590</data>
+</node>
+<node id="asset-unknown-0004A30B00C78E5B">
+  <data key="d0">asset-unknown-0004A30B00C78E5B</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B00C78E5B' id=asset-unknown-0004A30B00C78E5B lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446590</data>
+</node>
+<node id="device:0004a30b00c78e5b">
+  <data key="d0">device:0004a30b00c78e5b</data>
+  <data key="d3">chunk-72593016b5cd420ea62c89a0d78a6b43</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396655</data>
+</node>
+<node id="site:asset-unknown-0004a30b00c78e5b">
+  <data key="d0">site:asset-unknown-0004a30b00c78e5b</data>
+  <data key="d3">chunk-72593016b5cd420ea62c89a0d78a6b43</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396655</data>
+</node>
+<node id="24E124415B101379">
+  <data key="d0">24E124415B101379</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B101379' [SmartSwitch] site_id=asset-unknown-24E124415B101379 lat=0.0 lon=0.0 serial=24E124415B101379</data>
+  <data key="d3">chunk-2e71917df2b1d81092e9464a5b5dbb3d</data>
+  <data key="d4"></data>
+  <data key="d5">1758446591</data>
+</node>
+<node id="asset-unknown-24E124415B101379">
+  <data key="d0">asset-unknown-24E124415B101379</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B101379' id=asset-unknown-24E124415B101379 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446591</data>
+</node>
+<node id="device:24e124415b101379">
+  <data key="d0">device:24e124415b101379</data>
+  <data key="d3">chunk-2e71917df2b1d81092e9464a5b5dbb3d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396656</data>
+</node>
+<node id="site:asset-unknown-24e124415b101379">
+  <data key="d0">site:asset-unknown-24e124415b101379</data>
+  <data key="d3">chunk-2e71917df2b1d81092e9464a5b5dbb3d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396656</data>
+</node>
+<node id="24E124415B101627">
+  <data key="d0">24E124415B101627</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B101627' [SmartSwitch] site_id=asset-unknown-24E124415B101627 lat=0.0 lon=0.0 serial=24E124415B101627</data>
+  <data key="d3">chunk-74df4d0bd88a77eba88afe21282fbb86</data>
+  <data key="d4"></data>
+  <data key="d5">1758446592</data>
+</node>
+<node id="asset-unknown-24E124415B101627">
+  <data key="d0">asset-unknown-24E124415B101627</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B101627' id=asset-unknown-24E124415B101627 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446592</data>
+</node>
+<node id="device:24e124415b101627">
+  <data key="d0">device:24e124415b101627</data>
+  <data key="d3">chunk-74df4d0bd88a77eba88afe21282fbb86</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396657</data>
+</node>
+<node id="site:asset-unknown-24e124415b101627">
+  <data key="d0">site:asset-unknown-24e124415b101627</data>
+  <data key="d3">chunk-74df4d0bd88a77eba88afe21282fbb86</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396657</data>
+</node>
+<node id="24E124415B103312">
+  <data key="d0">24E124415B103312</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B103312' [SmartSwitch] site_id=asset-unknown-24E124415B103312 lat=0.0 lon=0.0 serial=24E124415B103312</data>
+  <data key="d3">chunk-6e85c5628ee473fedeabf112593259d7</data>
+  <data key="d4"></data>
+  <data key="d5">1758446592</data>
+</node>
+<node id="asset-unknown-24E124415B103312">
+  <data key="d0">asset-unknown-24E124415B103312</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B103312' id=asset-unknown-24E124415B103312 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446592</data>
+</node>
+<node id="device:24e124415b103312">
+  <data key="d0">device:24e124415b103312</data>
+  <data key="d3">chunk-6e85c5628ee473fedeabf112593259d7</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396657</data>
+</node>
+<node id="site:asset-unknown-24e124415b103312">
+  <data key="d0">site:asset-unknown-24e124415b103312</data>
+  <data key="d3">chunk-6e85c5628ee473fedeabf112593259d7</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396657</data>
+</node>
+<node id="24E124415B103885">
+  <data key="d0">24E124415B103885</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B103885' [SmartSwitch] site_id=asset-unknown-24E124415B103885 lat=0.0 lon=0.0 serial=24E124415B103885</data>
+  <data key="d3">chunk-dbfc6ea7a7fe7ad0d866dd7e151eef0e</data>
+  <data key="d4"></data>
+  <data key="d5">1758446593</data>
+</node>
+<node id="asset-unknown-24E124415B103885">
+  <data key="d0">asset-unknown-24E124415B103885</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B103885' id=asset-unknown-24E124415B103885 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446593</data>
+</node>
+<node id="device:24e124415b103885">
+  <data key="d0">device:24e124415b103885</data>
+  <data key="d3">chunk-dbfc6ea7a7fe7ad0d866dd7e151eef0e</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396658</data>
+</node>
+<node id="site:asset-unknown-24e124415b103885">
+  <data key="d0">site:asset-unknown-24e124415b103885</data>
+  <data key="d3">chunk-dbfc6ea7a7fe7ad0d866dd7e151eef0e</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396658</data>
+</node>
+<node id="24E124415B105089">
+  <data key="d0">24E124415B105089</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B105089' [SmartSwitch] site_id=asset-unknown-24E124415B105089 lat=0.0 lon=0.0 serial=24E124415B105089</data>
+  <data key="d3">chunk-d06cb6332974b5ce734b0a6a2a3e89fd</data>
+  <data key="d4"></data>
+  <data key="d5">1758446594</data>
+</node>
+<node id="asset-unknown-24E124415B105089">
+  <data key="d0">asset-unknown-24E124415B105089</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B105089' id=asset-unknown-24E124415B105089 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446594</data>
+</node>
+<node id="device:24e124415b105089">
+  <data key="d0">device:24e124415b105089</data>
+  <data key="d3">chunk-d06cb6332974b5ce734b0a6a2a3e89fd</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396659</data>
+</node>
+<node id="site:asset-unknown-24e124415b105089">
+  <data key="d0">site:asset-unknown-24e124415b105089</data>
+  <data key="d3">chunk-d06cb6332974b5ce734b0a6a2a3e89fd</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396659</data>
+</node>
+<node id="24E124415B106073">
+  <data key="d0">24E124415B106073</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B106073' [SmartSwitch] site_id=asset-unknown-24E124415B106073 lat=0.0 lon=0.0 serial=24E124415B106073</data>
+  <data key="d3">chunk-2ae492425093cc560b01968d50c595ef</data>
+  <data key="d4"></data>
+  <data key="d5">1758446595</data>
+</node>
+<node id="asset-unknown-24E124415B106073">
+  <data key="d0">asset-unknown-24E124415B106073</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B106073' id=asset-unknown-24E124415B106073 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446595</data>
+</node>
+<node id="device:24e124415b106073">
+  <data key="d0">device:24e124415b106073</data>
+  <data key="d3">chunk-2ae492425093cc560b01968d50c595ef</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396659</data>
+</node>
+<node id="site:asset-unknown-24e124415b106073">
+  <data key="d0">site:asset-unknown-24e124415b106073</data>
+  <data key="d3">chunk-2ae492425093cc560b01968d50c595ef</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396659</data>
+</node>
+<node id="24E124415B107089">
+  <data key="d0">24E124415B107089</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B107089' [SmartSwitch] site_id=asset-unknown-24E124415B107089 lat=0.0 lon=0.0 serial=24E124415B107089</data>
+  <data key="d3">chunk-8f5f3843ee122c51e639237cce61fd39</data>
+  <data key="d4"></data>
+  <data key="d5">1758446596</data>
+</node>
+<node id="asset-unknown-24E124415B107089">
+  <data key="d0">asset-unknown-24E124415B107089</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B107089' id=asset-unknown-24E124415B107089 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446596</data>
+</node>
+<node id="device:24e124415b107089">
+  <data key="d0">device:24e124415b107089</data>
+  <data key="d3">chunk-8f5f3843ee122c51e639237cce61fd39</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396660</data>
+</node>
+<node id="site:asset-unknown-24e124415b107089">
+  <data key="d0">site:asset-unknown-24e124415b107089</data>
+  <data key="d3">chunk-8f5f3843ee122c51e639237cce61fd39</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396660</data>
+</node>
+<node id="24E124415B107544">
+  <data key="d0">24E124415B107544</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B107544' [SmartSwitch] site_id=asset-unknown-24E124415B107544 lat=0.0 lon=0.0 serial=24E124415B107544</data>
+  <data key="d3">chunk-5f0c10ce2c493bc22dcb1a8ecdd482ba</data>
+  <data key="d4"></data>
+  <data key="d5">1758446597</data>
+</node>
+<node id="asset-unknown-24E124415B107544">
+  <data key="d0">asset-unknown-24E124415B107544</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B107544' id=asset-unknown-24E124415B107544 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446597</data>
+</node>
+<node id="device:24e124415b107544">
+  <data key="d0">device:24e124415b107544</data>
+  <data key="d3">chunk-5f0c10ce2c493bc22dcb1a8ecdd482ba</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396660</data>
+</node>
+<node id="site:asset-unknown-24e124415b107544">
+  <data key="d0">site:asset-unknown-24e124415b107544</data>
+  <data key="d3">chunk-5f0c10ce2c493bc22dcb1a8ecdd482ba</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396660</data>
+</node>
+<node id="24E124415B108143">
+  <data key="d0">24E124415B108143</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B108143' [SmartSwitch] site_id=asset-unknown-24E124415B108143 lat=0.0 lon=0.0 serial=24E124415B108143</data>
+  <data key="d3">chunk-4daa3d4c8296eb19aa988622c8628762</data>
+  <data key="d4"></data>
+  <data key="d5">1758446598</data>
+</node>
+<node id="asset-unknown-24E124415B108143">
+  <data key="d0">asset-unknown-24E124415B108143</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B108143' id=asset-unknown-24E124415B108143 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446598</data>
+</node>
+<node id="device:24e124415b108143">
+  <data key="d0">device:24e124415b108143</data>
+  <data key="d3">chunk-4daa3d4c8296eb19aa988622c8628762</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396661</data>
+</node>
+<node id="site:asset-unknown-24e124415b108143">
+  <data key="d0">site:asset-unknown-24e124415b108143</data>
+  <data key="d3">chunk-4daa3d4c8296eb19aa988622c8628762</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396661</data>
+</node>
+<node id="24E124415B108259">
+  <data key="d0">24E124415B108259</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B108259' [SmartSwitch] site_id=asset-unknown-24E124415B108259 lat=0.0 lon=0.0 serial=24E124415B108259</data>
+  <data key="d3">chunk-a68d73978a477b12ae76a60e34d4e870</data>
+  <data key="d4"></data>
+  <data key="d5">1758446598</data>
+</node>
+<node id="asset-unknown-24E124415B108259">
+  <data key="d0">asset-unknown-24E124415B108259</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B108259' id=asset-unknown-24E124415B108259 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446598</data>
+</node>
+<node id="device:24e124415b108259">
+  <data key="d0">device:24e124415b108259</data>
+  <data key="d3">chunk-a68d73978a477b12ae76a60e34d4e870</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396662</data>
+</node>
+<node id="site:asset-unknown-24e124415b108259">
+  <data key="d0">site:asset-unknown-24e124415b108259</data>
+  <data key="d3">chunk-a68d73978a477b12ae76a60e34d4e870</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396662</data>
+</node>
+<node id="24e124126b428820">
+  <data key="d0">24e124126b428820</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24e124126b428820' [Soil Moisture] site_id=asset-unknown-24e124126b428820 lat=0.0 lon=0.0 serial=24e124126b428820</data>
+  <data key="d3">chunk-a0add2ca52296301b0f906a28e965802</data>
+  <data key="d4"></data>
+  <data key="d5">1758446599</data>
+</node>
+<node id="asset-unknown-24e124126b428820">
+  <data key="d0">asset-unknown-24e124126b428820</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24e124126b428820' id=asset-unknown-24e124126b428820 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446599</data>
+</node>
+<node id="device:24e124126b428820">
+  <data key="d0">device:24e124126b428820</data>
+  <data key="d3">chunk-a0add2ca52296301b0f906a28e965802</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396662</data>
+</node>
+<node id="site:asset-unknown-24e124126b428820">
+  <data key="d0">site:asset-unknown-24e124126b428820</data>
+  <data key="d3">chunk-a0add2ca52296301b0f906a28e965802</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396662</data>
+</node>
+<node id="24e124126b420341">
+  <data key="d0">24e124126b420341</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24e124126b420341' [Soil Moisture] site_id=asset-unknown-24e124126b420341 lat=0.0 lon=0.0 serial=24e124126b420341</data>
+  <data key="d3">chunk-81fdbe864546f9fe3e136cf188b06956</data>
+  <data key="d4"></data>
+  <data key="d5">1758446600</data>
+</node>
+<node id="asset-unknown-24e124126b420341">
+  <data key="d0">asset-unknown-24e124126b420341</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24e124126b420341' id=asset-unknown-24e124126b420341 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446600</data>
+</node>
+<node id="device:24e124126b420341">
+  <data key="d0">device:24e124126b420341</data>
+  <data key="d3">chunk-81fdbe864546f9fe3e136cf188b06956</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396663</data>
+</node>
+<node id="site:asset-unknown-24e124126b420341">
+  <data key="d0">site:asset-unknown-24e124126b420341</data>
+  <data key="d3">chunk-81fdbe864546f9fe3e136cf188b06956</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396663</data>
+</node>
+<node id="0004A30B0050948B">
+  <data key="d0">0004A30B0050948B</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B0050948B' [Environmental] site_id=asset-unknown-0004A30B0050948B lat=0.0 lon=0.0 serial=0004A30B0050948B</data>
+  <data key="d3">chunk-5e2c428113da9fa1bebee898e4bec7c8</data>
+  <data key="d4"></data>
+  <data key="d5">1758446600</data>
+</node>
+<node id="asset-unknown-0004A30B0050948B">
+  <data key="d0">asset-unknown-0004A30B0050948B</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B0050948B' id=asset-unknown-0004A30B0050948B lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446600</data>
+</node>
+<node id="device:0004a30b0050948b">
+  <data key="d0">device:0004a30b0050948b</data>
+  <data key="d3">chunk-5e2c428113da9fa1bebee898e4bec7c8</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396663</data>
+</node>
+<node id="site:asset-unknown-0004a30b0050948b">
+  <data key="d0">site:asset-unknown-0004a30b0050948b</data>
+  <data key="d3">chunk-5e2c428113da9fa1bebee898e4bec7c8</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396663</data>
+</node>
+<node id="0004A30B0050947F">
+  <data key="d0">0004A30B0050947F</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B0050947F' [Environmental] site_id=asset-unknown-0004A30B0050947F lat=0.0 lon=0.0 serial=0004A30B0050947F</data>
+  <data key="d3">chunk-f1bd2129e008ac29a09e764f02acf5be</data>
+  <data key="d4"></data>
+  <data key="d5">1758446601</data>
+</node>
+<node id="asset-unknown-0004A30B0050947F">
+  <data key="d0">asset-unknown-0004A30B0050947F</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B0050947F' id=asset-unknown-0004A30B0050947F lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446601</data>
+</node>
+<node id="device:0004a30b0050947f">
+  <data key="d0">device:0004a30b0050947f</data>
+  <data key="d3">chunk-f1bd2129e008ac29a09e764f02acf5be</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396664</data>
+</node>
+<node id="site:asset-unknown-0004a30b0050947f">
+  <data key="d0">site:asset-unknown-0004a30b0050947f</data>
+  <data key="d3">chunk-f1bd2129e008ac29a09e764f02acf5be</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396664</data>
+</node>
+<node id="0004A30B0050AC26">
+  <data key="d0">0004A30B0050AC26</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B0050AC26' [Environmental] site_id=asset-unknown-0004A30B0050AC26 lat=0.0 lon=0.0 serial=0004A30B0050AC26</data>
+  <data key="d3">chunk-f03d9ff009258c312f2a098b96378c03</data>
+  <data key="d4"></data>
+  <data key="d5">1758446602</data>
+</node>
+<node id="asset-unknown-0004A30B0050AC26">
+  <data key="d0">asset-unknown-0004A30B0050AC26</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B0050AC26' id=asset-unknown-0004A30B0050AC26 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446602</data>
+</node>
+<node id="device:0004a30b0050ac26">
+  <data key="d0">device:0004a30b0050ac26</data>
+  <data key="d3">chunk-f03d9ff009258c312f2a098b96378c03</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396665</data>
+</node>
+<node id="site:asset-unknown-0004a30b0050ac26">
+  <data key="d0">site:asset-unknown-0004a30b0050ac26</data>
+  <data key="d3">chunk-f03d9ff009258c312f2a098b96378c03</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396665</data>
+</node>
+<node id="0004A30B0050A86E">
+  <data key="d0">0004A30B0050A86E</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B0050A86E' [Environmental] site_id=asset-unknown-0004A30B0050A86E lat=0.0 lon=0.0 serial=0004A30B0050A86E</data>
+  <data key="d3">chunk-ad63eb2857b11ece7c2a14fb0da60011</data>
+  <data key="d4"></data>
+  <data key="d5">1758446602</data>
+</node>
+<node id="asset-unknown-0004A30B0050A86E">
+  <data key="d0">asset-unknown-0004A30B0050A86E</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B0050A86E' id=asset-unknown-0004A30B0050A86E lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446602</data>
+</node>
+<node id="device:0004a30b0050a86e">
+  <data key="d0">device:0004a30b0050a86e</data>
+  <data key="d3">chunk-ad63eb2857b11ece7c2a14fb0da60011</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396665</data>
+</node>
+<node id="site:asset-unknown-0004a30b0050a86e">
+  <data key="d0">site:asset-unknown-0004a30b0050a86e</data>
+  <data key="d3">chunk-ad63eb2857b11ece7c2a14fb0da60011</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396665</data>
+</node>
+<node id="0004A30B0050C0AD">
+  <data key="d0">0004A30B0050C0AD</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B0050C0AD' [Environmental] site_id=asset-unknown-0004A30B0050C0AD lat=0.0 lon=0.0 serial=0004A30B0050C0AD</data>
+  <data key="d3">chunk-186daed8252a56d8ea0cd35fa58f99b6</data>
+  <data key="d4"></data>
+  <data key="d5">1758446603</data>
+</node>
+<node id="asset-unknown-0004A30B0050C0AD">
+  <data key="d0">asset-unknown-0004A30B0050C0AD</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B0050C0AD' id=asset-unknown-0004A30B0050C0AD lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446603</data>
+</node>
+<node id="device:0004a30b0050c0ad">
+  <data key="d0">device:0004a30b0050c0ad</data>
+  <data key="d3">chunk-186daed8252a56d8ea0cd35fa58f99b6</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396666</data>
+</node>
+<node id="site:asset-unknown-0004a30b0050c0ad">
+  <data key="d0">site:asset-unknown-0004a30b0050c0ad</data>
+  <data key="d3">chunk-186daed8252a56d8ea0cd35fa58f99b6</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396666</data>
+</node>
+<node id="0004A30B0050C5EB">
+  <data key="d0">0004A30B0050C5EB</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0004A30B0050C5EB' [Environmental] site_id=asset-unknown-0004A30B0050C5EB lat=0.0 lon=0.0 serial=0004A30B0050C5EB</data>
+  <data key="d3">chunk-bcf9cea13235ba0009a54ff2173195c5</data>
+  <data key="d4"></data>
+  <data key="d5">1758446603</data>
+</node>
+<node id="asset-unknown-0004A30B0050C5EB">
+  <data key="d0">asset-unknown-0004A30B0050C5EB</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0004A30B0050C5EB' id=asset-unknown-0004A30B0050C5EB lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446603</data>
+</node>
+<node id="device:0004a30b0050c5eb">
+  <data key="d0">device:0004a30b0050c5eb</data>
+  <data key="d3">chunk-bcf9cea13235ba0009a54ff2173195c5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396666</data>
+</node>
+<node id="site:asset-unknown-0004a30b0050c5eb">
+  <data key="d0">site:asset-unknown-0004a30b0050c5eb</data>
+  <data key="d3">chunk-bcf9cea13235ba0009a54ff2173195c5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396666</data>
+</node>
+<node id="24E124415B461861">
+  <data key="d0">24E124415B461861</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B461861' [SmartSwitch] site_id=asset-unknown-24E124415B461861 lat=0.0 lon=0.0 serial=24E124415B461861</data>
+  <data key="d3">chunk-c44d76db6fd7c2c8a7457531eed923d8</data>
+  <data key="d4"></data>
+  <data key="d5">1758446604</data>
+</node>
+<node id="asset-unknown-24E124415B461861">
+  <data key="d0">asset-unknown-24E124415B461861</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B461861' id=asset-unknown-24E124415B461861 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446604</data>
+</node>
+<node id="device:24e124415b461861">
+  <data key="d0">device:24e124415b461861</data>
+  <data key="d3">chunk-c44d76db6fd7c2c8a7457531eed923d8</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396667</data>
+</node>
+<node id="site:asset-unknown-24e124415b461861">
+  <data key="d0">site:asset-unknown-24e124415b461861</data>
+  <data key="d3">chunk-c44d76db6fd7c2c8a7457531eed923d8</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396667</data>
+</node>
+<node id="24E124415B469069">
+  <data key="d0">24E124415B469069</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B469069' [SmartSwitch] site_id=asset-unknown-24E124415B469069 lat=0.0 lon=0.0 serial=24E124415B469069</data>
+  <data key="d3">chunk-b09c4485b19d4e367aa702d99e5b614c</data>
+  <data key="d4"></data>
+  <data key="d5">1758446605</data>
+</node>
+<node id="asset-unknown-24E124415B469069">
+  <data key="d0">asset-unknown-24E124415B469069</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B469069' id=asset-unknown-24E124415B469069 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446605</data>
+</node>
+<node id="device:24e124415b469069">
+  <data key="d0">device:24e124415b469069</data>
+  <data key="d3">chunk-b09c4485b19d4e367aa702d99e5b614c</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396668</data>
+</node>
+<node id="site:asset-unknown-24e124415b469069">
+  <data key="d0">site:asset-unknown-24e124415b469069</data>
+  <data key="d3">chunk-b09c4485b19d4e367aa702d99e5b614c</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396668</data>
+</node>
+<node id="24E124415B464301">
+  <data key="d0">24E124415B464301</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B464301' [SmartSwitch] site_id=asset-unknown-24E124415B464301 lat=0.0 lon=0.0 serial=24E124415B464301</data>
+  <data key="d3">chunk-408cc811089a937358cac0ff4dc3084a</data>
+  <data key="d4"></data>
+  <data key="d5">1758446605</data>
+</node>
+<node id="asset-unknown-24E124415B464301">
+  <data key="d0">asset-unknown-24E124415B464301</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B464301' id=asset-unknown-24E124415B464301 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446605</data>
+</node>
+<node id="device:24e124415b464301">
+  <data key="d0">device:24e124415b464301</data>
+  <data key="d3">chunk-408cc811089a937358cac0ff4dc3084a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396668</data>
+</node>
+<node id="site:asset-unknown-24e124415b464301">
+  <data key="d0">site:asset-unknown-24e124415b464301</data>
+  <data key="d3">chunk-408cc811089a937358cac0ff4dc3084a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396668</data>
+</node>
+<node id="24E124126C142091">
+  <data key="d0">24E124126C142091</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142091' [Soil Moisture] site_id=asset-unknown-24E124126C142091 lat=0.0 lon=0.0 serial=24E124126C142091</data>
+  <data key="d3">chunk-f9ab0cc1fef1b3f194fa0f7d1b483c1f</data>
+  <data key="d4"></data>
+  <data key="d5">1758446606</data>
+</node>
+<node id="asset-unknown-24E124126C142091">
+  <data key="d0">asset-unknown-24E124126C142091</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142091' id=asset-unknown-24E124126C142091 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446606</data>
+</node>
+<node id="device:24e124126c142091">
+  <data key="d0">device:24e124126c142091</data>
+  <data key="d3">chunk-f9ab0cc1fef1b3f194fa0f7d1b483c1f</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396669</data>
+</node>
+<node id="site:asset-unknown-24e124126c142091">
+  <data key="d0">site:asset-unknown-24e124126c142091</data>
+  <data key="d3">chunk-f9ab0cc1fef1b3f194fa0f7d1b483c1f</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396669</data>
+</node>
+<node id="24E124415B463798">
+  <data key="d0">24E124415B463798</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B463798' [SmartSwitch] site_id=asset-unknown-24E124415B463798 lat=0.0 lon=0.0 serial=24E124415B463798</data>
+  <data key="d3">chunk-121015e89e98c8fbf7527014d6da1faf</data>
+  <data key="d4"></data>
+  <data key="d5">1758446607</data>
+</node>
+<node id="asset-unknown-24E124415B463798">
+  <data key="d0">asset-unknown-24E124415B463798</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B463798' id=asset-unknown-24E124415B463798 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446607</data>
+</node>
+<node id="device:24e124415b463798">
+  <data key="d0">device:24e124415b463798</data>
+  <data key="d3">chunk-121015e89e98c8fbf7527014d6da1faf</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396669</data>
+</node>
+<node id="site:asset-unknown-24e124415b463798">
+  <data key="d0">site:asset-unknown-24e124415b463798</data>
+  <data key="d3">chunk-121015e89e98c8fbf7527014d6da1faf</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396669</data>
+</node>
+<node id="24E124415B462561">
+  <data key="d0">24E124415B462561</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B462561' [SmartSwitch] site_id=asset-unknown-24E124415B462561 lat=0.0 lon=0.0 serial=24E124415B462561</data>
+  <data key="d3">chunk-d8fd323161bb88c292517a5ec46e0028</data>
+  <data key="d4"></data>
+  <data key="d5">1758446607</data>
+</node>
+<node id="asset-unknown-24E124415B462561">
+  <data key="d0">asset-unknown-24E124415B462561</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B462561' id=asset-unknown-24E124415B462561 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446607</data>
+</node>
+<node id="device:24e124415b462561">
+  <data key="d0">device:24e124415b462561</data>
+  <data key="d3">chunk-d8fd323161bb88c292517a5ec46e0028</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396670</data>
+</node>
+<node id="site:asset-unknown-24e124415b462561">
+  <data key="d0">site:asset-unknown-24e124415b462561</data>
+  <data key="d3">chunk-d8fd323161bb88c292517a5ec46e0028</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396670</data>
+</node>
+<node id="24E124415B463802">
+  <data key="d0">24E124415B463802</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B463802' [SmartSwitch] site_id=asset-unknown-24E124415B463802 lat=0.0 lon=0.0 serial=24E124415B463802</data>
+  <data key="d3">chunk-6177191723aebd532626208f3c195a76</data>
+  <data key="d4"></data>
+  <data key="d5">1758446608</data>
+</node>
+<node id="asset-unknown-24E124415B463802">
+  <data key="d0">asset-unknown-24E124415B463802</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B463802' id=asset-unknown-24E124415B463802 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446608</data>
+</node>
+<node id="device:24e124415b463802">
+  <data key="d0">device:24e124415b463802</data>
+  <data key="d3">chunk-6177191723aebd532626208f3c195a76</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396671</data>
+</node>
+<node id="site:asset-unknown-24e124415b463802">
+  <data key="d0">site:asset-unknown-24e124415b463802</data>
+  <data key="d3">chunk-6177191723aebd532626208f3c195a76</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396671</data>
+</node>
+<node id="24E124415B466170">
+  <data key="d0">24E124415B466170</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B466170' [SmartSwitch] site_id=asset-unknown-24E124415B466170 lat=0.0 lon=0.0 serial=24E124415B466170</data>
+  <data key="d3">chunk-04201188c04ffe4ce827326d8d341016</data>
+  <data key="d4"></data>
+  <data key="d5">1758446609</data>
+</node>
+<node id="asset-unknown-24E124415B466170">
+  <data key="d0">asset-unknown-24E124415B466170</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B466170' id=asset-unknown-24E124415B466170 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446609</data>
+</node>
+<node id="device:24e124415b466170">
+  <data key="d0">device:24e124415b466170</data>
+  <data key="d3">chunk-04201188c04ffe4ce827326d8d341016</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396671</data>
+</node>
+<node id="site:asset-unknown-24e124415b466170">
+  <data key="d0">site:asset-unknown-24e124415b466170</data>
+  <data key="d3">chunk-04201188c04ffe4ce827326d8d341016</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396671</data>
+</node>
+<node id="24E124415B464572">
+  <data key="d0">24E124415B464572</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B464572' [SmartSwitch] site_id=asset-unknown-24E124415B464572 lat=0.0 lon=0.0 serial=24E124415B464572</data>
+  <data key="d3">chunk-b5776a3e0110b6779f6660963bca42e1</data>
+  <data key="d4"></data>
+  <data key="d5">1758446610</data>
+</node>
+<node id="asset-unknown-24E124415B464572">
+  <data key="d0">asset-unknown-24E124415B464572</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B464572' id=asset-unknown-24E124415B464572 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446610</data>
+</node>
+<node id="device:24e124415b464572">
+  <data key="d0">device:24e124415b464572</data>
+  <data key="d3">chunk-b5776a3e0110b6779f6660963bca42e1</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396672</data>
+</node>
+<node id="site:asset-unknown-24e124415b464572">
+  <data key="d0">site:asset-unknown-24e124415b464572</data>
+  <data key="d3">chunk-b5776a3e0110b6779f6660963bca42e1</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396672</data>
+</node>
+<node id="24E124415B464074">
+  <data key="d0">24E124415B464074</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B464074' [SmartSwitch] site_id=asset-unknown-24E124415B464074 lat=0.0 lon=0.0 serial=24E124415B464074</data>
+  <data key="d3">chunk-f030187cfe4c61397e2f9a828fbc936a</data>
+  <data key="d4"></data>
+  <data key="d5">1758446610</data>
+</node>
+<node id="asset-unknown-24E124415B464074">
+  <data key="d0">asset-unknown-24E124415B464074</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B464074' id=asset-unknown-24E124415B464074 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446610</data>
+</node>
+<node id="device:24e124415b464074">
+  <data key="d0">device:24e124415b464074</data>
+  <data key="d3">chunk-f030187cfe4c61397e2f9a828fbc936a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396672</data>
+</node>
+<node id="site:asset-unknown-24e124415b464074">
+  <data key="d0">site:asset-unknown-24e124415b464074</data>
+  <data key="d3">chunk-f030187cfe4c61397e2f9a828fbc936a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396672</data>
+</node>
+<node id="24E124415B321942">
+  <data key="d0">24E124415B321942</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B321942' [SmartSwitch] site_id=asset-unknown-24E124415B321942 lat=0.0 lon=0.0 serial=24E124415B321942</data>
+  <data key="d3">chunk-ce6959803c94c2ab6c8d31516991d161</data>
+  <data key="d4"></data>
+  <data key="d5">1758446611</data>
+</node>
+<node id="asset-unknown-24E124415B321942">
+  <data key="d0">asset-unknown-24E124415B321942</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B321942' id=asset-unknown-24E124415B321942 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446611</data>
+</node>
+<node id="device:24e124415b321942">
+  <data key="d0">device:24e124415b321942</data>
+  <data key="d3">chunk-ce6959803c94c2ab6c8d31516991d161</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396673</data>
+</node>
+<node id="site:asset-unknown-24e124415b321942">
+  <data key="d0">site:asset-unknown-24e124415b321942</data>
+  <data key="d3">chunk-ce6959803c94c2ab6c8d31516991d161</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396673</data>
+</node>
+<node id="24E124415B469901">
+  <data key="d0">24E124415B469901</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B469901' [SmartSwitch] site_id=asset-unknown-24E124415B469901 lat=0.0 lon=0.0 serial=24E124415B469901</data>
+  <data key="d3">chunk-702d791c2905dd18be5111fec1cc8436</data>
+  <data key="d4"></data>
+  <data key="d5">1758446612</data>
+</node>
+<node id="asset-unknown-24E124415B469901">
+  <data key="d0">asset-unknown-24E124415B469901</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B469901' id=asset-unknown-24E124415B469901 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446612</data>
+</node>
+<node id="device:24e124415b469901">
+  <data key="d0">device:24e124415b469901</data>
+  <data key="d3">chunk-702d791c2905dd18be5111fec1cc8436</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396674</data>
+</node>
+<node id="site:asset-unknown-24e124415b469901">
+  <data key="d0">site:asset-unknown-24e124415b469901</data>
+  <data key="d3">chunk-702d791c2905dd18be5111fec1cc8436</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396674</data>
+</node>
+<node id="24E124415B469222">
+  <data key="d0">24E124415B469222</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B469222' [SmartSwitch] site_id=asset-unknown-24E124415B469222 lat=0.0 lon=0.0 serial=24E124415B469222</data>
+  <data key="d3">chunk-e292d957a699347271ae011175a96719</data>
+  <data key="d4"></data>
+  <data key="d5">1758446612</data>
+</node>
+<node id="asset-unknown-24E124415B469222">
+  <data key="d0">asset-unknown-24E124415B469222</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B469222' id=asset-unknown-24E124415B469222 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446612</data>
+</node>
+<node id="device:24e124415b469222">
+  <data key="d0">device:24e124415b469222</data>
+  <data key="d3">chunk-e292d957a699347271ae011175a96719</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396674</data>
+</node>
+<node id="site:asset-unknown-24e124415b469222">
+  <data key="d0">site:asset-unknown-24e124415b469222</data>
+  <data key="d3">chunk-e292d957a699347271ae011175a96719</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396674</data>
+</node>
+<node id="24E124415B462193">
+  <data key="d0">24E124415B462193</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B462193' [SmartSwitch] site_id=asset-unknown-24E124415B462193 lat=0.0 lon=0.0 serial=24E124415B462193</data>
+  <data key="d3">chunk-e7987ee221ceb48cec86b56defb827e6</data>
+  <data key="d4"></data>
+  <data key="d5">1758446613</data>
+</node>
+<node id="asset-unknown-24E124415B462193">
+  <data key="d0">asset-unknown-24E124415B462193</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B462193' id=asset-unknown-24E124415B462193 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446613</data>
+</node>
+<node id="device:24e124415b462193">
+  <data key="d0">device:24e124415b462193</data>
+  <data key="d3">chunk-e7987ee221ceb48cec86b56defb827e6</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396675</data>
+</node>
+<node id="site:asset-unknown-24e124415b462193">
+  <data key="d0">site:asset-unknown-24e124415b462193</data>
+  <data key="d3">chunk-e7987ee221ceb48cec86b56defb827e6</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396675</data>
+</node>
+<node id="24E124415B463169">
+  <data key="d0">24E124415B463169</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B463169' [SmartSwitch] site_id=asset-unknown-24E124415B463169 lat=0.0 lon=0.0 serial=24E124415B463169</data>
+  <data key="d3">chunk-cae9fb15e79a9594e5e992c63a4c511b</data>
+  <data key="d4"></data>
+  <data key="d5">1758446614</data>
+</node>
+<node id="asset-unknown-24E124415B463169">
+  <data key="d0">asset-unknown-24E124415B463169</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B463169' id=asset-unknown-24E124415B463169 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446614</data>
+</node>
+<node id="device:24e124415b463169">
+  <data key="d0">device:24e124415b463169</data>
+  <data key="d3">chunk-cae9fb15e79a9594e5e992c63a4c511b</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396676</data>
+</node>
+<node id="site:asset-unknown-24e124415b463169">
+  <data key="d0">site:asset-unknown-24e124415b463169</data>
+  <data key="d3">chunk-cae9fb15e79a9594e5e992c63a4c511b</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396676</data>
+</node>
+<node id="DESCONECTADO_24E124415B462560">
+  <data key="d0">DESCONECTADO_24E124415B462560</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device 'DESCONECTADO_24E124415B462560' [SmartSwitch] site_id=asset-unknown-DESCONECTADO_24E124415B462560 lat=0.0 lon=0.0 serial=DESCONECTADO_24E124415B462560</data>
+  <data key="d3">chunk-b45600c774ddec01ddd432d6274a1da5</data>
+  <data key="d4"></data>
+  <data key="d5">1758446615</data>
+</node>
+<node id="asset-unknown-DESCONECTADO_24E124415B462560">
+  <data key="d0">asset-unknown-DESCONECTADO_24E124415B462560</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-DESCONECTADO_24E124415B462560' id=asset-unknown-DESCONECTADO_24E124415B462560 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446615</data>
+</node>
+<node id="device:desconectado_24e124415b462560">
+  <data key="d0">device:desconectado_24e124415b462560</data>
+  <data key="d3">chunk-b45600c774ddec01ddd432d6274a1da5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396676</data>
+</node>
+<node id="site:asset-unknown-desconectado_24e124415b462560">
+  <data key="d0">site:asset-unknown-desconectado_24e124415b462560</data>
+  <data key="d3">chunk-b45600c774ddec01ddd432d6274a1da5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396676</data>
+</node>
+<node id="24E124415B464699">
+  <data key="d0">24E124415B464699</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B464699' [SmartSwitch] site_id=asset-unknown-24E124415B464699 lat=0.0 lon=0.0 serial=24E124415B464699</data>
+  <data key="d3">chunk-7fde163053a7c6de71c7e264e6198859</data>
+  <data key="d4"></data>
+  <data key="d5">1758446616</data>
+</node>
+<node id="asset-unknown-24E124415B464699">
+  <data key="d0">asset-unknown-24E124415B464699</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B464699' id=asset-unknown-24E124415B464699 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446616</data>
+</node>
+<node id="device:24e124415b464699">
+  <data key="d0">device:24e124415b464699</data>
+  <data key="d3">chunk-7fde163053a7c6de71c7e264e6198859</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396677</data>
+</node>
+<node id="site:asset-unknown-24e124415b464699">
+  <data key="d0">site:asset-unknown-24e124415b464699</data>
+  <data key="d3">chunk-7fde163053a7c6de71c7e264e6198859</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396677</data>
+</node>
+<node id="24E124415B464797">
+  <data key="d0">24E124415B464797</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B464797' [SmartSwitch] site_id=asset-unknown-24E124415B464797 lat=0.0 lon=0.0 serial=24E124415B464797</data>
+  <data key="d3">chunk-548d406c046f1d9b8f964e1f4e0eeb28</data>
+  <data key="d4"></data>
+  <data key="d5">1758446617</data>
+</node>
+<node id="asset-unknown-24E124415B464797">
+  <data key="d0">asset-unknown-24E124415B464797</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B464797' id=asset-unknown-24E124415B464797 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446617</data>
+</node>
+<node id="device:24e124415b464797">
+  <data key="d0">device:24e124415b464797</data>
+  <data key="d3">chunk-548d406c046f1d9b8f964e1f4e0eeb28</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396678</data>
+</node>
+<node id="site:asset-unknown-24e124415b464797">
+  <data key="d0">site:asset-unknown-24e124415b464797</data>
+  <data key="d3">chunk-548d406c046f1d9b8f964e1f4e0eeb28</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396678</data>
+</node>
+<node id="24E124415B468555">
+  <data key="d0">24E124415B468555</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B468555' [SmartSwitch] site_id=asset-unknown-24E124415B468555 lat=0.0 lon=0.0 serial=24E124415B468555</data>
+  <data key="d3">chunk-e353632cbdd1a6cbfc2a3e69885fac59</data>
+  <data key="d4"></data>
+  <data key="d5">1758446617</data>
+</node>
+<node id="asset-unknown-24E124415B468555">
+  <data key="d0">asset-unknown-24E124415B468555</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B468555' id=asset-unknown-24E124415B468555 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446617</data>
+</node>
+<node id="device:24e124415b468555">
+  <data key="d0">device:24e124415b468555</data>
+  <data key="d3">chunk-e353632cbdd1a6cbfc2a3e69885fac59</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396678</data>
+</node>
+<node id="site:asset-unknown-24e124415b468555">
+  <data key="d0">site:asset-unknown-24e124415b468555</data>
+  <data key="d3">chunk-e353632cbdd1a6cbfc2a3e69885fac59</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396678</data>
+</node>
+<node id="24E124415B469434">
+  <data key="d0">24E124415B469434</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B469434' [SmartSwitch] site_id=asset-unknown-24E124415B469434 lat=0.0 lon=0.0 serial=24E124415B469434</data>
+  <data key="d3">chunk-4d7031512120fe1affe3784e4fe9c614</data>
+  <data key="d4"></data>
+  <data key="d5">1758446618</data>
+</node>
+<node id="asset-unknown-24E124415B469434">
+  <data key="d0">asset-unknown-24E124415B469434</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B469434' id=asset-unknown-24E124415B469434 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446618</data>
+</node>
+<node id="device:24e124415b469434">
+  <data key="d0">device:24e124415b469434</data>
+  <data key="d3">chunk-4d7031512120fe1affe3784e4fe9c614</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396679</data>
+</node>
+<node id="site:asset-unknown-24e124415b469434">
+  <data key="d0">site:asset-unknown-24e124415b469434</data>
+  <data key="d3">chunk-4d7031512120fe1affe3784e4fe9c614</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396679</data>
+</node>
+<node id="AVERIADO_24E124415B460961">
+  <data key="d0">AVERIADO_24E124415B460961</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device 'AVERIADO_24E124415B460961' [SmartSwitch] site_id=asset-unknown-AVERIADO_24E124415B460961 lat=0.0 lon=0.0 serial=AVERIADO_24E124415B460961</data>
+  <data key="d3">chunk-13f28fa2726cdd26bc20d2aae63a8e1f</data>
+  <data key="d4"></data>
+  <data key="d5">1758446619</data>
+</node>
+<node id="asset-unknown-AVERIADO_24E124415B460961">
+  <data key="d0">asset-unknown-AVERIADO_24E124415B460961</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-AVERIADO_24E124415B460961' id=asset-unknown-AVERIADO_24E124415B460961 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446619</data>
+</node>
+<node id="device:averiado_24e124415b460961">
+  <data key="d0">device:averiado_24e124415b460961</data>
+  <data key="d3">chunk-13f28fa2726cdd26bc20d2aae63a8e1f</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396680</data>
+</node>
+<node id="site:asset-unknown-averiado_24e124415b460961">
+  <data key="d0">site:asset-unknown-averiado_24e124415b460961</data>
+  <data key="d3">chunk-13f28fa2726cdd26bc20d2aae63a8e1f</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396680</data>
+</node>
+<node id="24E124415B464298">
+  <data key="d0">24E124415B464298</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B464298' [SmartSwitch] site_id=asset-unknown-24E124415B464298 lat=0.0 lon=0.0 serial=24E124415B464298</data>
+  <data key="d3">chunk-46d23bba769e770df1b4ce8ac74e8a19</data>
+  <data key="d4"></data>
+  <data key="d5">1758446620</data>
+</node>
+<node id="asset-unknown-24E124415B464298">
+  <data key="d0">asset-unknown-24E124415B464298</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B464298' id=asset-unknown-24E124415B464298 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446620</data>
+</node>
+<node id="device:24e124415b464298">
+  <data key="d0">device:24e124415b464298</data>
+  <data key="d3">chunk-46d23bba769e770df1b4ce8ac74e8a19</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396681</data>
+</node>
+<node id="site:asset-unknown-24e124415b464298">
+  <data key="d0">site:asset-unknown-24e124415b464298</data>
+  <data key="d3">chunk-46d23bba769e770df1b4ce8ac74e8a19</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396681</data>
+</node>
+<node id="24E124415B462517">
+  <data key="d0">24E124415B462517</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B462517' [SmartSwitch] site_id=asset-unknown-24E124415B462517 lat=0.0 lon=0.0 serial=24E124415B462517</data>
+  <data key="d3">chunk-044f251470438325ea7d6d0540f81153</data>
+  <data key="d4"></data>
+  <data key="d5">1758446621</data>
+</node>
+<node id="asset-unknown-24E124415B462517">
+  <data key="d0">asset-unknown-24E124415B462517</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B462517' id=asset-unknown-24E124415B462517 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446621</data>
+</node>
+<node id="device:24e124415b462517">
+  <data key="d0">device:24e124415b462517</data>
+  <data key="d3">chunk-044f251470438325ea7d6d0540f81153</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396682</data>
+</node>
+<node id="site:asset-unknown-24e124415b462517">
+  <data key="d0">site:asset-unknown-24e124415b462517</data>
+  <data key="d3">chunk-044f251470438325ea7d6d0540f81153</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396682</data>
+</node>
+<node id="24E124415B467748">
+  <data key="d0">24E124415B467748</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B467748' [SmartSwitch] site_id=asset-unknown-24E124415B467748 lat=0.0 lon=0.0 serial=24E124415B467748</data>
+  <data key="d3">chunk-1520ee9a99e49e116d9b13a9eaa68687</data>
+  <data key="d4"></data>
+  <data key="d5">1758446621</data>
+</node>
+<node id="asset-unknown-24E124415B467748">
+  <data key="d0">asset-unknown-24E124415B467748</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B467748' id=asset-unknown-24E124415B467748 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446621</data>
+</node>
+<node id="device:24e124415b467748">
+  <data key="d0">device:24e124415b467748</data>
+  <data key="d3">chunk-1520ee9a99e49e116d9b13a9eaa68687</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396682</data>
+</node>
+<node id="site:asset-unknown-24e124415b467748">
+  <data key="d0">site:asset-unknown-24e124415b467748</data>
+  <data key="d3">chunk-1520ee9a99e49e116d9b13a9eaa68687</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396682</data>
+</node>
+<node id="24E124415B326176">
+  <data key="d0">24E124415B326176</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B326176' [SmartSwitch] site_id=asset-unknown-24E124415B326176 lat=0.0 lon=0.0 serial=24E124415B326176</data>
+  <data key="d3">chunk-e0ed503e2af7d99e67f53343f71f038d</data>
+  <data key="d4"></data>
+  <data key="d5">1758446622</data>
+</node>
+<node id="asset-unknown-24E124415B326176">
+  <data key="d0">asset-unknown-24E124415B326176</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B326176' id=asset-unknown-24E124415B326176 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446622</data>
+</node>
+<node id="device:24e124415b326176">
+  <data key="d0">device:24e124415b326176</data>
+  <data key="d3">chunk-e0ed503e2af7d99e67f53343f71f038d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396683</data>
+</node>
+<node id="site:asset-unknown-24e124415b326176">
+  <data key="d0">site:asset-unknown-24e124415b326176</data>
+  <data key="d3">chunk-e0ed503e2af7d99e67f53343f71f038d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396683</data>
+</node>
+<node id="24E124415B461021">
+  <data key="d0">24E124415B461021</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B461021' [SmartSwitch] site_id=asset-unknown-24E124415B461021 lat=0.0 lon=0.0 serial=24E124415B461021</data>
+  <data key="d3">chunk-548eed29181a43263c4338219a3c1b7d</data>
+  <data key="d4"></data>
+  <data key="d5">1758446623</data>
+</node>
+<node id="asset-unknown-24E124415B461021">
+  <data key="d0">asset-unknown-24E124415B461021</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B461021' id=asset-unknown-24E124415B461021 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446623</data>
+</node>
+<node id="device:24e124415b461021">
+  <data key="d0">device:24e124415b461021</data>
+  <data key="d3">chunk-548eed29181a43263c4338219a3c1b7d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396684</data>
+</node>
+<node id="site:asset-unknown-24e124415b461021">
+  <data key="d0">site:asset-unknown-24e124415b461021</data>
+  <data key="d3">chunk-548eed29181a43263c4338219a3c1b7d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396684</data>
+</node>
+<node id="24E124415B465872">
+  <data key="d0">24E124415B465872</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B465872' [SmartSwitch] site_id=asset-unknown-24E124415B465872 lat=0.0 lon=0.0 serial=24E124415B465872</data>
+  <data key="d3">chunk-f58dbb1b021cee9999729081d9639ee3</data>
+  <data key="d4"></data>
+  <data key="d5">1758446624</data>
+</node>
+<node id="asset-unknown-24E124415B465872">
+  <data key="d0">asset-unknown-24E124415B465872</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B465872' id=asset-unknown-24E124415B465872 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446624</data>
+</node>
+<node id="device:24e124415b465872">
+  <data key="d0">device:24e124415b465872</data>
+  <data key="d3">chunk-f58dbb1b021cee9999729081d9639ee3</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396684</data>
+</node>
+<node id="site:asset-unknown-24e124415b465872">
+  <data key="d0">site:asset-unknown-24e124415b465872</data>
+  <data key="d3">chunk-f58dbb1b021cee9999729081d9639ee3</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396684</data>
+</node>
+<node id="24E124415B460924">
+  <data key="d0">24E124415B460924</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B460924' [SmartSwitch] site_id=asset-unknown-24E124415B460924 lat=0.0 lon=0.0 serial=24E124415B460924</data>
+  <data key="d3">chunk-67fbfb8cf70195994022ed945574be2a</data>
+  <data key="d4"></data>
+  <data key="d5">1758446624</data>
+</node>
+<node id="asset-unknown-24E124415B460924">
+  <data key="d0">asset-unknown-24E124415B460924</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B460924' id=asset-unknown-24E124415B460924 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446624</data>
+</node>
+<node id="device:24e124415b460924">
+  <data key="d0">device:24e124415b460924</data>
+  <data key="d3">chunk-67fbfb8cf70195994022ed945574be2a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396685</data>
+</node>
+<node id="site:asset-unknown-24e124415b460924">
+  <data key="d0">site:asset-unknown-24e124415b460924</data>
+  <data key="d3">chunk-67fbfb8cf70195994022ed945574be2a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396685</data>
+</node>
+<node id="24E124415B462362">
+  <data key="d0">24E124415B462362</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B462362' [SmartSwitch] site_id=asset-unknown-24E124415B462362 lat=0.0 lon=0.0 serial=24E124415B462362</data>
+  <data key="d3">chunk-30d51bb614a900b6a1da123451b9dffd</data>
+  <data key="d4"></data>
+  <data key="d5">1758446625</data>
+</node>
+<node id="asset-unknown-24E124415B462362">
+  <data key="d0">asset-unknown-24E124415B462362</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B462362' id=asset-unknown-24E124415B462362 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446625</data>
+</node>
+<node id="device:24e124415b462362">
+  <data key="d0">device:24e124415b462362</data>
+  <data key="d3">chunk-30d51bb614a900b6a1da123451b9dffd</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396686</data>
+</node>
+<node id="site:asset-unknown-24e124415b462362">
+  <data key="d0">site:asset-unknown-24e124415b462362</data>
+  <data key="d3">chunk-30d51bb614a900b6a1da123451b9dffd</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396686</data>
+</node>
+<node id="24E124415B461690">
+  <data key="d0">24E124415B461690</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B461690' [SmartSwitch] site_id=asset-unknown-24E124415B461690 lat=0.0 lon=0.0 serial=24E124415B461690</data>
+  <data key="d3">chunk-4c042964500fd7183fba7d5b2c1d6f2a</data>
+  <data key="d4"></data>
+  <data key="d5">1758446626</data>
+</node>
+<node id="asset-unknown-24E124415B461690">
+  <data key="d0">asset-unknown-24E124415B461690</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B461690' id=asset-unknown-24E124415B461690 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446626</data>
+</node>
+<node id="device:24e124415b461690">
+  <data key="d0">device:24e124415b461690</data>
+  <data key="d3">chunk-4c042964500fd7183fba7d5b2c1d6f2a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396686</data>
+</node>
+<node id="site:asset-unknown-24e124415b461690">
+  <data key="d0">site:asset-unknown-24e124415b461690</data>
+  <data key="d3">chunk-4c042964500fd7183fba7d5b2c1d6f2a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396686</data>
+</node>
+<node id="24E124415B461761">
+  <data key="d0">24E124415B461761</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B461761' [SmartSwitch] site_id=asset-unknown-24E124415B461761 lat=0.0 lon=0.0 serial=24E124415B461761</data>
+  <data key="d3">chunk-18464eae842b668833f1d86068daa92d</data>
+  <data key="d4"></data>
+  <data key="d5">1758446627</data>
+</node>
+<node id="asset-unknown-24E124415B461761">
+  <data key="d0">asset-unknown-24E124415B461761</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B461761' id=asset-unknown-24E124415B461761 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446627</data>
+</node>
+<node id="device:24e124415b461761">
+  <data key="d0">device:24e124415b461761</data>
+  <data key="d3">chunk-18464eae842b668833f1d86068daa92d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396687</data>
+</node>
+<node id="site:asset-unknown-24e124415b461761">
+  <data key="d0">site:asset-unknown-24e124415b461761</data>
+  <data key="d3">chunk-18464eae842b668833f1d86068daa92d</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396687</data>
+</node>
+<node id="24E124415B469464">
+  <data key="d0">24E124415B469464</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B469464' [SmartSwitch] site_id=asset-unknown-24E124415B469464 lat=0.0 lon=0.0 serial=24E124415B469464</data>
+  <data key="d3">chunk-7d66123069b87b16c9601b502ca5a1ef</data>
+  <data key="d4"></data>
+  <data key="d5">1758446627</data>
+</node>
+<node id="asset-unknown-24E124415B469464">
+  <data key="d0">asset-unknown-24E124415B469464</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B469464' id=asset-unknown-24E124415B469464 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446627</data>
+</node>
+<node id="device:24e124415b469464">
+  <data key="d0">device:24e124415b469464</data>
+  <data key="d3">chunk-7d66123069b87b16c9601b502ca5a1ef</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396687</data>
+</node>
+<node id="site:asset-unknown-24e124415b469464">
+  <data key="d0">site:asset-unknown-24e124415b469464</data>
+  <data key="d3">chunk-7d66123069b87b16c9601b502ca5a1ef</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396687</data>
+</node>
+<node id="24E124415B460590">
+  <data key="d0">24E124415B460590</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B460590' [SmartSwitch] site_id=asset-unknown-24E124415B460590 lat=0.0 lon=0.0 serial=24E124415B460590</data>
+  <data key="d3">chunk-d72f4bec49ebee2e27339e8693ce0b47</data>
+  <data key="d4"></data>
+  <data key="d5">1758446628</data>
+</node>
+<node id="asset-unknown-24E124415B460590">
+  <data key="d0">asset-unknown-24E124415B460590</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B460590' id=asset-unknown-24E124415B460590 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446628</data>
+</node>
+<node id="device:24e124415b460590">
+  <data key="d0">device:24e124415b460590</data>
+  <data key="d3">chunk-d72f4bec49ebee2e27339e8693ce0b47</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396688</data>
+</node>
+<node id="site:asset-unknown-24e124415b460590">
+  <data key="d0">site:asset-unknown-24e124415b460590</data>
+  <data key="d3">chunk-d72f4bec49ebee2e27339e8693ce0b47</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396688</data>
+</node>
+<node id="24E124415B462823">
+  <data key="d0">24E124415B462823</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B462823' [SmartSwitch] site_id=asset-unknown-24E124415B462823 lat=0.0 lon=0.0 serial=24E124415B462823</data>
+  <data key="d3">chunk-8c71a35b571e8ba807ac55bd562ca2a2</data>
+  <data key="d4"></data>
+  <data key="d5">1758446629</data>
+</node>
+<node id="asset-unknown-24E124415B462823">
+  <data key="d0">asset-unknown-24E124415B462823</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B462823' id=asset-unknown-24E124415B462823 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446629</data>
+</node>
+<node id="device:24e124415b462823">
+  <data key="d0">device:24e124415b462823</data>
+  <data key="d3">chunk-8c71a35b571e8ba807ac55bd562ca2a2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396689</data>
+</node>
+<node id="site:asset-unknown-24e124415b462823">
+  <data key="d0">site:asset-unknown-24e124415b462823</data>
+  <data key="d3">chunk-8c71a35b571e8ba807ac55bd562ca2a2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396689</data>
+</node>
+<node id="24E124415B465758">
+  <data key="d0">24E124415B465758</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B465758' [SmartSwitch] site_id=asset-unknown-24E124415B465758 lat=0.0 lon=0.0 serial=24E124415B465758</data>
+  <data key="d3">chunk-15a2663b8c8679124f19264f1dbef381</data>
+  <data key="d4"></data>
+  <data key="d5">1758446630</data>
+</node>
+<node id="asset-unknown-24E124415B465758">
+  <data key="d0">asset-unknown-24E124415B465758</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B465758' id=asset-unknown-24E124415B465758 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446630</data>
+</node>
+<node id="device:24e124415b465758">
+  <data key="d0">device:24e124415b465758</data>
+  <data key="d3">chunk-15a2663b8c8679124f19264f1dbef381</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396689</data>
+</node>
+<node id="site:asset-unknown-24e124415b465758">
+  <data key="d0">site:asset-unknown-24e124415b465758</data>
+  <data key="d3">chunk-15a2663b8c8679124f19264f1dbef381</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396689</data>
+</node>
+<node id="24E124415B466375">
+  <data key="d0">24E124415B466375</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B466375' [SmartSwitch] site_id=asset-unknown-24E124415B466375 lat=0.0 lon=0.0 serial=24E124415B466375</data>
+  <data key="d3">chunk-9ea58b3939d663b771c9f585b977bdc5</data>
+  <data key="d4"></data>
+  <data key="d5">1758446630</data>
+</node>
+<node id="asset-unknown-24E124415B466375">
+  <data key="d0">asset-unknown-24E124415B466375</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B466375' id=asset-unknown-24E124415B466375 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446630</data>
+</node>
+<node id="device:24e124415b466375">
+  <data key="d0">device:24e124415b466375</data>
+  <data key="d3">chunk-9ea58b3939d663b771c9f585b977bdc5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396690</data>
+</node>
+<node id="site:asset-unknown-24e124415b466375">
+  <data key="d0">site:asset-unknown-24e124415b466375</data>
+  <data key="d3">chunk-9ea58b3939d663b771c9f585b977bdc5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396690</data>
+</node>
+<node id="24E124415B327171">
+  <data key="d0">24E124415B327171</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B327171' [SmartSwitch] site_id=asset-unknown-24E124415B327171 lat=0.0 lon=0.0 serial=24E124415B327171</data>
+  <data key="d3">chunk-ab6b43d3a6dee56e4e25f1357a9e82db</data>
+  <data key="d4"></data>
+  <data key="d5">1758446631</data>
+</node>
+<node id="asset-unknown-24E124415B327171">
+  <data key="d0">asset-unknown-24E124415B327171</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B327171' id=asset-unknown-24E124415B327171 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446631</data>
+</node>
+<node id="device:24e124415b327171">
+  <data key="d0">device:24e124415b327171</data>
+  <data key="d3">chunk-ab6b43d3a6dee56e4e25f1357a9e82db</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396690</data>
+</node>
+<node id="site:asset-unknown-24e124415b327171">
+  <data key="d0">site:asset-unknown-24e124415b327171</data>
+  <data key="d3">chunk-ab6b43d3a6dee56e4e25f1357a9e82db</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396690</data>
+</node>
+<node id="24E124415B467799">
+  <data key="d0">24E124415B467799</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B467799' [SmartSwitch] site_id=asset-unknown-24E124415B467799 lat=0.0 lon=0.0 serial=24E124415B467799</data>
+  <data key="d3">chunk-69e62a49e6fed0da57ecae1b6ce58447</data>
+  <data key="d4"></data>
+  <data key="d5">1758446632</data>
+</node>
+<node id="asset-unknown-24E124415B467799">
+  <data key="d0">asset-unknown-24E124415B467799</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B467799' id=asset-unknown-24E124415B467799 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446632</data>
+</node>
+<node id="device:24e124415b467799">
+  <data key="d0">device:24e124415b467799</data>
+  <data key="d3">chunk-69e62a49e6fed0da57ecae1b6ce58447</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396691</data>
+</node>
+<node id="site:asset-unknown-24e124415b467799">
+  <data key="d0">site:asset-unknown-24e124415b467799</data>
+  <data key="d3">chunk-69e62a49e6fed0da57ecae1b6ce58447</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396691</data>
+</node>
+<node id="24E124126C142173">
+  <data key="d0">24E124126C142173</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142173' [Soil Moisture] site_id=asset-unknown-24E124126C142173 lat=0.0 lon=0.0 serial=24E124126C142173</data>
+  <data key="d3">chunk-94d413915f6ba2d0ac00af04e37a8bf5</data>
+  <data key="d4"></data>
+  <data key="d5">1758446633</data>
+</node>
+<node id="asset-unknown-24E124126C142173">
+  <data key="d0">asset-unknown-24E124126C142173</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142173' id=asset-unknown-24E124126C142173 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446633</data>
+</node>
+<node id="device:24e124126c142173">
+  <data key="d0">device:24e124126c142173</data>
+  <data key="d3">chunk-94d413915f6ba2d0ac00af04e37a8bf5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396692</data>
+</node>
+<node id="site:asset-unknown-24e124126c142173">
+  <data key="d0">site:asset-unknown-24e124126c142173</data>
+  <data key="d3">chunk-94d413915f6ba2d0ac00af04e37a8bf5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396692</data>
+</node>
+<node id="24E124126C142172">
+  <data key="d0">24E124126C142172</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142172' [Soil Moisture] site_id=asset-unknown-24E124126C142172 lat=0.0 lon=0.0 serial=24E124126C142172</data>
+  <data key="d3">chunk-edc7171aa5c99f25b38d00f92ad7a606</data>
+  <data key="d4"></data>
+  <data key="d5">1758446633</data>
+</node>
+<node id="asset-unknown-24E124126C142172">
+  <data key="d0">asset-unknown-24E124126C142172</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142172' id=asset-unknown-24E124126C142172 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446633</data>
+</node>
+<node id="device:24e124126c142172">
+  <data key="d0">device:24e124126c142172</data>
+  <data key="d3">chunk-edc7171aa5c99f25b38d00f92ad7a606</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396692</data>
+</node>
+<node id="site:asset-unknown-24e124126c142172">
+  <data key="d0">site:asset-unknown-24e124126c142172</data>
+  <data key="d3">chunk-edc7171aa5c99f25b38d00f92ad7a606</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396692</data>
+</node>
+<node id="24E124126C141984">
+  <data key="d0">24E124126C141984</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C141984' [Soil Moisture] site_id=asset-unknown-24E124126C141984 lat=0.0 lon=0.0 serial=24E124126C141984</data>
+  <data key="d3">chunk-4444b527cadff556610d711024338c55</data>
+  <data key="d4"></data>
+  <data key="d5">1758446634</data>
+</node>
+<node id="asset-unknown-24E124126C141984">
+  <data key="d0">asset-unknown-24E124126C141984</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C141984' id=asset-unknown-24E124126C141984 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446634</data>
+</node>
+<node id="device:24e124126c141984">
+  <data key="d0">device:24e124126c141984</data>
+  <data key="d3">chunk-4444b527cadff556610d711024338c55</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396693</data>
+</node>
+<node id="site:asset-unknown-24e124126c141984">
+  <data key="d0">site:asset-unknown-24e124126c141984</data>
+  <data key="d3">chunk-4444b527cadff556610d711024338c55</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396693</data>
+</node>
+<node id="24E124126C142210">
+  <data key="d0">24E124126C142210</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142210' [Soil Moisture] site_id=asset-unknown-24E124126C142210 lat=0.0 lon=0.0 serial=24E124126C142210</data>
+  <data key="d3">chunk-36a5dd895ccf04925276738b319a6cf0</data>
+  <data key="d4"></data>
+  <data key="d5">1758446635</data>
+</node>
+<node id="asset-unknown-24E124126C142210">
+  <data key="d0">asset-unknown-24E124126C142210</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142210' id=asset-unknown-24E124126C142210 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446635</data>
+</node>
+<node id="device:24e124126c142210">
+  <data key="d0">device:24e124126c142210</data>
+  <data key="d3">chunk-36a5dd895ccf04925276738b319a6cf0</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396693</data>
+</node>
+<node id="site:asset-unknown-24e124126c142210">
+  <data key="d0">site:asset-unknown-24e124126c142210</data>
+  <data key="d3">chunk-36a5dd895ccf04925276738b319a6cf0</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396693</data>
+</node>
+<node id="24E124126C142095">
+  <data key="d0">24E124126C142095</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142095' [Soil Moisture] site_id=asset-unknown-24E124126C142095 lat=0.0 lon=0.0 serial=24E124126C142095</data>
+  <data key="d3">chunk-26329ad966487eafcbdcd9320e4ee86b</data>
+  <data key="d4"></data>
+  <data key="d5">1758446636</data>
+</node>
+<node id="asset-unknown-24E124126C142095">
+  <data key="d0">asset-unknown-24E124126C142095</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142095' id=asset-unknown-24E124126C142095 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446636</data>
+</node>
+<node id="device:24e124126c142095">
+  <data key="d0">device:24e124126c142095</data>
+  <data key="d3">chunk-26329ad966487eafcbdcd9320e4ee86b</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396694</data>
+</node>
+<node id="site:asset-unknown-24e124126c142095">
+  <data key="d0">site:asset-unknown-24e124126c142095</data>
+  <data key="d3">chunk-26329ad966487eafcbdcd9320e4ee86b</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396694</data>
+</node>
+<node id="24E124126C142110">
+  <data key="d0">24E124126C142110</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142110' [Soil Moisture] site_id=asset-unknown-24E124126C142110 lat=0.0 lon=0.0 serial=24E124126C142110</data>
+  <data key="d3">chunk-d73c0eab988e257c48330f787531a8b7</data>
+  <data key="d4"></data>
+  <data key="d5">1758446637</data>
+</node>
+<node id="asset-unknown-24E124126C142110">
+  <data key="d0">asset-unknown-24E124126C142110</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142110' id=asset-unknown-24E124126C142110 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446637</data>
+</node>
+<node id="device:24e124126c142110">
+  <data key="d0">device:24e124126c142110</data>
+  <data key="d3">chunk-d73c0eab988e257c48330f787531a8b7</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396695</data>
+</node>
+<node id="site:asset-unknown-24e124126c142110">
+  <data key="d0">site:asset-unknown-24e124126c142110</data>
+  <data key="d3">chunk-d73c0eab988e257c48330f787531a8b7</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396695</data>
+</node>
+<node id="24E124126C142223">
+  <data key="d0">24E124126C142223</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142223' [Soil Moisture] site_id=asset-unknown-24E124126C142223 lat=0.0 lon=0.0 serial=24E124126C142223</data>
+  <data key="d3">chunk-8fdfe67f39161aebf0e83ae7369df2a6</data>
+  <data key="d4"></data>
+  <data key="d5">1758446637</data>
+</node>
+<node id="asset-unknown-24E124126C142223">
+  <data key="d0">asset-unknown-24E124126C142223</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142223' id=asset-unknown-24E124126C142223 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446638</data>
+</node>
+<node id="device:24e124126c142223">
+  <data key="d0">device:24e124126c142223</data>
+  <data key="d3">chunk-8fdfe67f39161aebf0e83ae7369df2a6</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396695</data>
+</node>
+<node id="site:asset-unknown-24e124126c142223">
+  <data key="d0">site:asset-unknown-24e124126c142223</data>
+  <data key="d3">chunk-8fdfe67f39161aebf0e83ae7369df2a6</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396695</data>
+</node>
+<node id="24E124126C141970">
+  <data key="d0">24E124126C141970</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C141970' [Soil Moisture] site_id=asset-unknown-24E124126C141970 lat=0.0 lon=0.0 serial=24E124126C141970</data>
+  <data key="d3">chunk-9165cdd9ad6a371e62318085e9b299e2</data>
+  <data key="d4"></data>
+  <data key="d5">1758446638</data>
+</node>
+<node id="asset-unknown-24E124126C141970">
+  <data key="d0">asset-unknown-24E124126C141970</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C141970' id=asset-unknown-24E124126C141970 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446638</data>
+</node>
+<node id="device:24e124126c141970">
+  <data key="d0">device:24e124126c141970</data>
+  <data key="d3">chunk-9165cdd9ad6a371e62318085e9b299e2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396696</data>
+</node>
+<node id="site:asset-unknown-24e124126c141970">
+  <data key="d0">site:asset-unknown-24e124126c141970</data>
+  <data key="d3">chunk-9165cdd9ad6a371e62318085e9b299e2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396696</data>
+</node>
+<node id="24E124126C142273">
+  <data key="d0">24E124126C142273</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142273' [Soil Moisture] site_id=asset-unknown-24E124126C142273 lat=0.0 lon=0.0 serial=24E124126C142273</data>
+  <data key="d3">chunk-b17858d1b7e1dd99ac3a5088a0299d14</data>
+  <data key="d4"></data>
+  <data key="d5">1758446639</data>
+</node>
+<node id="asset-unknown-24E124126C142273">
+  <data key="d0">asset-unknown-24E124126C142273</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142273' id=asset-unknown-24E124126C142273 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446639</data>
+</node>
+<node id="device:24e124126c142273">
+  <data key="d0">device:24e124126c142273</data>
+  <data key="d3">chunk-b17858d1b7e1dd99ac3a5088a0299d14</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396697</data>
+</node>
+<node id="site:asset-unknown-24e124126c142273">
+  <data key="d0">site:asset-unknown-24e124126c142273</data>
+  <data key="d3">chunk-b17858d1b7e1dd99ac3a5088a0299d14</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396697</data>
+</node>
+<node id="24E124126C141997">
+  <data key="d0">24E124126C141997</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C141997' [Soil Moisture] site_id=asset-unknown-24E124126C141997 lat=0.0 lon=0.0 serial=24E124126C141997</data>
+  <data key="d3">chunk-51b4690a7485afb49820eb5559454c95</data>
+  <data key="d4"></data>
+  <data key="d5">1758446640</data>
+</node>
+<node id="asset-unknown-24E124126C141997">
+  <data key="d0">asset-unknown-24E124126C141997</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C141997' id=asset-unknown-24E124126C141997 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446640</data>
+</node>
+<node id="device:24e124126c141997">
+  <data key="d0">device:24e124126c141997</data>
+  <data key="d3">chunk-51b4690a7485afb49820eb5559454c95</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396697</data>
+</node>
+<node id="site:asset-unknown-24e124126c141997">
+  <data key="d0">site:asset-unknown-24e124126c141997</data>
+  <data key="d3">chunk-51b4690a7485afb49820eb5559454c95</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396697</data>
+</node>
+<node id="24E124126C142142">
+  <data key="d0">24E124126C142142</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124126C142142' [Soil Moisture] site_id=asset-unknown-24E124126C142142 lat=0.0 lon=0.0 serial=24E124126C142142</data>
+  <data key="d3">chunk-23960e1220d50971f441cc689b516fd2</data>
+  <data key="d4"></data>
+  <data key="d5">1758446641</data>
+</node>
+<node id="asset-unknown-24E124126C142142">
+  <data key="d0">asset-unknown-24E124126C142142</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124126C142142' id=asset-unknown-24E124126C142142 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446641</data>
+</node>
+<node id="device:24e124126c142142">
+  <data key="d0">device:24e124126c142142</data>
+  <data key="d3">chunk-23960e1220d50971f441cc689b516fd2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396698</data>
+</node>
+<node id="site:asset-unknown-24e124126c142142">
+  <data key="d0">site:asset-unknown-24e124126c142142</data>
+  <data key="d3">chunk-23960e1220d50971f441cc689b516fd2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396698</data>
+</node>
+<node id="001D0A80A0C9">
+  <data key="d0">001D0A80A0C9</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '001D0A80A0C9' [Meteo Station] site_id=asset-unknown-001D0A80A0C9 lat=0.0 lon=0.0 serial=001D0A80A0C9</data>
+  <data key="d3">chunk-f6b71ef8234833ef85cbcce1c8434714</data>
+  <data key="d4"></data>
+  <data key="d5">1758446641</data>
+</node>
+<node id="asset-unknown-001D0A80A0C9">
+  <data key="d0">asset-unknown-001D0A80A0C9</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-001D0A80A0C9' id=asset-unknown-001D0A80A0C9 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446641</data>
+</node>
+<node id="device:001d0a80a0c9">
+  <data key="d0">device:001d0a80a0c9</data>
+  <data key="d3">chunk-f6b71ef8234833ef85cbcce1c8434714</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396699</data>
+</node>
+<node id="site:asset-unknown-001d0a80a0c9">
+  <data key="d0">site:asset-unknown-001d0a80a0c9</data>
+  <data key="d3">chunk-f6b71ef8234833ef85cbcce1c8434714</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396699</data>
+</node>
+<node id="001D0A80A0BA">
+  <data key="d0">001D0A80A0BA</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '001D0A80A0BA' [Meteo Station] site_id=asset-unknown-001D0A80A0BA lat=0.0 lon=0.0 serial=001D0A80A0BA</data>
+  <data key="d3">chunk-8befaf7d68c2cebc5c122a070f1658e5</data>
+  <data key="d4"></data>
+  <data key="d5">1758446642</data>
+</node>
+<node id="asset-unknown-001D0A80A0BA">
+  <data key="d0">asset-unknown-001D0A80A0BA</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-001D0A80A0BA' id=asset-unknown-001D0A80A0BA lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446642</data>
+</node>
+<node id="device:001d0a80a0ba">
+  <data key="d0">device:001d0a80a0ba</data>
+  <data key="d3">chunk-8befaf7d68c2cebc5c122a070f1658e5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396699</data>
+</node>
+<node id="site:asset-unknown-001d0a80a0ba">
+  <data key="d0">site:asset-unknown-001d0a80a0ba</data>
+  <data key="d3">chunk-8befaf7d68c2cebc5c122a070f1658e5</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396699</data>
+</node>
+<node id="001D0A80A0CB">
+  <data key="d0">001D0A80A0CB</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '001D0A80A0CB' [Meteo Station] site_id=asset-unknown-001D0A80A0CB lat=0.0 lon=0.0 serial=001D0A80A0CB</data>
+  <data key="d3">chunk-19421b2e6ce64a5d198e08d9bee65049</data>
+  <data key="d4"></data>
+  <data key="d5">1758446643</data>
+</node>
+<node id="asset-unknown-001D0A80A0CB">
+  <data key="d0">asset-unknown-001D0A80A0CB</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-001D0A80A0CB' id=asset-unknown-001D0A80A0CB lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446643</data>
+</node>
+<node id="device:001d0a80a0cb">
+  <data key="d0">device:001d0a80a0cb</data>
+  <data key="d3">chunk-19421b2e6ce64a5d198e08d9bee65049</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396700</data>
+</node>
+<node id="site:asset-unknown-001d0a80a0cb">
+  <data key="d0">site:asset-unknown-001d0a80a0cb</data>
+  <data key="d3">chunk-19421b2e6ce64a5d198e08d9bee65049</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396700</data>
+</node>
+<node id="24E124415B465954">
+  <data key="d0">24E124415B465954</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B465954' [SmartSwitch] site_id=asset-unknown-24E124415B465954 lat=0.0 lon=0.0 serial=24E124415B465954</data>
+  <data key="d3">chunk-024a45b424d970af03fdc0a865ec3ac2</data>
+  <data key="d4"></data>
+  <data key="d5">1758446643</data>
+</node>
+<node id="asset-unknown-24E124415B465954">
+  <data key="d0">asset-unknown-24E124415B465954</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B465954' id=asset-unknown-24E124415B465954 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446643</data>
+</node>
+<node id="device:24e124415b465954">
+  <data key="d0">device:24e124415b465954</data>
+  <data key="d3">chunk-024a45b424d970af03fdc0a865ec3ac2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396700</data>
+</node>
+<node id="site:asset-unknown-24e124415b465954">
+  <data key="d0">site:asset-unknown-24e124415b465954</data>
+  <data key="d3">chunk-024a45b424d970af03fdc0a865ec3ac2</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396700</data>
+</node>
+<node id="24E124415B466084">
+  <data key="d0">24E124415B466084</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B466084' [SmartSwitch] site_id=asset-unknown-24E124415B466084 lat=0.0 lon=0.0 serial=24E124415B466084</data>
+  <data key="d3">chunk-ad0ecc61fadefe44fcef875d4d3cc449</data>
+  <data key="d4"></data>
+  <data key="d5">1758446644</data>
+</node>
+<node id="asset-unknown-24E124415B466084">
+  <data key="d0">asset-unknown-24E124415B466084</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B466084' id=asset-unknown-24E124415B466084 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446644</data>
+</node>
+<node id="device:24e124415b466084">
+  <data key="d0">device:24e124415b466084</data>
+  <data key="d3">chunk-ad0ecc61fadefe44fcef875d4d3cc449</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396701</data>
+</node>
+<node id="site:asset-unknown-24e124415b466084">
+  <data key="d0">site:asset-unknown-24e124415b466084</data>
+  <data key="d3">chunk-ad0ecc61fadefe44fcef875d4d3cc449</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396701</data>
+</node>
+<node id="24E124415B469250">
+  <data key="d0">24E124415B469250</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B469250' [SmartSwitch] site_id=asset-unknown-24E124415B469250 lat=0.0 lon=0.0 serial=24E124415B469250</data>
+  <data key="d3">chunk-a9012ade573301d6cf8ff626b942c1af</data>
+  <data key="d4"></data>
+  <data key="d5">1758446645</data>
+</node>
+<node id="asset-unknown-24E124415B469250">
+  <data key="d0">asset-unknown-24E124415B469250</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B469250' id=asset-unknown-24E124415B469250 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446645</data>
+</node>
+<node id="device:24e124415b469250">
+  <data key="d0">device:24e124415b469250</data>
+  <data key="d3">chunk-a9012ade573301d6cf8ff626b942c1af</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396702</data>
+</node>
+<node id="site:asset-unknown-24e124415b469250">
+  <data key="d0">site:asset-unknown-24e124415b469250</data>
+  <data key="d3">chunk-a9012ade573301d6cf8ff626b942c1af</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396702</data>
+</node>
+<node id="AVERIADO_24E124460D081749">
+  <data key="d0">AVERIADO_24E124460D081749</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device 'AVERIADO_24E124460D081749' [SmartSwitch] site_id=asset-unknown-AVERIADO_24E124460D081749 lat=0.0 lon=0.0 serial=AVERIADO_24E124460D081749</data>
+  <data key="d3">chunk-2b1df282b251a4adc44281b0a4118077</data>
+  <data key="d4"></data>
+  <data key="d5">1758446646</data>
+</node>
+<node id="asset-unknown-AVERIADO_24E124460D081749">
+  <data key="d0">asset-unknown-AVERIADO_24E124460D081749</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-AVERIADO_24E124460D081749' id=asset-unknown-AVERIADO_24E124460D081749 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446646</data>
+</node>
+<node id="device:averiado_24e124460d081749">
+  <data key="d0">device:averiado_24e124460d081749</data>
+  <data key="d3">chunk-2b1df282b251a4adc44281b0a4118077</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396702</data>
+</node>
+<node id="site:asset-unknown-averiado_24e124460d081749">
+  <data key="d0">site:asset-unknown-averiado_24e124460d081749</data>
+  <data key="d3">chunk-2b1df282b251a4adc44281b0a4118077</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396702</data>
+</node>
+<node id="24e124460d084558">
+  <data key="d0">24e124460d084558</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24e124460d084558' [SmartSwitch] site_id=asset-unknown-24e124460d084558 lat=0.0 lon=0.0 serial=24e124460d084558</data>
+  <data key="d3">chunk-7f33c26ad250befee77693f5a8045efb</data>
+  <data key="d4"></data>
+  <data key="d5">1758446647</data>
+</node>
+<node id="asset-unknown-24e124460d084558">
+  <data key="d0">asset-unknown-24e124460d084558</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24e124460d084558' id=asset-unknown-24e124460d084558 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446647</data>
+</node>
+<node id="device:24e124460d084558">
+  <data key="d0">device:24e124460d084558</data>
+  <data key="d3">chunk-7f33c26ad250befee77693f5a8045efb</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396703</data>
+</node>
+<node id="site:asset-unknown-24e124460d084558">
+  <data key="d0">site:asset-unknown-24e124460d084558</data>
+  <data key="d3">chunk-7f33c26ad250befee77693f5a8045efb</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396703</data>
+</node>
+<node id="24E124415B463999">
+  <data key="d0">24E124415B463999</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B463999' [SmartSwitch] site_id=asset-unknown-24E124415B463999 lat=0.0 lon=0.0 serial=24E124415B463999</data>
+  <data key="d3">chunk-ae1d4cd4e28ac2f6c4e1e523325f0d59</data>
+  <data key="d4"></data>
+  <data key="d5">1758446647</data>
+</node>
+<node id="asset-unknown-24E124415B463999">
+  <data key="d0">asset-unknown-24E124415B463999</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B463999' id=asset-unknown-24E124415B463999 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446647</data>
+</node>
+<node id="device:24e124415b463999">
+  <data key="d0">device:24e124415b463999</data>
+  <data key="d3">chunk-ae1d4cd4e28ac2f6c4e1e523325f0d59</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396704</data>
+</node>
+<node id="site:asset-unknown-24e124415b463999">
+  <data key="d0">site:asset-unknown-24e124415b463999</data>
+  <data key="d3">chunk-ae1d4cd4e28ac2f6c4e1e523325f0d59</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396704</data>
+</node>
+<node id="24E124415B461443">
+  <data key="d0">24E124415B461443</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B461443' [SmartSwitch] site_id=asset-unknown-24E124415B461443 lat=0.0 lon=0.0 serial=24E124415B461443</data>
+  <data key="d3">chunk-95dbfbc6b6b85faa952f0f13d2bb4870</data>
+  <data key="d4"></data>
+  <data key="d5">1758446648</data>
+</node>
+<node id="asset-unknown-24E124415B461443">
+  <data key="d0">asset-unknown-24E124415B461443</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B461443' id=asset-unknown-24E124415B461443 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446648</data>
+</node>
+<node id="device:24e124415b461443">
+  <data key="d0">device:24e124415b461443</data>
+  <data key="d3">chunk-95dbfbc6b6b85faa952f0f13d2bb4870</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396704</data>
+</node>
+<node id="site:asset-unknown-24e124415b461443">
+  <data key="d0">site:asset-unknown-24e124415b461443</data>
+  <data key="d3">chunk-95dbfbc6b6b85faa952f0f13d2bb4870</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396704</data>
+</node>
+<node id="0ADB426177106D27">
+  <data key="d0">0ADB426177106D27</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '0ADB426177106D27' [IoT Node] site_id=asset-unknown-0ADB426177106D27 lat=0.0 lon=0.0 serial=0ADB426177106D27</data>
+  <data key="d3">chunk-b31d0c26aeb244106017701431a97f39</data>
+  <data key="d4"></data>
+  <data key="d5">1758446649</data>
+</node>
+<node id="asset-unknown-0ADB426177106D27">
+  <data key="d0">asset-unknown-0ADB426177106D27</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-0ADB426177106D27' id=asset-unknown-0ADB426177106D27 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446649</data>
+</node>
+<node id="device:0adb426177106d27">
+  <data key="d0">device:0adb426177106d27</data>
+  <data key="d3">chunk-b31d0c26aeb244106017701431a97f39</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396705</data>
+</node>
+<node id="site:asset-unknown-0adb426177106d27">
+  <data key="d0">site:asset-unknown-0adb426177106d27</data>
+  <data key="d3">chunk-b31d0c26aeb244106017701431a97f39</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396705</data>
+</node>
+<node id="24e124460d081649">
+  <data key="d0">24e124460d081649</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24e124460d081649' [SmartSwitch] site_id=asset-unknown-24e124460d081649 lat=0.0 lon=0.0 serial=24e124460d081649</data>
+  <data key="d3">chunk-a26b0324bd35aeb0b33e5a239c438d45</data>
+  <data key="d4"></data>
+  <data key="d5">1758446649</data>
+</node>
+<node id="asset-unknown-24e124460d081649">
+  <data key="d0">asset-unknown-24e124460d081649</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24e124460d081649' id=asset-unknown-24e124460d081649 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446649</data>
+</node>
+<node id="device:24e124460d081649">
+  <data key="d0">device:24e124460d081649</data>
+  <data key="d3">chunk-a26b0324bd35aeb0b33e5a239c438d45</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396706</data>
+</node>
+<node id="site:asset-unknown-24e124460d081649">
+  <data key="d0">site:asset-unknown-24e124460d081649</data>
+  <data key="d3">chunk-a26b0324bd35aeb0b33e5a239c438d45</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396706</data>
+</node>
+<node id="24e124460d081737">
+  <data key="d0">24e124460d081737</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24e124460d081737' [SmartSwitch] site_id=asset-unknown-24e124460d081737 lat=0.0 lon=0.0 serial=24e124460d081737</data>
+  <data key="d3">chunk-869be089e10e25962f8b4c83b3937daa</data>
+  <data key="d4"></data>
+  <data key="d5">1758446650</data>
+</node>
+<node id="asset-unknown-24e124460d081737">
+  <data key="d0">asset-unknown-24e124460d081737</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24e124460d081737' id=asset-unknown-24e124460d081737 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446650</data>
+</node>
+<node id="device:24e124460d081737">
+  <data key="d0">device:24e124460d081737</data>
+  <data key="d3">chunk-869be089e10e25962f8b4c83b3937daa</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396706</data>
+</node>
+<node id="site:asset-unknown-24e124460d081737">
+  <data key="d0">site:asset-unknown-24e124460d081737</data>
+  <data key="d3">chunk-869be089e10e25962f8b4c83b3937daa</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396706</data>
+</node>
+<node id="24E124415B462490">
+  <data key="d0">24E124415B462490</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124415B462490' [SmartSwitch] site_id=asset-unknown-24E124415B462490 lat=0.0 lon=0.0 serial=24E124415B462490</data>
+  <data key="d3">chunk-f7ba36691d8fe9782d8dfc38921b5754</data>
+  <data key="d4"></data>
+  <data key="d5">1758446651</data>
+</node>
+<node id="asset-unknown-24E124415B462490">
+  <data key="d0">asset-unknown-24E124415B462490</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124415B462490' id=asset-unknown-24E124415B462490 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446651</data>
+</node>
+<node id="device:24e124415b462490">
+  <data key="d0">device:24e124415b462490</data>
+  <data key="d3">chunk-f7ba36691d8fe9782d8dfc38921b5754</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396707</data>
+</node>
+<node id="site:asset-unknown-24e124415b462490">
+  <data key="d0">site:asset-unknown-24e124415b462490</data>
+  <data key="d3">chunk-f7ba36691d8fe9782d8dfc38921b5754</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396707</data>
+</node>
+<node id="24e124415b102437">
+  <data key="d0">24e124415b102437</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24e124415b102437' [SmartSwitch] site_id=asset-unknown-24e124415b102437 lat=0.0 lon=0.0 serial=24e124415b102437</data>
+  <data key="d3">chunk-4d8558b1f0c9328c2955e030af63bf55</data>
+  <data key="d4"></data>
+  <data key="d5">1758446652</data>
+</node>
+<node id="asset-unknown-24e124415b102437">
+  <data key="d0">asset-unknown-24e124415b102437</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24e124415b102437' id=asset-unknown-24e124415b102437 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446652</data>
+</node>
+<node id="device:24e124415b102437">
+  <data key="d0">device:24e124415b102437</data>
+  <data key="d3">chunk-4d8558b1f0c9328c2955e030af63bf55</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396708</data>
+</node>
+<node id="site:asset-unknown-24e124415b102437">
+  <data key="d0">site:asset-unknown-24e124415b102437</data>
+  <data key="d3">chunk-4d8558b1f0c9328c2955e030af63bf55</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396708</data>
+</node>
+<node id="24E124460D085825">
+  <data key="d0">24E124460D085825</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D085825' [SmartSwitch] site_id=asset-unknown-24E124460D085825 lat=0.0 lon=0.0 serial=24E124460D085825</data>
+  <data key="d3">chunk-eecd23cb7daba1a2b21bea40b9a6d546</data>
+  <data key="d4"></data>
+  <data key="d5">1758446652</data>
+</node>
+<node id="asset-unknown-24E124460D085825">
+  <data key="d0">asset-unknown-24E124460D085825</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D085825' id=asset-unknown-24E124460D085825 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446652</data>
+</node>
+<node id="device:24e124460d085825">
+  <data key="d0">device:24e124460d085825</data>
+  <data key="d3">chunk-eecd23cb7daba1a2b21bea40b9a6d546</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396708</data>
+</node>
+<node id="site:asset-unknown-24e124460d085825">
+  <data key="d0">site:asset-unknown-24e124460d085825</data>
+  <data key="d3">chunk-eecd23cb7daba1a2b21bea40b9a6d546</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396708</data>
+</node>
+<node id="24E124460D082821">
+  <data key="d0">24E124460D082821</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D082821' [SmartSwitch] site_id=asset-unknown-24E124460D082821 lat=0.0 lon=0.0 serial=24E124460D082821</data>
+  <data key="d3">chunk-19c6ae23eae7496d20fa91dec12eaf9b</data>
+  <data key="d4"></data>
+  <data key="d5">1758446653</data>
+</node>
+<node id="asset-unknown-24E124460D082821">
+  <data key="d0">asset-unknown-24E124460D082821</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D082821' id=asset-unknown-24E124460D082821 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446653</data>
+</node>
+<node id="device:24e124460d082821">
+  <data key="d0">device:24e124460d082821</data>
+  <data key="d3">chunk-19c6ae23eae7496d20fa91dec12eaf9b</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396709</data>
+</node>
+<node id="site:asset-unknown-24e124460d082821">
+  <data key="d0">site:asset-unknown-24e124460d082821</data>
+  <data key="d3">chunk-19c6ae23eae7496d20fa91dec12eaf9b</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396709</data>
+</node>
+<node id="24E124460C141231">
+  <data key="d0">24E124460C141231</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460C141231' [SmartSwitch] site_id=asset-unknown-24E124460C141231 lat=0.0 lon=0.0 serial=24E124460C141231</data>
+  <data key="d3">chunk-4c38a494b76fb936edc81034e3e70468</data>
+  <data key="d4"></data>
+  <data key="d5">1758446654</data>
+</node>
+<node id="asset-unknown-24E124460C141231">
+  <data key="d0">asset-unknown-24E124460C141231</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460C141231' id=asset-unknown-24E124460C141231 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446654</data>
+</node>
+<node id="device:24e124460c141231">
+  <data key="d0">device:24e124460c141231</data>
+  <data key="d3">chunk-4c38a494b76fb936edc81034e3e70468</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396709</data>
+</node>
+<node id="site:asset-unknown-24e124460c141231">
+  <data key="d0">site:asset-unknown-24e124460c141231</data>
+  <data key="d3">chunk-4c38a494b76fb936edc81034e3e70468</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396709</data>
+</node>
+<node id="24E124460D085182">
+  <data key="d0">24E124460D085182</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D085182' [SmartSwitch] site_id=asset-unknown-24E124460D085182 lat=0.0 lon=0.0 serial=24E124460D085182</data>
+  <data key="d3">chunk-8f643ef5f86ddfd4246259206427b92a</data>
+  <data key="d4"></data>
+  <data key="d5">1758446654</data>
+</node>
+<node id="asset-unknown-24E124460D085182">
+  <data key="d0">asset-unknown-24E124460D085182</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D085182' id=asset-unknown-24E124460D085182 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446654</data>
+</node>
+<node id="device:24e124460d085182">
+  <data key="d0">device:24e124460d085182</data>
+  <data key="d3">chunk-8f643ef5f86ddfd4246259206427b92a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396710</data>
+</node>
+<node id="site:asset-unknown-24e124460d085182">
+  <data key="d0">site:asset-unknown-24e124460d085182</data>
+  <data key="d3">chunk-8f643ef5f86ddfd4246259206427b92a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396710</data>
+</node>
+<node id="24E124460D085942">
+  <data key="d0">24E124460D085942</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D085942' [SmartSwitch] site_id=asset-unknown-24E124460D085942 lat=0.0 lon=0.0 serial=24E124460D085942</data>
+  <data key="d3">chunk-93aca44564b920b18a86091491bf8013</data>
+  <data key="d4"></data>
+  <data key="d5">1758446655</data>
+</node>
+<node id="asset-unknown-24E124460D085942">
+  <data key="d0">asset-unknown-24E124460D085942</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D085942' id=asset-unknown-24E124460D085942 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446655</data>
+</node>
+<node id="device:24e124460d085942">
+  <data key="d0">device:24e124460d085942</data>
+  <data key="d3">chunk-93aca44564b920b18a86091491bf8013</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396711</data>
+</node>
+<node id="site:asset-unknown-24e124460d085942">
+  <data key="d0">site:asset-unknown-24e124460d085942</data>
+  <data key="d3">chunk-93aca44564b920b18a86091491bf8013</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396711</data>
+</node>
+<node id="24E124460C211778">
+  <data key="d0">24E124460C211778</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460C211778' [SmartSwitch] site_id=asset-unknown-24E124460C211778 lat=0.0 lon=0.0 serial=24E124460C211778</data>
+  <data key="d3">chunk-dc417c039c9733cd7de03554e9359313</data>
+  <data key="d4"></data>
+  <data key="d5">1758446656</data>
+</node>
+<node id="asset-unknown-24E124460C211778">
+  <data key="d0">asset-unknown-24E124460C211778</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460C211778' id=asset-unknown-24E124460C211778 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446656</data>
+</node>
+<node id="device:24e124460c211778">
+  <data key="d0">device:24e124460c211778</data>
+  <data key="d3">chunk-dc417c039c9733cd7de03554e9359313</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396711</data>
+</node>
+<node id="site:asset-unknown-24e124460c211778">
+  <data key="d0">site:asset-unknown-24e124460c211778</data>
+  <data key="d3">chunk-dc417c039c9733cd7de03554e9359313</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396711</data>
+</node>
+<node id="24E124460D443792">
+  <data key="d0">24E124460D443792</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D443792' [SmartSwitch] site_id=asset-unknown-24E124460D443792 lat=0.0 lon=0.0 serial=24E124460D443792</data>
+  <data key="d3">chunk-229acb988850f2cd86731e068d6248af</data>
+  <data key="d4"></data>
+  <data key="d5">1758446657</data>
+</node>
+<node id="asset-unknown-24E124460D443792">
+  <data key="d0">asset-unknown-24E124460D443792</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D443792' id=asset-unknown-24E124460D443792 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446657</data>
+</node>
+<node id="device:24e124460d443792">
+  <data key="d0">device:24e124460d443792</data>
+  <data key="d3">chunk-229acb988850f2cd86731e068d6248af</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396712</data>
+</node>
+<node id="site:asset-unknown-24e124460d443792">
+  <data key="d0">site:asset-unknown-24e124460d443792</data>
+  <data key="d3">chunk-229acb988850f2cd86731e068d6248af</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396712</data>
+</node>
+<node id="24E124460D445533">
+  <data key="d0">24E124460D445533</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D445533' [SmartSwitch] site_id=asset-unknown-24E124460D445533 lat=0.0 lon=0.0 serial=24E124460D445533</data>
+  <data key="d3">chunk-3ac51e17ccad41f92ea475ce6ad9981a</data>
+  <data key="d4"></data>
+  <data key="d5">1758446657</data>
+</node>
+<node id="asset-unknown-24E124460D445533">
+  <data key="d0">asset-unknown-24E124460D445533</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D445533' id=asset-unknown-24E124460D445533 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446657</data>
+</node>
+<node id="device:24e124460d445533">
+  <data key="d0">device:24e124460d445533</data>
+  <data key="d3">chunk-3ac51e17ccad41f92ea475ce6ad9981a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396713</data>
+</node>
+<node id="site:asset-unknown-24e124460d445533">
+  <data key="d0">site:asset-unknown-24e124460d445533</data>
+  <data key="d3">chunk-3ac51e17ccad41f92ea475ce6ad9981a</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396713</data>
+</node>
+<node id="24E124460D448169">
+  <data key="d0">24E124460D448169</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D448169' [SmartSwitch] site_id=asset-unknown-24E124460D448169 lat=0.0 lon=0.0 serial=24E124460D448169</data>
+  <data key="d3">chunk-3de83d48189a08a8dc2b02f4577a595f</data>
+  <data key="d4"></data>
+  <data key="d5">1758446658</data>
+</node>
+<node id="asset-unknown-24E124460D448169">
+  <data key="d0">asset-unknown-24E124460D448169</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D448169' id=asset-unknown-24E124460D448169 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446658</data>
+</node>
+<node id="device:24e124460d448169">
+  <data key="d0">device:24e124460d448169</data>
+  <data key="d3">chunk-3de83d48189a08a8dc2b02f4577a595f</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396713</data>
+</node>
+<node id="site:asset-unknown-24e124460d448169">
+  <data key="d0">site:asset-unknown-24e124460d448169</data>
+  <data key="d3">chunk-3de83d48189a08a8dc2b02f4577a595f</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396713</data>
+</node>
+<node id="24E124460D442227">
+  <data key="d0">24E124460D442227</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Device '24E124460D442227' [SmartSwitch] site_id=asset-unknown-24E124460D442227 lat=0.0 lon=0.0 serial=24E124460D442227</data>
+  <data key="d3">chunk-0efcf2c618559157b3539bc63d9e7617</data>
+  <data key="d4"></data>
+  <data key="d5">1758446659</data>
+</node>
+<node id="asset-unknown-24E124460D442227">
+  <data key="d0">asset-unknown-24E124460D442227</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d2">Site 'asset-unknown-24E124460D442227' id=asset-unknown-24E124460D442227 lat=0.0 lon=0.0</data>
+  <data key="d3">UNKNOWN</data>
+  <data key="d4"></data>
+  <data key="d5">1758446659</data>
+</node>
+<node id="device:24e124460d442227">
+  <data key="d0">device:24e124460d442227</data>
+  <data key="d3">chunk-0efcf2c618559157b3539bc63d9e7617</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396714</data>
+</node>
+<node id="site:asset-unknown-24e124460d442227">
+  <data key="d0">site:asset-unknown-24e124460d442227</data>
+  <data key="d3">chunk-0efcf2c618559157b3539bc63d9e7617</data>
+  <data key="d2">UNKNOWN</data>
+  <data key="d1">UNKNOWN</data>
+  <data key="d4">custom_kg</data>
+  <data key="d5">1758396714</data>
+</node>
+<edge source="device:0004a30b00c781a1" target="site:asset-unknown-0004a30b00c781a1">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C781A1' is installed at site 'asset-unknown-0004A30B00C781A1'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c781a1", "sound"]</data>
+  <data key="d9">chunk-3a36389c247aa123d05cd9b9086f6300</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446585</data>
+</edge>
+<edge source="device:0004a30b00c7844e" target="site:asset-unknown-0004a30b00c7844e">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C7844E' is installed at site 'asset-unknown-0004A30B00C7844E'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c7844e", "sound"]</data>
+  <data key="d9">chunk-8a537e2b9fec4cc0618b876240cf0ebe</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446586</data>
+</edge>
+<edge source="device:0004a30b00c7ec84" target="site:asset-unknown-0004a30b00c7ec84">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C7EC84' is installed at site 'asset-unknown-0004A30B00C7EC84'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c7ec84", "sound"]</data>
+  <data key="d9">chunk-1ad7c6faceee7899ee43aee1824f4396</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446586</data>
+</edge>
+<edge source="device:0004a30b00c7cda7" target="site:asset-unknown-0004a30b00c7cda7">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C7CDA7' is installed at site 'asset-unknown-0004A30B00C7CDA7'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c7cda7", "sound"]</data>
+  <data key="d9">chunk-eb6e77331b23c68cbacfb1de69d142a1</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446587</data>
+</edge>
+<edge source="device:0004a30b00c77daf" target="site:asset-unknown-0004a30b00c77daf">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C77DAF' is installed at site 'asset-unknown-0004A30B00C77DAF'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c77daf", "air", "quality"]</data>
+  <data key="d9">chunk-f70257fc5392023943a1e88e4e0fc67e</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446588</data>
+</edge>
+<edge source="device:0004a30b00c77ef1" target="site:asset-unknown-0004a30b00c77ef1">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C77EF1' is installed at site 'asset-unknown-0004A30B00C77EF1'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c77ef1", "air", "quality"]</data>
+  <data key="d9">chunk-1f68e55cabb017cdbd3a82c77ecb50b1</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446588</data>
+</edge>
+<edge source="device:0004a30b00c7859c" target="site:asset-unknown-0004a30b00c7859c">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C7859C' is installed at site 'asset-unknown-0004A30B00C7859C'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c7859c", "air", "quality"]</data>
+  <data key="d9">chunk-efa37330eebd3a98f0139831e93f7da5</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446589</data>
+</edge>
+<edge source="device:0004a30b00c78e5b" target="site:asset-unknown-0004a30b00c78e5b">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B00C78E5B' is installed at site 'asset-unknown-0004A30B00C78E5B'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b00c78e5b", "air", "quality"]</data>
+  <data key="d9">chunk-72593016b5cd420ea62c89a0d78a6b43</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446590</data>
+</edge>
+<edge source="device:24e124415b101379" target="site:asset-unknown-24e124415b101379">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B101379' is installed at site 'asset-unknown-24E124415B101379'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b101379", "smartswitch"]</data>
+  <data key="d9">chunk-2e71917df2b1d81092e9464a5b5dbb3d</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446591</data>
+</edge>
+<edge source="device:24e124415b101627" target="site:asset-unknown-24e124415b101627">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B101627' is installed at site 'asset-unknown-24E124415B101627'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b101627", "smartswitch"]</data>
+  <data key="d9">chunk-74df4d0bd88a77eba88afe21282fbb86</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446592</data>
+</edge>
+<edge source="device:24e124415b103312" target="site:asset-unknown-24e124415b103312">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B103312' is installed at site 'asset-unknown-24E124415B103312'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b103312", "smartswitch"]</data>
+  <data key="d9">chunk-6e85c5628ee473fedeabf112593259d7</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446592</data>
+</edge>
+<edge source="device:24e124415b103885" target="site:asset-unknown-24e124415b103885">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B103885' is installed at site 'asset-unknown-24E124415B103885'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b103885", "smartswitch"]</data>
+  <data key="d9">chunk-dbfc6ea7a7fe7ad0d866dd7e151eef0e</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446593</data>
+</edge>
+<edge source="device:24e124415b105089" target="site:asset-unknown-24e124415b105089">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B105089' is installed at site 'asset-unknown-24E124415B105089'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b105089", "smartswitch"]</data>
+  <data key="d9">chunk-d06cb6332974b5ce734b0a6a2a3e89fd</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446594</data>
+</edge>
+<edge source="device:24e124415b106073" target="site:asset-unknown-24e124415b106073">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B106073' is installed at site 'asset-unknown-24E124415B106073'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b106073", "smartswitch"]</data>
+  <data key="d9">chunk-2ae492425093cc560b01968d50c595ef</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446595</data>
+</edge>
+<edge source="device:24e124415b107089" target="site:asset-unknown-24e124415b107089">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B107089' is installed at site 'asset-unknown-24E124415B107089'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b107089", "smartswitch"]</data>
+  <data key="d9">chunk-8f5f3843ee122c51e639237cce61fd39</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446596</data>
+</edge>
+<edge source="device:24e124415b107544" target="site:asset-unknown-24e124415b107544">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B107544' is installed at site 'asset-unknown-24E124415B107544'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b107544", "smartswitch"]</data>
+  <data key="d9">chunk-5f0c10ce2c493bc22dcb1a8ecdd482ba</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446597</data>
+</edge>
+<edge source="device:24e124415b108143" target="site:asset-unknown-24e124415b108143">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B108143' is installed at site 'asset-unknown-24E124415B108143'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b108143", "smartswitch"]</data>
+  <data key="d9">chunk-4daa3d4c8296eb19aa988622c8628762</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446598</data>
+</edge>
+<edge source="device:24e124415b108259" target="site:asset-unknown-24e124415b108259">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B108259' is installed at site 'asset-unknown-24E124415B108259'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b108259", "smartswitch"]</data>
+  <data key="d9">chunk-a68d73978a477b12ae76a60e34d4e870</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446598</data>
+</edge>
+<edge source="device:24e124126b428820" target="site:asset-unknown-24e124126b428820">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24e124126b428820' is installed at site 'asset-unknown-24e124126b428820'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126b428820", "soil", "moisture"]</data>
+  <data key="d9">chunk-a0add2ca52296301b0f906a28e965802</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446599</data>
+</edge>
+<edge source="device:24e124126b420341" target="site:asset-unknown-24e124126b420341">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24e124126b420341' is installed at site 'asset-unknown-24e124126b420341'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126b420341", "soil", "moisture"]</data>
+  <data key="d9">chunk-81fdbe864546f9fe3e136cf188b06956</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446600</data>
+</edge>
+<edge source="device:0004a30b0050948b" target="site:asset-unknown-0004a30b0050948b">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B0050948B' is installed at site 'asset-unknown-0004A30B0050948B'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b0050948b", "environmental"]</data>
+  <data key="d9">chunk-5e2c428113da9fa1bebee898e4bec7c8</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446600</data>
+</edge>
+<edge source="device:0004a30b0050947f" target="site:asset-unknown-0004a30b0050947f">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B0050947F' is installed at site 'asset-unknown-0004A30B0050947F'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b0050947f", "environmental"]</data>
+  <data key="d9">chunk-f1bd2129e008ac29a09e764f02acf5be</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446601</data>
+</edge>
+<edge source="device:0004a30b0050ac26" target="site:asset-unknown-0004a30b0050ac26">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B0050AC26' is installed at site 'asset-unknown-0004A30B0050AC26'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b0050ac26", "environmental"]</data>
+  <data key="d9">chunk-f03d9ff009258c312f2a098b96378c03</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446602</data>
+</edge>
+<edge source="device:0004a30b0050a86e" target="site:asset-unknown-0004a30b0050a86e">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B0050A86E' is installed at site 'asset-unknown-0004A30B0050A86E'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b0050a86e", "environmental"]</data>
+  <data key="d9">chunk-ad63eb2857b11ece7c2a14fb0da60011</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446602</data>
+</edge>
+<edge source="device:0004a30b0050c0ad" target="site:asset-unknown-0004a30b0050c0ad">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B0050C0AD' is installed at site 'asset-unknown-0004A30B0050C0AD'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b0050c0ad", "environmental"]</data>
+  <data key="d9">chunk-186daed8252a56d8ea0cd35fa58f99b6</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446603</data>
+</edge>
+<edge source="device:0004a30b0050c5eb" target="site:asset-unknown-0004a30b0050c5eb">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0004A30B0050C5EB' is installed at site 'asset-unknown-0004A30B0050C5EB'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0004a30b0050c5eb", "environmental"]</data>
+  <data key="d9">chunk-bcf9cea13235ba0009a54ff2173195c5</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446603</data>
+</edge>
+<edge source="device:24e124415b461861" target="site:asset-unknown-24e124415b461861">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B461861' is installed at site 'asset-unknown-24E124415B461861'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b461861", "smartswitch"]</data>
+  <data key="d9">chunk-c44d76db6fd7c2c8a7457531eed923d8</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446604</data>
+</edge>
+<edge source="device:24e124415b469069" target="site:asset-unknown-24e124415b469069">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B469069' is installed at site 'asset-unknown-24E124415B469069'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b469069", "smartswitch"]</data>
+  <data key="d9">chunk-b09c4485b19d4e367aa702d99e5b614c</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446605</data>
+</edge>
+<edge source="device:24e124415b464301" target="site:asset-unknown-24e124415b464301">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B464301' is installed at site 'asset-unknown-24E124415B464301'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b464301", "smartswitch"]</data>
+  <data key="d9">chunk-408cc811089a937358cac0ff4dc3084a</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446605</data>
+</edge>
+<edge source="device:24e124126c142091" target="site:asset-unknown-24e124126c142091">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142091' is installed at site 'asset-unknown-24E124126C142091'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142091", "soil", "moisture"]</data>
+  <data key="d9">chunk-f9ab0cc1fef1b3f194fa0f7d1b483c1f</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446606</data>
+</edge>
+<edge source="device:24e124415b463798" target="site:asset-unknown-24e124415b463798">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B463798' is installed at site 'asset-unknown-24E124415B463798'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b463798", "smartswitch"]</data>
+  <data key="d9">chunk-121015e89e98c8fbf7527014d6da1faf</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446607</data>
+</edge>
+<edge source="device:24e124415b462561" target="site:asset-unknown-24e124415b462561">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B462561' is installed at site 'asset-unknown-24E124415B462561'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b462561", "smartswitch"]</data>
+  <data key="d9">chunk-d8fd323161bb88c292517a5ec46e0028</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446607</data>
+</edge>
+<edge source="device:24e124415b463802" target="site:asset-unknown-24e124415b463802">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B463802' is installed at site 'asset-unknown-24E124415B463802'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b463802", "smartswitch"]</data>
+  <data key="d9">chunk-6177191723aebd532626208f3c195a76</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446608</data>
+</edge>
+<edge source="device:24e124415b466170" target="site:asset-unknown-24e124415b466170">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B466170' is installed at site 'asset-unknown-24E124415B466170'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b466170", "smartswitch"]</data>
+  <data key="d9">chunk-04201188c04ffe4ce827326d8d341016</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446609</data>
+</edge>
+<edge source="device:24e124415b464572" target="site:asset-unknown-24e124415b464572">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B464572' is installed at site 'asset-unknown-24E124415B464572'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b464572", "smartswitch"]</data>
+  <data key="d9">chunk-b5776a3e0110b6779f6660963bca42e1</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446610</data>
+</edge>
+<edge source="device:24e124415b464074" target="site:asset-unknown-24e124415b464074">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B464074' is installed at site 'asset-unknown-24E124415B464074'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b464074", "smartswitch"]</data>
+  <data key="d9">chunk-f030187cfe4c61397e2f9a828fbc936a</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446610</data>
+</edge>
+<edge source="device:24e124415b321942" target="site:asset-unknown-24e124415b321942">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B321942' is installed at site 'asset-unknown-24E124415B321942'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b321942", "smartswitch"]</data>
+  <data key="d9">chunk-ce6959803c94c2ab6c8d31516991d161</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446611</data>
+</edge>
+<edge source="device:24e124415b469901" target="site:asset-unknown-24e124415b469901">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B469901' is installed at site 'asset-unknown-24E124415B469901'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b469901", "smartswitch"]</data>
+  <data key="d9">chunk-702d791c2905dd18be5111fec1cc8436</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446612</data>
+</edge>
+<edge source="device:24e124415b469222" target="site:asset-unknown-24e124415b469222">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B469222' is installed at site 'asset-unknown-24E124415B469222'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b469222", "smartswitch"]</data>
+  <data key="d9">chunk-e292d957a699347271ae011175a96719</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446612</data>
+</edge>
+<edge source="device:24e124415b462193" target="site:asset-unknown-24e124415b462193">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B462193' is installed at site 'asset-unknown-24E124415B462193'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b462193", "smartswitch"]</data>
+  <data key="d9">chunk-e7987ee221ceb48cec86b56defb827e6</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446613</data>
+</edge>
+<edge source="device:24e124415b463169" target="site:asset-unknown-24e124415b463169">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B463169' is installed at site 'asset-unknown-24E124415B463169'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b463169", "smartswitch"]</data>
+  <data key="d9">chunk-cae9fb15e79a9594e5e992c63a4c511b</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446614</data>
+</edge>
+<edge source="device:desconectado_24e124415b462560" target="site:asset-unknown-desconectado_24e124415b462560">
+  <data key="d6">1.0</data>
+  <data key="d7">Device 'DESCONECTADO_24E124415B462560' is installed at site 'asset-unknown-DESCONECTADO_24E124415B462560'</data>
+  <data key="d8">["installed", "site", "asset-unknown-desconectado_24e124415b462560", "smartswitch"]</data>
+  <data key="d9">chunk-b45600c774ddec01ddd432d6274a1da5</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446615</data>
+</edge>
+<edge source="device:24e124415b464699" target="site:asset-unknown-24e124415b464699">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B464699' is installed at site 'asset-unknown-24E124415B464699'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b464699", "smartswitch"]</data>
+  <data key="d9">chunk-7fde163053a7c6de71c7e264e6198859</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446616</data>
+</edge>
+<edge source="device:24e124415b464797" target="site:asset-unknown-24e124415b464797">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B464797' is installed at site 'asset-unknown-24E124415B464797'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b464797", "smartswitch"]</data>
+  <data key="d9">chunk-548d406c046f1d9b8f964e1f4e0eeb28</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446617</data>
+</edge>
+<edge source="device:24e124415b468555" target="site:asset-unknown-24e124415b468555">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B468555' is installed at site 'asset-unknown-24E124415B468555'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b468555", "smartswitch"]</data>
+  <data key="d9">chunk-e353632cbdd1a6cbfc2a3e69885fac59</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446617</data>
+</edge>
+<edge source="device:24e124415b469434" target="site:asset-unknown-24e124415b469434">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B469434' is installed at site 'asset-unknown-24E124415B469434'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b469434", "smartswitch"]</data>
+  <data key="d9">chunk-4d7031512120fe1affe3784e4fe9c614</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446618</data>
+</edge>
+<edge source="device:averiado_24e124415b460961" target="site:asset-unknown-averiado_24e124415b460961">
+  <data key="d6">1.0</data>
+  <data key="d7">Device 'AVERIADO_24E124415B460961' is installed at site 'asset-unknown-AVERIADO_24E124415B460961'</data>
+  <data key="d8">["installed", "site", "asset-unknown-averiado_24e124415b460961", "smartswitch"]</data>
+  <data key="d9">chunk-13f28fa2726cdd26bc20d2aae63a8e1f</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446619</data>
+</edge>
+<edge source="device:24e124415b464298" target="site:asset-unknown-24e124415b464298">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B464298' is installed at site 'asset-unknown-24E124415B464298'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b464298", "smartswitch"]</data>
+  <data key="d9">chunk-46d23bba769e770df1b4ce8ac74e8a19</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446620</data>
+</edge>
+<edge source="device:24e124415b462517" target="site:asset-unknown-24e124415b462517">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B462517' is installed at site 'asset-unknown-24E124415B462517'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b462517", "smartswitch"]</data>
+  <data key="d9">chunk-044f251470438325ea7d6d0540f81153</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446621</data>
+</edge>
+<edge source="device:24e124415b467748" target="site:asset-unknown-24e124415b467748">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B467748' is installed at site 'asset-unknown-24E124415B467748'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b467748", "smartswitch"]</data>
+  <data key="d9">chunk-1520ee9a99e49e116d9b13a9eaa68687</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446621</data>
+</edge>
+<edge source="device:24e124415b326176" target="site:asset-unknown-24e124415b326176">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B326176' is installed at site 'asset-unknown-24E124415B326176'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b326176", "smartswitch"]</data>
+  <data key="d9">chunk-e0ed503e2af7d99e67f53343f71f038d</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446622</data>
+</edge>
+<edge source="device:24e124415b461021" target="site:asset-unknown-24e124415b461021">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B461021' is installed at site 'asset-unknown-24E124415B461021'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b461021", "smartswitch"]</data>
+  <data key="d9">chunk-548eed29181a43263c4338219a3c1b7d</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446623</data>
+</edge>
+<edge source="device:24e124415b465872" target="site:asset-unknown-24e124415b465872">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B465872' is installed at site 'asset-unknown-24E124415B465872'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b465872", "smartswitch"]</data>
+  <data key="d9">chunk-f58dbb1b021cee9999729081d9639ee3</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446624</data>
+</edge>
+<edge source="device:24e124415b460924" target="site:asset-unknown-24e124415b460924">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B460924' is installed at site 'asset-unknown-24E124415B460924'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b460924", "smartswitch"]</data>
+  <data key="d9">chunk-67fbfb8cf70195994022ed945574be2a</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446624</data>
+</edge>
+<edge source="device:24e124415b462362" target="site:asset-unknown-24e124415b462362">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B462362' is installed at site 'asset-unknown-24E124415B462362'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b462362", "smartswitch"]</data>
+  <data key="d9">chunk-30d51bb614a900b6a1da123451b9dffd</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446625</data>
+</edge>
+<edge source="device:24e124415b461690" target="site:asset-unknown-24e124415b461690">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B461690' is installed at site 'asset-unknown-24E124415B461690'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b461690", "smartswitch"]</data>
+  <data key="d9">chunk-4c042964500fd7183fba7d5b2c1d6f2a</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446626</data>
+</edge>
+<edge source="device:24e124415b461761" target="site:asset-unknown-24e124415b461761">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B461761' is installed at site 'asset-unknown-24E124415B461761'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b461761", "smartswitch"]</data>
+  <data key="d9">chunk-18464eae842b668833f1d86068daa92d</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446627</data>
+</edge>
+<edge source="device:24e124415b469464" target="site:asset-unknown-24e124415b469464">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B469464' is installed at site 'asset-unknown-24E124415B469464'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b469464", "smartswitch"]</data>
+  <data key="d9">chunk-7d66123069b87b16c9601b502ca5a1ef</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446627</data>
+</edge>
+<edge source="device:24e124415b460590" target="site:asset-unknown-24e124415b460590">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B460590' is installed at site 'asset-unknown-24E124415B460590'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b460590", "smartswitch"]</data>
+  <data key="d9">chunk-d72f4bec49ebee2e27339e8693ce0b47</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446628</data>
+</edge>
+<edge source="device:24e124415b462823" target="site:asset-unknown-24e124415b462823">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B462823' is installed at site 'asset-unknown-24E124415B462823'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b462823", "smartswitch"]</data>
+  <data key="d9">chunk-8c71a35b571e8ba807ac55bd562ca2a2</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446629</data>
+</edge>
+<edge source="device:24e124415b465758" target="site:asset-unknown-24e124415b465758">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B465758' is installed at site 'asset-unknown-24E124415B465758'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b465758", "smartswitch"]</data>
+  <data key="d9">chunk-15a2663b8c8679124f19264f1dbef381</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446630</data>
+</edge>
+<edge source="device:24e124415b466375" target="site:asset-unknown-24e124415b466375">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B466375' is installed at site 'asset-unknown-24E124415B466375'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b466375", "smartswitch"]</data>
+  <data key="d9">chunk-9ea58b3939d663b771c9f585b977bdc5</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446630</data>
+</edge>
+<edge source="device:24e124415b327171" target="site:asset-unknown-24e124415b327171">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B327171' is installed at site 'asset-unknown-24E124415B327171'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b327171", "smartswitch"]</data>
+  <data key="d9">chunk-ab6b43d3a6dee56e4e25f1357a9e82db</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446631</data>
+</edge>
+<edge source="device:24e124415b467799" target="site:asset-unknown-24e124415b467799">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B467799' is installed at site 'asset-unknown-24E124415B467799'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b467799", "smartswitch"]</data>
+  <data key="d9">chunk-69e62a49e6fed0da57ecae1b6ce58447</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446632</data>
+</edge>
+<edge source="device:24e124126c142173" target="site:asset-unknown-24e124126c142173">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142173' is installed at site 'asset-unknown-24E124126C142173'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142173", "soil", "moisture"]</data>
+  <data key="d9">chunk-94d413915f6ba2d0ac00af04e37a8bf5</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446633</data>
+</edge>
+<edge source="device:24e124126c142172" target="site:asset-unknown-24e124126c142172">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142172' is installed at site 'asset-unknown-24E124126C142172'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142172", "soil", "moisture"]</data>
+  <data key="d9">chunk-edc7171aa5c99f25b38d00f92ad7a606</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446633</data>
+</edge>
+<edge source="device:24e124126c141984" target="site:asset-unknown-24e124126c141984">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C141984' is installed at site 'asset-unknown-24E124126C141984'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c141984", "soil", "moisture"]</data>
+  <data key="d9">chunk-4444b527cadff556610d711024338c55</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446634</data>
+</edge>
+<edge source="device:24e124126c142210" target="site:asset-unknown-24e124126c142210">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142210' is installed at site 'asset-unknown-24E124126C142210'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142210", "soil", "moisture"]</data>
+  <data key="d9">chunk-36a5dd895ccf04925276738b319a6cf0</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446635</data>
+</edge>
+<edge source="device:24e124126c142095" target="site:asset-unknown-24e124126c142095">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142095' is installed at site 'asset-unknown-24E124126C142095'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142095", "soil", "moisture"]</data>
+  <data key="d9">chunk-26329ad966487eafcbdcd9320e4ee86b</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446636</data>
+</edge>
+<edge source="device:24e124126c142110" target="site:asset-unknown-24e124126c142110">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142110' is installed at site 'asset-unknown-24E124126C142110'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142110", "soil", "moisture"]</data>
+  <data key="d9">chunk-d73c0eab988e257c48330f787531a8b7</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446637</data>
+</edge>
+<edge source="device:24e124126c142223" target="site:asset-unknown-24e124126c142223">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142223' is installed at site 'asset-unknown-24E124126C142223'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142223", "soil", "moisture"]</data>
+  <data key="d9">chunk-8fdfe67f39161aebf0e83ae7369df2a6</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446638</data>
+</edge>
+<edge source="device:24e124126c141970" target="site:asset-unknown-24e124126c141970">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C141970' is installed at site 'asset-unknown-24E124126C141970'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c141970", "soil", "moisture"]</data>
+  <data key="d9">chunk-9165cdd9ad6a371e62318085e9b299e2</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446638</data>
+</edge>
+<edge source="device:24e124126c142273" target="site:asset-unknown-24e124126c142273">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142273' is installed at site 'asset-unknown-24E124126C142273'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142273", "soil", "moisture"]</data>
+  <data key="d9">chunk-b17858d1b7e1dd99ac3a5088a0299d14</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446639</data>
+</edge>
+<edge source="device:24e124126c141997" target="site:asset-unknown-24e124126c141997">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C141997' is installed at site 'asset-unknown-24E124126C141997'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c141997", "soil", "moisture"]</data>
+  <data key="d9">chunk-51b4690a7485afb49820eb5559454c95</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446640</data>
+</edge>
+<edge source="device:24e124126c142142" target="site:asset-unknown-24e124126c142142">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124126C142142' is installed at site 'asset-unknown-24E124126C142142'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124126c142142", "soil", "moisture"]</data>
+  <data key="d9">chunk-23960e1220d50971f441cc689b516fd2</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446641</data>
+</edge>
+<edge source="device:001d0a80a0c9" target="site:asset-unknown-001d0a80a0c9">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '001D0A80A0C9' is installed at site 'asset-unknown-001D0A80A0C9'</data>
+  <data key="d8">["installed", "site", "asset-unknown-001d0a80a0c9", "meteo", "station"]</data>
+  <data key="d9">chunk-f6b71ef8234833ef85cbcce1c8434714</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446641</data>
+</edge>
+<edge source="device:001d0a80a0ba" target="site:asset-unknown-001d0a80a0ba">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '001D0A80A0BA' is installed at site 'asset-unknown-001D0A80A0BA'</data>
+  <data key="d8">["installed", "site", "asset-unknown-001d0a80a0ba", "meteo", "station"]</data>
+  <data key="d9">chunk-8befaf7d68c2cebc5c122a070f1658e5</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446642</data>
+</edge>
+<edge source="device:001d0a80a0cb" target="site:asset-unknown-001d0a80a0cb">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '001D0A80A0CB' is installed at site 'asset-unknown-001D0A80A0CB'</data>
+  <data key="d8">["installed", "site", "asset-unknown-001d0a80a0cb", "meteo", "station"]</data>
+  <data key="d9">chunk-19421b2e6ce64a5d198e08d9bee65049</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446643</data>
+</edge>
+<edge source="device:24e124415b465954" target="site:asset-unknown-24e124415b465954">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B465954' is installed at site 'asset-unknown-24E124415B465954'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b465954", "smartswitch"]</data>
+  <data key="d9">chunk-024a45b424d970af03fdc0a865ec3ac2</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446643</data>
+</edge>
+<edge source="device:24e124415b466084" target="site:asset-unknown-24e124415b466084">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B466084' is installed at site 'asset-unknown-24E124415B466084'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b466084", "smartswitch"]</data>
+  <data key="d9">chunk-ad0ecc61fadefe44fcef875d4d3cc449</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446644</data>
+</edge>
+<edge source="device:24e124415b469250" target="site:asset-unknown-24e124415b469250">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B469250' is installed at site 'asset-unknown-24E124415B469250'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b469250", "smartswitch"]</data>
+  <data key="d9">chunk-a9012ade573301d6cf8ff626b942c1af</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446645</data>
+</edge>
+<edge source="device:averiado_24e124460d081749" target="site:asset-unknown-averiado_24e124460d081749">
+  <data key="d6">1.0</data>
+  <data key="d7">Device 'AVERIADO_24E124460D081749' is installed at site 'asset-unknown-AVERIADO_24E124460D081749'</data>
+  <data key="d8">["installed", "site", "asset-unknown-averiado_24e124460d081749", "smartswitch"]</data>
+  <data key="d9">chunk-2b1df282b251a4adc44281b0a4118077</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446646</data>
+</edge>
+<edge source="device:24e124460d084558" target="site:asset-unknown-24e124460d084558">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24e124460d084558' is installed at site 'asset-unknown-24e124460d084558'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d084558", "smartswitch"]</data>
+  <data key="d9">chunk-7f33c26ad250befee77693f5a8045efb</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446647</data>
+</edge>
+<edge source="device:24e124415b463999" target="site:asset-unknown-24e124415b463999">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B463999' is installed at site 'asset-unknown-24E124415B463999'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b463999", "smartswitch"]</data>
+  <data key="d9">chunk-ae1d4cd4e28ac2f6c4e1e523325f0d59</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446647</data>
+</edge>
+<edge source="device:24e124415b461443" target="site:asset-unknown-24e124415b461443">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B461443' is installed at site 'asset-unknown-24E124415B461443'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b461443", "smartswitch"]</data>
+  <data key="d9">chunk-95dbfbc6b6b85faa952f0f13d2bb4870</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446648</data>
+</edge>
+<edge source="device:0adb426177106d27" target="site:asset-unknown-0adb426177106d27">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '0ADB426177106D27' is installed at site 'asset-unknown-0ADB426177106D27'</data>
+  <data key="d8">["installed", "site", "asset-unknown-0adb426177106d27", "iot", "node"]</data>
+  <data key="d9">chunk-b31d0c26aeb244106017701431a97f39</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446649</data>
+</edge>
+<edge source="device:24e124460d081649" target="site:asset-unknown-24e124460d081649">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24e124460d081649' is installed at site 'asset-unknown-24e124460d081649'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d081649", "smartswitch"]</data>
+  <data key="d9">chunk-a26b0324bd35aeb0b33e5a239c438d45</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446649</data>
+</edge>
+<edge source="device:24e124460d081737" target="site:asset-unknown-24e124460d081737">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24e124460d081737' is installed at site 'asset-unknown-24e124460d081737'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d081737", "smartswitch"]</data>
+  <data key="d9">chunk-869be089e10e25962f8b4c83b3937daa</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446650</data>
+</edge>
+<edge source="device:24e124415b462490" target="site:asset-unknown-24e124415b462490">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124415B462490' is installed at site 'asset-unknown-24E124415B462490'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b462490", "smartswitch"]</data>
+  <data key="d9">chunk-f7ba36691d8fe9782d8dfc38921b5754</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446651</data>
+</edge>
+<edge source="device:24e124415b102437" target="site:asset-unknown-24e124415b102437">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24e124415b102437' is installed at site 'asset-unknown-24e124415b102437'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124415b102437", "smartswitch"]</data>
+  <data key="d9">chunk-4d8558b1f0c9328c2955e030af63bf55</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446652</data>
+</edge>
+<edge source="device:24e124460d085825" target="site:asset-unknown-24e124460d085825">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D085825' is installed at site 'asset-unknown-24E124460D085825'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d085825", "smartswitch"]</data>
+  <data key="d9">chunk-eecd23cb7daba1a2b21bea40b9a6d546</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446652</data>
+</edge>
+<edge source="device:24e124460d082821" target="site:asset-unknown-24e124460d082821">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D082821' is installed at site 'asset-unknown-24E124460D082821'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d082821", "smartswitch"]</data>
+  <data key="d9">chunk-19c6ae23eae7496d20fa91dec12eaf9b</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446653</data>
+</edge>
+<edge source="device:24e124460c141231" target="site:asset-unknown-24e124460c141231">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460C141231' is installed at site 'asset-unknown-24E124460C141231'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460c141231", "smartswitch"]</data>
+  <data key="d9">chunk-4c38a494b76fb936edc81034e3e70468</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446654</data>
+</edge>
+<edge source="device:24e124460d085182" target="site:asset-unknown-24e124460d085182">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D085182' is installed at site 'asset-unknown-24E124460D085182'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d085182", "smartswitch"]</data>
+  <data key="d9">chunk-8f643ef5f86ddfd4246259206427b92a</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446654</data>
+</edge>
+<edge source="device:24e124460d085942" target="site:asset-unknown-24e124460d085942">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D085942' is installed at site 'asset-unknown-24E124460D085942'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d085942", "smartswitch"]</data>
+  <data key="d9">chunk-93aca44564b920b18a86091491bf8013</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446655</data>
+</edge>
+<edge source="device:24e124460c211778" target="site:asset-unknown-24e124460c211778">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460C211778' is installed at site 'asset-unknown-24E124460C211778'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460c211778", "smartswitch"]</data>
+  <data key="d9">chunk-dc417c039c9733cd7de03554e9359313</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446656</data>
+</edge>
+<edge source="device:24e124460d443792" target="site:asset-unknown-24e124460d443792">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D443792' is installed at site 'asset-unknown-24E124460D443792'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d443792", "smartswitch"]</data>
+  <data key="d9">chunk-229acb988850f2cd86731e068d6248af</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446657</data>
+</edge>
+<edge source="device:24e124460d445533" target="site:asset-unknown-24e124460d445533">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D445533' is installed at site 'asset-unknown-24E124460D445533'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d445533", "smartswitch"]</data>
+  <data key="d9">chunk-3ac51e17ccad41f92ea475ce6ad9981a</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446657</data>
+</edge>
+<edge source="device:24e124460d448169" target="site:asset-unknown-24e124460d448169">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D448169' is installed at site 'asset-unknown-24E124460D448169'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d448169", "smartswitch"]</data>
+  <data key="d9">chunk-3de83d48189a08a8dc2b02f4577a595f</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446658</data>
+</edge>
+<edge source="device:24e124460d442227" target="site:asset-unknown-24e124460d442227">
+  <data key="d6">1.0</data>
+  <data key="d7">Device '24E124460D442227' is installed at site 'asset-unknown-24E124460D442227'</data>
+  <data key="d8">["installed", "site", "asset-unknown-24e124460d442227", "smartswitch"]</data>
+  <data key="d9">chunk-0efcf2c618559157b3539bc63d9e7617</data>
+  <data key="d10">custom_kg</data>
+  <data key="d11">1758446659</data>
+</edge>
+</graph></graphml>

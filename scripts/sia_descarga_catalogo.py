@@ -42,32 +42,46 @@ def build_client(wsdl: str,
                  ca_path: Optional[str],
                  insecure: bool,
                  timeout: int = 30):
+    import requests
+    from requests.auth import HTTPBasicAuth
+    from zeep import Client, Settings
+    from zeep.transports import Transport
+
     session = requests.Session()
     if user and password:
         session.auth = HTTPBasicAuth(user, password)
+    # TLS (no aplica para http://, pero lo dejamos por compatibilidad)
     if ca_path:
         session.verify = ca_path
     else:
-        session.verify = not insecure  # True por defecto; False si --insecure
+        session.verify = not insecure
+    # Si tu entorno tiene proxy y quieres ignorarlo, descomenta:
+    # session.trust_env = False
+
     transport = Transport(session=session, timeout=timeout)
     settings = Settings(strict=False, xml_huge_tree=True)
     client = Client(wsdl, transport=transport, settings=settings)
 
-    if endpoint_override:
-        # Usamos el primer servicio/puerto por defecto; si tienes varios, ajusta aquí.
-        service = next(iter(client.wsdl.services.values()))
-        port = next(iter(service.ports.values()))
-        binding_qname = port.binding.qname
-        svc = client.create_service(binding_qname, endpoint_override)
-    else:
-        # Servicio por defecto
-        service = next(iter(client.wsdl.services.values()))
-        port = next(iter(service.ports.values()))
-        binding_qname = port.binding.qname
-        # location del WSDL
-        endpoint = port.binding.options.get('address')
-        svc = client.create_service(binding_qname, endpoint)
+    # Si NO sobrescribes endpoint, usa el proxy de servicio por defecto de zeep.
+    if not endpoint_override:
+        svc = client.service
+        return client, svc
+
+    # Si SÍ sobrescribes endpoint, necesitamos el QName del binding.
+    service = next(iter(client.wsdl.services.values()))
+    port = next(iter(service.ports.values()))
+
+    # En zeep nuevas no hay .qname en el binding; construimos el QName a mano:
+    # QName = {namespace}binding_name
+    ns = getattr(client.wsdl, "target_namespace", None) or getattr(client.wsdl, "tns", None)
+    bname = getattr(port.binding, "name", None)
+    if not (ns and bname):
+        raise RuntimeError("No se pudo determinar el QName del binding (namespace o nombre nulos).")
+    binding_qname = f"{{{ns}}}{bname}"
+
+    svc = client.create_service(binding_qname, endpoint_override)
     return client, svc
+
 
 
 def list_operations(client: Client) -> List[Tuple[str, str, str]]:

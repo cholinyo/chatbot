@@ -21,12 +21,15 @@ from flask import Flask, jsonify
 from app.extensions.logging import init_logging
 from app.extensions.db import init_engine, init_session, create_all
 
+# Admin/core blueprints (seguros de importar a nivel módulo)
 from app.blueprints.admin.routes_main import bp as bp_admin_home
 from app.blueprints.admin.routes_data_sources import bp_ds
 from app.blueprints.admin.routes_ingesta_docs import bp as bp_ingesta_docs
 from app.blueprints.admin.routes_ingesta_web import bp_ingesta_web
 from app.blueprints.admin.routes_vector_store import bp as bp_vector_store
 from app.blueprints.admin.rag_routes import admin_rag_bp
+# IMPORTANTE: NO importamos aquí routes_knowledge_graph para evitar cargar LightRAG antes de tiempo.
+
 
 def _load_settings(path: str = "config/settings.toml") -> Dict[str, Any]:
     p = Path(path)
@@ -69,6 +72,7 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
         "SQLALCHEMY_DATABASE_URI",
         os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///data/processed/tracking.sqlite"),
     )
+    app.config.setdefault("MODELS_DIR", "models")
 
     # 4) Mezclar settings.toml + overrides
     _ = _load_settings()
@@ -84,6 +88,7 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
         # (Opcional) preparar directorios de índices para evitar fallos de escritura
         Path("models/faiss").mkdir(parents=True, exist_ok=True)
         Path("models/chroma").mkdir(parents=True, exist_ok=True)
+        Path("models/kg").mkdir(parents=True, exist_ok=True)
 
     engine = init_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     init_session(engine)
@@ -92,13 +97,26 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
     from app.models import source, ingestion_run, document, chunk  # noqa: F401
     create_all(engine)
 
-    # 7) Blueprints
+    # 7) Blueprints seguros
     app.register_blueprint(bp_admin_home)
     app.register_blueprint(bp_ds)
     app.register_blueprint(bp_ingesta_docs)
     app.register_blueprint(bp_ingesta_web)
     app.register_blueprint(bp_vector_store)
     app.register_blueprint(admin_rag_bp)
+
+    # 7.1) Registrar blueprint del KG de forma perezosa
+    # Evitamos importar LightRAG/LLM en el import de app para que los scripts CLI funcionen.
+    try:
+        from app.blueprints.admin.routes_knowledge_graph import bp as bp_kg  # import aquí
+        app.register_blueprint(bp_kg)
+    except Exception as e:
+        app.logger.warning("Blueprint KG no registrado (deferred import falló): %s", e)
+
+    # (Útil para depurar rutas una vez todo está registrado)
+    print("== URL MAP ==")
+    print(app.url_map)
+
     try:
         from app.blueprints.ingestion.routes import bp as ingestion_bp  # type: ignore
         app.register_blueprint(ingestion_bp, url_prefix="/ingestion")

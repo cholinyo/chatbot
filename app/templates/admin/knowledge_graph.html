@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-3">
+  <h2>Grafo de Conocimiento (Smart City)</h2>
+
+  <form method="post" action="{{ url_for('knowledge_graph.do_sync') }}" class="row g-2 mb-4">
+    <div class="col-auto">
+      <label class="form-label">Ventana (horas)</label>
+      <input class="form-control" type="number" name="hours" value="6" min="1" />
+    </div>
+    <div class="col-auto align-self-end">
+      <button class="btn btn-primary">Sincronizar KG</button>
+    </div>
+  </form>
+
+  <form method="post" action="{{ url_for('knowledge_graph.smoke') }}" class="row g-2 mb-4">
+    <div class="col-8">
+      <input class="form-control" type="text" name="q" placeholder="Pregunta de prueba (hybrid query)" />
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-secondary">Smoke test</button>
+    </div>
+  </form>
+
+  <h5>Histórico (models/kg)</h5>
+  <ul class="list-group">
+    {% for item in history %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ item.fname }} — {{ item.ts }} — total={{ item.total }}</span>
+        <span class="badge bg-{{ 'success' if item.ok else 'danger' }}">{{ 'OK' if item.ok else 'ERROR' }}</span>
+      </li>
+    {% else %}
+      <li class="list-group-item">Sin entradas aún.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

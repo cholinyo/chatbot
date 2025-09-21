@@ -1,0 +1,58 @@
+{% set sources = ["smartcity","sia"] %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Admin · KG</title>
+  <style>
+    body{font-family:system-ui,sans-serif;padding:24px;}
+    .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+    input,select,button{padding:8px}
+    pre{white-space:pre-wrap;background:#111;color:#eee;padding:12px;border-radius:8px}
+  </style>
+</head>
+<body>
+  <h1>Grafo de Conocimiento</h1>
+  <div class="row">
+    <label>Fuente:</label>
+    <select id="source" onchange="onSourceChange()">
+      {% for s in sources %}
+        <option value="{{ s }}" {% if s==source %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <div>Nodos: <b>{{ nodes }}</b></div>
+    <div>Aristas: <b>{{ edges }}</b></div>
+    <div>Workdir: <code>{{ workdir }}</code></div>
+  </div>
+    <div class="mt-3">
+      <a class="btn btn-sm btn-primary" href="{{ url_for_safe('admin_kg.kg_graphml', source=source) }}">Descargar GraphML</a>
+      <a class="btn btn-sm btn-secondary" href="{{ url_for_safe('admin_kg.kg_preview', source=source) }}">Vista interactiva</a>
+      <a class="btn btn-sm btn-success" href="{{ url_for_safe('admin_kg.kg_preview', source=source, cluster=1) }}">Vista interactiva (clusters)</a>
+    </div>
+
+
+  <h3>Consulta híbrida</h3>
+  <div class="row">
+    <input id="q" placeholder="p.ej. ¿qué mide el dispositivo X?" style="min-width:360px"/>
+    <button onclick="doQuery()">Buscar</button>
+  </div>
+  <pre id="out"></pre>
+
+  <script>
+    function onSourceChange(){
+      const s = document.getElementById('source').value;
+      location.href = `/admin/kg?source=${s}`;
+    }
+    async function doQuery(){
+      const s = document.getElementById('source').value;
+      const q = document.getElementById('q').value;
+      const r = await fetch(`/admin/kg/query?source=${s}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ q, source: s })
+      });
+      const j = await r.json();
+      document.getElementById('out').textContent = j.ok ? j.answer : ('Error: '+(j.error||''));
+    }
+  </script>
+</body>
+</html>

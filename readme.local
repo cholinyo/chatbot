@@ -1,0 +1,27 @@
+# Modo Local-First (KG + RAG)
+
+Este README describe cómo ejecutar **todo en local** (embeddings + LLM) y alternar a nube (OpenAI) sin tocar código.
+
+## 1) Variables de entorno
+
+Edita `.env` y deja (sin duplicados):
+
+```env
+# —— Embeddings locales ——
+EMBED_PROVIDER=local
+EMBED_PROFILE=minilm-l6          # 384D (rápido en CPU)
+# LIGHTRAG_LOCAL_MODEL=sentence-transformers/all-MiniLM-L6-v2  # opcional
+
+# —— LLM para LightRAG ——
+# Proveedor: ollama | openai
+LIGHTRAG_LLM_PROVIDER=ollama
+LIGHTRAG_LLM_MODEL=llama3.1:8b-instruct
+OLLAMA_BASE_URL=http://localhost:11434
+
+# —— Workdir KG ——
+LIGHTRAG_WORKDIR=models/kg
+
+# (Solo si quieres usar OpenAI)
+# LIGHTRAG_LLM_PROVIDER=openai
+# LIGHTRAG_LLM_MODEL=gpt-4o-mini
+# OPENAI_API_KEY=sk-...
