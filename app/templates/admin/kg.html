@@ -1,58 +1,103 @@
-{% set sources = ["smartcity","sia"] %}
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>Admin · KG</title>
-  <style>
-    body{font-family:system-ui,sans-serif;padding:24px;}
-    .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-    input,select,button{padding:8px}
-    pre{white-space:pre-wrap;background:#111;color:#eee;padding:12px;border-radius:8px}
-  </style>
-</head>
-<body>
-  <h1>Grafo de Conocimiento</h1>
-  <div class="row">
-    <label>Fuente:</label>
-    <select id="source" onchange="onSourceChange()">
-      {% for s in sources %}
-        <option value="{{ s }}" {% if s==source %}selected{% endif %}>{{ s }}</option>
-      {% endfor %}
-    </select>
-    <div>Nodos: <b>{{ nodes }}</b></div>
-    <div>Aristas: <b>{{ edges }}</b></div>
-    <div>Workdir: <code>{{ workdir }}</code></div>
+{% extends "base.html" %}
+{% block title %}Grafo · {{ source|capitalize }} · TFM RAG{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="h4 mb-1">Grafo: {{ source|capitalize }}</h1>
+      <p class="text-muted mb-0">Gestión y utilidades del Knowledge Graph (GraphML).</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" href="/admin/knowledge-graphs/">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver
+      </a>
+    </div>
   </div>
-    <div class="mt-3">
-      <a class="btn btn-sm btn-primary" href="{{ url_for_safe('admin_kg.kg_graphml', source=source) }}">Descargar GraphML</a>
-      <a class="btn btn-sm btn-secondary" href="{{ url_for_safe('admin_kg.kg_preview', source=source) }}">Vista interactiva</a>
-      <a class="btn btn-sm btn-success" href="{{ url_for_safe('admin_kg.kg_preview', source=source, cluster=1) }}">Vista interactiva (clusters)</a>
+
+  <div class="row g-3">
+    <!-- Métricas -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-title">Estado del grafo</h6>
+          <dl class="row mb-0">
+            <dt class="col-6 text-muted">Nodos</dt>
+            <dd class="col-6">{{ nodes }}</dd>
+            <dt class="col-6 text-muted">Aristas</dt>
+            <dd class="col-6">{{ edges }}</dd>
+            <dt class="col-6 text-muted">Workdir</dt>
+            <dd class="col-6 text-break"><code>{{ workdir }}</code></dd>
+          </dl>
+          <div class="mt-3 d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="/admin/kg/where?source={{ source }}">¿Dónde está?</a>
+            <a class="btn btn-sm btn-outline-primary" href="/admin/kg/graphml?source={{ source }}">Descargar GraphML</a>
+            <a class="btn btn-sm btn-outline-primary" href="/admin/kg/preview?source={{ source }}">Preview</a>
+          </div>
+        </div>
+      </div>
     </div>
 
-
-  <h3>Consulta híbrida</h3>
-  <div class="row">
-    <input id="q" placeholder="p.ej. ¿qué mide el dispositivo X?" style="min-width:360px"/>
-    <button onclick="doQuery()">Buscar</button>
+    <!-- Acciones (re-ingesta, etc.) -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-title">Acciones</h6>
+          <p class="text-muted small mb-2">
+            Reconstruye el grafo desde IoTsens y actualiza el GraphML.
+          </p>
+          <button id="kgRebuildBtn" class="btn btn-outline-danger btn-sm"
+                  {% if source != 'smartcity' %}disabled title="Solo disponible para 'smartcity'"{% endif %}>
+            <i class="fa-solid fa-rotate"></i> Re-ingestar {{ 'smartcity' if source=='smartcity' else '' }}
+          </button>
+          <div class="text-muted small mt-3">
+            Los grafos se guardan bajo <code>models/kg/&lt;namespace&gt;/emb-384/</code>.
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <pre id="out"></pre>
+</div>
+{% endblock %}
 
-  <script>
-    function onSourceChange(){
-      const s = document.getElementById('source').value;
-      location.href = `/admin/kg?source=${s}`;
-    }
-    async function doQuery(){
-      const s = document.getElementById('source').value;
-      const q = document.getElementById('q').value;
-      const r = await fetch(`/admin/kg/query?source=${s}`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ q, source: s })
+{% block extra_js %}
+<script>
+(function () {
+  const toastEl = document.getElementById('appToast');
+  function showToast(msg, ok=true) {
+    if (!toastEl) return alert(msg);
+    const body = toastEl.querySelector('.toast-body');
+    if (body) body.textContent = msg;
+    toastEl.classList.remove('text-bg-primary','text-bg-danger','text-bg-success');
+    toastEl.classList.add(ok ? 'text-bg-success' : 'text-bg-danger');
+    new bootstrap.Toast(toastEl, { delay: 3500 }).show();
+  }
+
+  // Re-ingesta (smartcity)
+  const rb = document.getElementById('kgRebuildBtn');
+  rb?.addEventListener('click', async () => {
+    const source = 'smartcity';
+    rb.disabled = true;
+    rb.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> Re-ingestando...';
+    try {
+      const res = await fetch('/admin/kg/rebuild', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source })
       });
-      const j = await r.json();
-      document.getElementById('out').textContent = j.ok ? j.answer : ('Error: '+(j.error||''));
+      const data = await res.json();
+      if (data.ok) {
+        showToast(`Re-ingesta '${source}' OK.`);
+      } else {
+        showToast(`Error re-ingesta: ${data.error || data.returncode}`, false);
+      }
+    } catch (e) {
+      showToast('Error de red en re-ingesta', false);
+    } finally {
+      rb.disabled = false;
+      rb.innerHTML = '<i class="fa-solid fa-rotate"></i> Re-ingestar smartcity';
     }
-  </script>
-</body>
-</html>
+  });
+})();
+</script>
+{% endblock %}

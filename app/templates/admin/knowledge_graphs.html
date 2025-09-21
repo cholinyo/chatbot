@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Grafos de conocimiento · TFM RAG{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="h4 mb-1">Grafos de conocimiento</h1>
+      <p class="text-muted mb-0">Gestión básica de GraphML por namespace.</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <span><i class="fa-solid fa-project-diagram me-2"></i>Knowledge Graphs</span>
+      <small class="text-muted">Gestión básica (GraphML)</small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        {% for kg in kg_sources|default([]) %}
+        <div class="col-md-6">
+          <div class="card h-100" id="kg-card-{{ kg.namespace }}">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="card-title text-capitalize mb-0">{{ kg.namespace }}</h6>
+                <span class="badge {{ 'bg-success' if kg.exists else 'bg-secondary' }}" data-role="status">
+                  {{ 'Disponible' if kg.exists else 'No generado' }}
+                </span>
+              </div>
+
+              <p class="mb-1 small text-muted" data-role="metrics">
+                {% if kg.exists %}
+                  nodos: {{ kg.nodes or "?" }} · aristas: {{ kg.edges or "?" }} · emb: {{ kg.emb_dim }}
+                {% else %}
+                  Genera el grafo para ver métricas (emb: {{ kg.emb_dim }}).
+                {% endif %}
+              </p>
+
+              <p class="mb-2 small" style="word-break: break-all;">
+                <strong>GraphML:</strong> <span data-role="path">{{ kg.path }}</span>
+              </p>
+
+              <div class="mt-auto d-flex flex-wrap gap-2">
+                <a class="btn btn-sm btn-outline-primary" href="/admin/kg?source={{ kg.namespace }}">Abrir gestión</a>
+
+                {% if kg.exists %}
+                  <a class="btn btn-sm btn-outline-secondary" href="/admin/kg/preview?source={{ kg.namespace }}">Preview</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/admin/kg/graphml?source={{ kg.namespace }}">Descargar</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/admin/kg/where?source={{ kg.namespace }}">¿Dónde está?</a>
+                {% else %}
+                  <button class="btn btn-sm btn-outline-secondary" disabled>Preview</button>
+                  <button class="btn btn-sm btn-outline-secondary" disabled>Descargar</button>
+                  <button class="btn btn-sm btn-outline-secondary" disabled>¿Dónde está?</button>
+                {% endif %}
+
+                {% if kg.namespace == "smartcity" %}
+                <!-- Re-ingesta por fetch -->
+                <form method="post" action="/admin/kg/rebuild" data-role="rebuild-form" data-source="smartcity">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    Re-ingestar
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% if (kg_sources|default([]))|length == 0 %}
+          <div class="col-12"><div class="alert alert-info mb-0">No hay grafos configurados todavía.</div></div>
+        {% endif %}
+      </div>
+
+      <div class="alert alert-info mt-3 mb-0">
+        Los grafos usan embeddings de <code>384D</code> y se guardan bajo <code>models/kg/&lt;namespace&gt;/emb-384/</code>.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const toastEl = document.getElementById('appToast');
+  function showToast(msg, isOk) {
+    const body = toastEl?.querySelector('.toast-body');
+    if (body) body.textContent = msg;
+    toastEl?.classList.remove('text-bg-primary','text-bg-danger','text-bg-success');
+    toastEl?.classList.add(isOk ? 'text-bg-success' : 'text-bg-danger');
+    const t = new bootstrap.Toast(toastEl, { delay: 3500 });
+    t.show();
+  }
+
+  // Intercepta submit de formularios de re-ingesta
+  document.querySelectorAll('form[data-role="rebuild-form"]').forEach(form => {
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const source = form.getAttribute('data-source') || 'smartcity';
+      try {
+        const res = await fetch('/admin/kg/rebuild', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(`Re-ingesta '${source}' OK (código ${data.returncode}).`, true);
+          // refresca el card con métricas actuales
+          refreshMetrics(source);
+        } else {
+          showToast(`Error re-ingesta '${source}': ${data.error || data.returncode}`, false);
+          console.error(data);
+        }
+      } catch (e) {
+        showToast(`Error de red re-ingesta '${source}'`, false);
+        console.error(e);
+      }
+    });
+  });
+
+  async function refreshMetrics(source) {
+    try {
+      const res = await fetch(`/admin/kg/where?source=${encodeURIComponent(source)}`);
+      if (!res.ok) return;
+      const d = await res.json();
+      const card = document.getElementById(`kg-card-${source}`);
+      if (!card) return;
+      const status = card.querySelector('[data-role="status"]');
+      const metrics = card.querySelector('[data-role="metrics"]');
+      const exists = !!(d?.resolved?.exists && d?.resolved?.size > 0);
+      if (status) {
+        status.textContent = exists ? 'Disponible' : 'No generado';
+        status.className = `badge ${exists ? 'bg-success' : 'bg-secondary'}`;
+      }
+      if (metrics) {
+        if (exists && d?.resolved?.nodes != null) {
+          metrics.textContent = `nodos: ${d.resolved.nodes} · aristas: ${d.resolved.edges} · emb: ${d.embedding_dim}`;
+        } else {
+          metrics.textContent = `Genera el grafo para ver métricas (emb: ${d.embedding_dim}).`;
+        }
+      }
+    } catch {}
+  }
+})();
+</script>
+{% endblock %}

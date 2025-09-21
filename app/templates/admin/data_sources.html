@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  {# Accesos rápidos: Web, Documentos, APIs, BBDD #}
+  {# Accesos rápidos: Web, Documentos, APIs, Grafos #}
   <div class="row g-3 mb-4">
     <div class="col-md-3">
       <div class="card h-100 shadow-sm">
@@ -43,21 +43,20 @@
             <i class="fa-solid fa-cloud-arrow-down me-2"></i><strong>APIs</strong>
           </div>
           <p class="text-muted small mb-3">Conecta a APIs públicas/privadas (en preparación).</p>
-          <a class="btn btn-outline-secondary btn-sm w-100 disabled"
-             href="{{ url_for_safe('ingesta_apis.index') }}">Próximamente</a>
+          <a class="btn btn-outline-secondary btn-sm w-100 disabled" href="{{ url_for_safe('ingesta_apis.index') }}">Próximamente</a>
         </div>
       </div>
     </div>
 
+    <!-- Sustituimos "Bases de datos" por "Grafos de conocimiento" -->
     <div class="col-md-3">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
-            <i class="fa-solid fa-database me-2"></i><strong>Bases de datos</strong>
+            <i class="fa-solid fa-project-diagram me-2"></i><strong>Grafos de conocimiento</strong>
           </div>
-          <p class="text-muted small mb-3">ETL desde SQL/NoSQL (en preparación).</p>
-          <a class="btn btn-outline-secondary btn-sm w-100 disabled"
-             href="{{ url_for_safe('ingesta_bbdd.index') }}">Próximamente</a>
+          <p class="text-muted small mb-3">Explora y gestiona grafos (SmartCity, SIA).</p>
+          <a class="btn btn-outline-primary btn-sm w-100" href="/admin/knowledge-graphs/">Abrir</a>
         </div>
       </div>
     </div>
@@ -113,7 +112,7 @@
   </div>
 
   {# Estadísticas por tipo #}
-  <div class="card shadow-sm">
+  <div class="card shadow-sm mb-4">
     <div class="card-header">Estadísticas por tipo</div>
     <div class="table-responsive">
       <table class="table table-sm align-middle mb-0">

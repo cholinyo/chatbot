@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Inicio · TFM RAG{% endblock %}
+
 {% block content %}
 <h1 class="h3 mb-3">Panel de administración</h1>
 <p class="text-muted">Prototipo RAG para Administraciones Locales · UJI 2024–2025</p>
@@ -14,6 +15,7 @@
       </div>
     </div>
   </div>
+
   <div class="col-md-6">
     <div class="card shadow-sm">
       <div class="card-body">
@@ -23,12 +25,24 @@
       </div>
     </div>
   </div>
+
   <div class="col-md-6">
     <div class="card shadow-sm">
       <div class="card-body">
         <h2 class="h5">Ingesta de Documentos</h2>
         <p>Sube ficheros (PDF/DOCX/TXT/CSV) y lanza la ingesta.</p>
         <a class="btn btn-outline-primary" href="{{ url_for('ingesta_docs.index') }}">Abrir</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nueva tarjeta: Grafos de conocimiento -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Grafos de conocimiento</h2>
+        <p>Explora y gestiona grafos (SmartCity, SIA) y sus artefactos GraphML.</p>
+        <a class="btn btn-outline-primary" href="/admin/knowledge-graphs/">Abrir</a>
       </div>
     </div>
   </div>
