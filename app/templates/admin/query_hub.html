@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Consultas · TFM RAG{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="h4 mb-1">Consultas unificadas</h1>
+      <p class="text-muted mb-0">Elige la fuente (Vector, KG o Híbrido) y el modelo (Ollama/OpenAI).</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <form id="qhForm" onsubmit="return false;">
+        <div class="row g-3">
+          <div class="col-md-2">
+            <label class="form-label">Modo</label>
+            <select id="qhMode" class="form-select">
+              <option value="vector">Vector</option>
+              <option value="kg">KG</option>
+              <option value="hybrid">Híbrido</option>
+            </select>
+          </div>
+
+          <div class="col-md-5" id="qhVectorBlock">
+            <label class="form-label">Colección (Vector)</label>
+            <div class="input-group">
+              <select id="qhVecKind" class="form-select">
+                <option value="faiss">FAISS</option>
+                <option value="chroma">Chroma</option>
+              </select>
+              <select id="qhVecName" class="form-select">
+                {% for name in vector_collections.faiss %}
+                  <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-text">Carpetas en <code>models/faiss</code> o <code>models/chroma</code>.</div>
+          </div>
+
+          <div class="col-md-2" id="qhKgBlock" style="display:none;">
+            <label class="form-label">Namespace (KG)</label>
+            <select id="qhNamespace" class="form-select">
+              {% for ns in kg_namespaces %}
+                <option value="{{ ns }}">{{ ns }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">GraphML en <code>models/kg/&lt;ns&gt;/emb-384/</code>.</div>
+          </div>
+
+          <div class="col-md-1">
+            <label class="form-label">Prov.</label>
+            <select id="qhProvider" class="form-select">
+              <option value="ollama">Ollama</option>
+              <option value="openai" {% if not has_openai %}disabled{% endif %}>OpenAI</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">Modelo</label>
+            <select id="qhModel" class="form-select">
+              {% for m in llm_options.ollama %}
+                <option data-provider="ollama" value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+              {% for m in llm_options.openai %}
+                <option data-provider="openai" value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label">Pregunta</label>
+            <input id="qhQ" type="text" class="form-control" placeholder="Ej.: ¿Qué magnitudes mide el dispositivo X?">
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">k (Vector)</label>
+            <input id="qhK" type="number" min="1" max="20" class="form-control" value="4">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Temperatura</label>
+            <input id="qhTemp" type="number" step="0.05" min="0" max="2" class="form-control" value="0.2">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="qhMMR">
+              <label class="form-check-label" for="qhMMR">Usar MMR</label>
+            </div>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="qhRerank">
+              <label class="form-check-label" for="qhRerank">Reranker</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button id="qhRun" class="btn btn-primary">
+              <i class="fa-solid fa-magnifying-glass"></i> Consultar
+            </button>
+            <a class="btn btn-outline-secondary" href="/admin/knowledge-graphs/">Abrir grafos</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('vector_store.index') }}">Abrir Vector Store</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-7">
+      <div class="card shadow-sm h-100">
+        <div class="card-header">Respuesta</div>
+        <div class="card-body">
+          <pre id="qhOut" class="bg-body-tertiary p-3 rounded small mb-0" style="min-height: 220px; white-space: pre-wrap;">—</pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-header">Trazabilidad</div>
+        <div class="card-body">
+          <pre id="qhTrace" class="bg-body-tertiary p-3 rounded small mb-0" style="min-height: 220px; white-space: pre-wrap;">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const vecKinds = {{ vector_collections|tojson }};
+  const qhMode = document.getElementById('qhMode');
+  const qhVecBlock = document.getElementById('qhVectorBlock');
+  const qhKgBlock = document.getElementById('qhKgBlock');
+  const qhVecKind = document.getElementById('qhVecKind');
+  const qhVecName = document.getElementById('qhVecName');
+  const qhProvider = document.getElementById('qhProvider');
+  const qhModel = document.getElementById('qhModel');
+
+  function updateMode() {
+    const m = qhMode.value;
+    qhVecBlock.style.display = (m === 'vector' || m === 'hybrid') ? '' : 'none';
+    qhKgBlock.style.display = (m === 'kg' || m === 'hybrid') ? '' : 'none';
+  }
+  qhMode.addEventListener('change', updateMode);
+  updateMode();
+
+  function updateVecNames() {
+    const kind = qhVecKind.value;
+    const names = (vecKinds[kind] || []);
+    qhVecName.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('') || `<option value="">(sin colecciones)</option>`;
+  }
+  qhVecKind.addEventListener('change', updateVecNames);
+  updateVecNames();
+
+  function filterModelsByProvider() {
+    const provider = qhProvider.value;
+    const options = Array.from(qhModel.querySelectorAll('option'));
+    let firstVisible = null;
+    options.forEach(opt => {
+      const ok = (opt.getAttribute('data-provider') || 'ollama') === provider;
+      opt.style.display = ok ? '' : 'none';
+      if (ok && !firstVisible) firstVisible = opt.value;
+    });
+    if (firstVisible) qhModel.value = firstVisible;
+  }
+  qhProvider.addEventListener('change', filterModelsByProvider);
+  filterModelsByProvider();
+
+  const toastEl = document.getElementById('appToast');
+  function showToast(msg, ok=true) {
+    const body = toastEl?.querySelector('.toast-body');
+    if (body) body.textContent = msg;
+    toastEl?.classList.remove('text-bg-primary','text-bg-danger','text-bg-success');
+    toastEl?.classList.add(ok ? 'text-bg-success' : 'text-bg-danger');
+    const t = new bootstrap.Toast(toastEl, { delay: 3000 });
+    t.show();
+  }
+
+  document.getElementById('qhRun').addEventListener('click', async () => {
+    const payload = {
+      mode: qhMode.value,
+      q: document.getElementById('qhQ').value || '',
+      llm_provider: qhProvider.value,
+      llm_model: qhModel.value,
+      collection: {
+        kind: qhVecKind.value,
+        name: qhVecName.value
+      },
+      namespace: document.getElementById('qhNamespace')?.value || 'smartcity',
+      params: {
+        temperature: Number(document.getElementById('qhTemp').value || 0.2),
+        vector: {
+          k: Number(document.getElementById('qhK').value || 4),
+          mmr: document.getElementById('qhMMR').checked,
+          rerank: document.getElementById('qhRerank').checked
+        }
+      }
+    };
+    const out = document.getElementById('qhOut');
+    const trace = document.getElementById('qhTrace');
+    out.textContent = 'Consultando...';
+    trace.textContent = '—';
+
+    try {
+      const res = await fetch('/admin/query-hub/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.ok) {
+        out.textContent = data.answer || '(sin respuesta)';
+        trace.textContent = JSON.stringify(data.trace || {}, null, 2);
+        showToast('Consulta realizada.', true);
+      } else {
+        out.textContent = 'Error: ' + (data.error || 'consulta fallida');
+        showToast('Error en consulta', false);
+      }
+    } catch (e) {
+      out.textContent = 'Error de red.';
+      showToast('Error de red', false);
+      console.error(e);
+    }
+  });
+})();
+</script>
+{% endblock %}

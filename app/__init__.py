@@ -30,6 +30,9 @@ from app.blueprints.admin.routes_vector_store import bp as bp_vector_store
 from app.blueprints.admin.rag_routes import admin_rag_bp
 # IMPORTANTE: NO importamos aquí routes_knowledge_graph para evitar cargar LightRAG antes de tiempo.
 
+# NUEVO: Query Hub
+from app.blueprints.admin.routes_query_hub import bp as query_hub_bp
+
 
 def _load_settings(path: str = "config/settings.toml") -> Dict[str, Any]:
     p = Path(path)
@@ -104,6 +107,9 @@ def create_app(config_override: Optional[Dict[str, Any]] = None) -> Flask:
     app.register_blueprint(bp_ingesta_web)
     app.register_blueprint(bp_vector_store)
     app.register_blueprint(admin_rag_bp)
+
+    # NUEVO: Query Hub
+    app.register_blueprint(query_hub_bp)
 
     # 7.1) Registrar blueprint del KG de forma perezosa
     # Evitamos importar LightRAG/LLM en el import de app para que los scripts CLI funcionen.

@@ -58,7 +58,10 @@
       <a class="nav-link {% if on_vector %}active{% endif %} {% if has_endpoint is defined and not has_endpoint('vector_store.index') %}disabled{% endif %}" href="{{ url_for_safe('vector_store.index') }}">
         <i class="fa-solid fa-database me-2"></i>Vector Store
       </a>
-
+      <a class="nav-link {% if path.startswith('/admin/query-hub') %}active{% endif %} {% if has_endpoint is defined and not has_endpoint('query_hub.query_hub_index') %}disabled{% endif %}"
+      href="{{ url_for_safe('query_hub.query_hub_index') }}">
+        <i class="fa-solid fa-magnifying-glass me-2"></i>Consultas
+      </a>
       <a class="nav-link {% if on_kg %}active{% endif %}" href="/admin/knowledge-graphs/">
         <i class="fa-solid fa-project-diagram me-2"></i>Grafos
       </a>
@@ -160,6 +163,7 @@
     <a class="nav-link {% if has_endpoint is defined and not has_endpoint('config_modelos') %}disabled{% endif %}" href="{{ url_for_safe('config_modelos') }}"><i class="fa-solid fa-microchip me-2"></i>Modelos IA</a>
     <a class="nav-link {% if on_sources %}active{% endif %} {% if has_endpoint is defined and not has_endpoint('data_sources.index') %}disabled{% endif %}" href="{{ url_for_safe('data_sources.index') }}"><i class="fa-solid fa-layer-group me-2"></i>Fuentes de datos</a>
     <a class="nav-link {% if on_vector %}active{% endif %} {% if has_endpoint is defined and not has_endpoint('vector_store.index') %}disabled{% endif %}" href="{{ url_for_safe('vector_store.index') }}"><i class="fa-solid fa-database me-2"></i>Vector Store</a>
+    <a class="nav-link {% if path.startswith('/admin/query-hub') %}active{% endif %} {% if has_endpoint is defined and not has_endpoint('query_hub.query_hub_index') %}disabled{% endif %}" href="{{ url_for_safe('query_hub.query_hub_index') }}"><i class="fa-solid fa-magnifying-glass me-2"></i>Consultas</a>
     <a class="nav-link {% if on_kg %}active{% endif %}" href="/admin/knowledge-graphs/"><i class="fa-solid fa-project-diagram me-2"></i>Grafos</a>
     <a class="nav-link {% if has_endpoint is defined and not has_endpoint('config_general') %}disabled{% endif %}" href="{{ url_for_safe('config_general') }}"><i class="fa-solid fa-gear me-2"></i>General</a>
   </div>
